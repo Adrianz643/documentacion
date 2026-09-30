@@ -1,0 +1,224 @@
+// ============================================================
+// DECLARACIONES — Estilos específicos
+// Variables de la paleta oficial Hegewisch López Consultores
+// ============================================================
+
+// -- Tokens de la paleta oficial ----------------------------
+$azul-marino:       #062B63;
+$azul-institucional:#0B2F6B;
+$azul-botones:      #0B4DB8;
+$azul-hover:        #165DCC;
+$encabezado-tabla:  #DCEBEC;
+$texto-encabezado:  #12335D;
+$texto-principal:   #172B4D;
+$texto-secundario:  #53657D;
+$texto-tenue:       #7A889B;
+$borde:             #DDE5EF;
+$borde-fuerte:      #C9D5E3;
+$fondo:             #FFFFFF;
+$fondo-secundario:  #F7F9FC;
+$fondo-informativo: #EDF8F9;
+$teal-informativo:  #1596A0;
+$exito:             #22C55E;
+
+// -- Card que envuelve cada tabla ---------------------------
+.gd-card {
+  background: $fondo;
+  border: 1px solid $borde;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.gd-card-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid $borde;
+  background: $fondo;
+}
+
+.gd-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: $texto-principal;
+}
+
+// -- Tabla --------------------------------------------------
+.gd-table {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  color: $texto-principal;
+  border-collapse: collapse;
+  width: 100%;
+
+  thead tr {
+    background: $encabezado-tabla;
+  }
+
+  th {
+    font-size: 13px;
+    font-weight: 600;
+    color: $texto-encabezado;
+    padding: 12px 14px;
+    border-bottom: 1px solid $borde-fuerte;
+    white-space: nowrap;
+
+    &.sortable { cursor: pointer; user-select: none; }
+  }
+
+  td {
+    padding: 13px 14px;
+    border-bottom: 1px solid $borde;
+    vertical-align: middle;
+    color: $texto-principal;
+  }
+
+  tbody tr:hover td {
+    background: $fondo-secundario;
+  }
+}
+
+// -- Botón principal ----------------------------------------
+.gd-btn-primary {
+  background-color: $azul-botones;
+  border-color:     $azul-botones;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+
+  &:hover   { background-color: $azul-hover; border-color: $azul-hover; }
+  &:focus   { box-shadow: 0 0 0 3px rgba($azul-botones, .25); }
+}
+
+// -- Botones de ícono en tabla ------------------------------
+.btn-icon {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: $texto-secundario;
+  cursor: pointer;
+  transition: background .15s;
+
+  &:hover { background: $fondo-secundario; }
+  &.active { background: #E3ECFB; }
+  &--danger { color: #DC2626; }
+}
+
+// -- Celdas editables (con boton de quitar/editar) ----------
+.gd-cell { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.gd-cell-remove {
+  flex-shrink: 0; width: 16px; height: 16px; padding: 0; border: none; border-radius: 50%;
+  background: #FBEAEA; color: #C0392B; font-size: 12px; line-height: 1; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  &:hover { background: #F5D5D5; }
+}
+
+// -- Enlace de archivo --------------------------------------
+.gd-file-link {
+  color: $azul-botones;
+  text-decoration: none;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  &:hover { text-decoration: underline; color: $azul-hover; }
+}
+
+// -- Footer de tabla (paginación + filas por página) --------
+.gd-table-footer {
+  background: $fondo;
+  border-top: 1px solid $borde;
+  font-size: 13px;
+}
+
+// -- Caja informativa ---------------------------------------
+.gd-info-box {
+  background: $fondo-informativo;
+  border: 1px solid $teal-informativo;
+  color: $texto-principal;
+  font-size: 13px;
+}
+
+// -- Breadcrumb --------------------------------------------
+.gd-breadcrumb {
+  margin-bottom: 16px;
+
+  .breadcrumb-item {
+    font-size: 13px;
+    color: $texto-tenue;
+
+    a {
+      color: $azul-botones;
+      text-decoration: none;
+      &:hover { text-decoration: underline; }
+    }
+
+    &.active { color: $texto-principal; }
+  }
+}
+
+// -- Page title --------------------------------------------
+.gd-page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: $texto-principal;
+}
+
+// -- Icono sort -------------------------------------------
+.gd-th-inner { display: inline-flex; align-items: center; gap: 6px; }
+.gd-th-sort {
+  width: 18px; height: 18px; padding: 0; border: none; background: transparent;
+  color: $texto-encabezado; opacity: .6;
+  display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+  svg { width: 13px; height: 13px; }
+  &:hover { opacity: 1; }
+}
+
+// -- Icono decorativo de sección/página --------------------
+.gd-icon-bg {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: #EAF2FF; color: $azul-botones;
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+  svg { width: 20px; height: 20px; }
+  &--sm { width: 26px; height: 26px; border-radius: 7px; svg { width: 14px; height: 14px; } }
+}
+
+// -- Enlaces e íconos de acción -----------------------------
+.gd-file-link svg { width: 15px; height: 15px; flex-shrink: 0; }
+.btn-icon { color: $azul-botones; svg { width: 15px; height: 15px; } }
+
+.gd-info-icon {
+  width: 32px; height: 32px; flex-shrink: 0; border-radius: 8px; background: #fff; color: $exito;
+  display: inline-flex; align-items: center; justify-content: center;
+  svg { width: 17px; height: 17px; }
+}
+.gd-btn-ayuda {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px;
+  background: #fff; border: 1px solid $teal-informativo; color: #12657A; font-size: 12.5px; font-weight: 600;
+  border-radius: 8px; padding: 7px 14px; cursor: pointer;
+  svg { width: 15px; height: 15px; }
+  &:hover { background: #E3F4F5; }
+}
+
+// -- Menú de columnas ------------------------------------
+.gd-col-menu {
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.1);
+  font-size: 13px;
+}
+
+// -- Modal de ayuda ------------------------------------------
+.gd-help-list { display: flex; flex-direction: column; gap: 14px; }
+.gd-help-item {
+  padding-bottom: 14px; border-bottom: 1px solid $borde;
+  &:last-child { border-bottom: none; padding-bottom: 0; }
+  p { font-size: 13px; color: $texto-secundario; }
+}
+.gd-help-title { display: block; font-size: 13.5px; font-weight: 700; color: $texto-principal; margin-bottom: 4px; }

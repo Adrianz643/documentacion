@@ -1,0 +1,42 @@
+import { Router } from 'express';
+import actividadRoutes from '../modules/actividad/actividad.routes';
+import aparienciaRoutes from '../modules/apariencia/apariencia.routes';
+import authRoutes from '../modules/auth/auth.routes';
+import backupsRoutes from '../modules/backups/backups.routes';
+import catalogosRoutes from '../modules/catalogos/catalogos.routes';
+import documentosPersonalesRoutes from '../modules/documentos-personales/documentos-personales.routes';
+import columnasPersonalizadasRoutes from '../modules/columnas-personalizadas/columnas-personalizadas.routes';
+import configuracionRoutes from '../modules/configuracion/configuracion.routes';
+import dashboardRoutes from '../modules/dashboard/dashboard.routes';
+import declaracionesRoutes from '../modules/declaraciones/declaraciones.routes';
+import empresasChinasRoutes from '../modules/empresas-chinas/empresas-chinas.routes';
+import facturasRoutes from '../modules/facturas/facturas.routes';
+import facturasHlRoutes from '../modules/facturas-hl/facturas-hl.routes';
+import fielRoutes from '../modules/fiel/fiel.routes';
+import notificacionesRoutes from '../modules/notificaciones/notificaciones.routes';
+import papeleraRoutes from '../modules/papelera/papelera.routes';
+import propietariosRoutes from '../modules/propietarios/propietarios.routes';
+import usuariosRoutes from '../modules/usuarios/usuarios.routes';
+
+const router = Router();
+
+router.use('/auth', authRoutes);
+router.use('/usuarios', usuariosRoutes);
+router.use('/catalogos', catalogosRoutes);
+router.use('/apariencia', aparienciaRoutes);
+router.use('/propietarios', propietariosRoutes);
+router.use('/documentos-personales', documentosPersonalesRoutes);
+router.use('/fiel', fielRoutes);
+router.use('/declaraciones', declaracionesRoutes);
+router.use('/facturas', facturasRoutes);
+router.use('/facturas-hl', facturasHlRoutes);
+router.use('/empresas-chinas', empresasChinasRoutes);
+router.use('/columnas-personalizadas', columnasPersonalizadasRoutes);
+router.use('/notificaciones', notificacionesRoutes);
+router.use('/papelera', papeleraRoutes);
+router.use('/actividad', actividadRoutes);
+router.use('/dashboard', dashboardRoutes);
+router.use('/backups', backupsRoutes);
+router.use('/configuracion', configuracionRoutes);
+
+export default router;

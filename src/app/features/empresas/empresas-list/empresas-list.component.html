@@ -1,0 +1,16 @@
+<div class="d-flex align-items-center mb-4">
+    <h1 class="gd-page-title mb-0">Empresas</h1><a *appOcultoParaVisor routerLink="/empresas/nueva"
+        class="btn btn-sm btn-primary gd-btn-primary ms-auto">＋ Nueva empresa</a>
+</div>
+<div class="row g-3">@for(e of empresas();track e.id){<div class="col-md-6">
+        <div class="gd-emp-card p-4">
+            <div class="d-flex align-items-center gap-3 mb-3"><span class="gd-emp-icon" aria-hidden="true"><i class="fi"
+                        [class.fi-rr-globe]="e.tipo==='china'" [class.fi-rr-building]="e.tipo!=='china'"></i></span>
+                <div>
+                    <h2 class="gd-emp-nombre mb-0">{{e.nombre}}</h2><span class="gd-dot me-1"></span><span
+                        class="gd-emp-status">Empresa activa</span>
+                </div>
+            </div><a [routerLink]="e.tipo === 'china' ? ['/empresas-chinas', 'todas'] : ['/empresas', e.id]"
+                class="btn btn-sm gd-btn-abrir">Abrir empresa</a>
+        </div>
+    </div>}</div>

@@ -1,0 +1,67 @@
+$azul:#0B4DB8;$borde:#DDE5EF;$txt:#172B4D;$fondo:#F7F9FC;$enc:#DCEBEC;$enc-txt:#12335D;$verde:#1FA971;
+.gd-page-title{font-size:22px;font-weight:700;color:$txt;}
+.gd-breadcrumb{margin-bottom:14px;.breadcrumb-item{font-size:13px;color:#7A889B;a{color:$azul;text-decoration:none;&:hover{text-decoration:underline;}}&.active{color:$txt;}}}
+.gd-card{background:#fff;border:1px solid $borde;border-radius:10px;overflow:hidden;}
+.gd-table{font-size:13px;color:$txt;width:100%;border-collapse:collapse;thead tr{background:$enc;}th{font-size:13px;font-weight:600;color:$enc-txt;padding:12px 14px;border-bottom:1px solid #C9D5E3;}td{padding:12px 14px;border-bottom:1px solid $borde;vertical-align:middle;}tbody tr:hover td{background:$fondo;}}
+.gd-th-inner{display:inline-flex;align-items:center;gap:6px;}
+.gd-th-sort{
+  width:18px;height:18px;padding:0;border:none;background:transparent;color:$enc-txt;opacity:.6;
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+  svg{width:13px;height:13px;}
+  &:hover{opacity:1;}
+}
+.gd-btn-primary{background:$azul;border-color:$azul;font-size:13px;font-weight:500;border-radius:8px;&:hover{background:#165DCC;border-color:#165DCC;}}
+.btn-icon{width:30px;height:30px;padding:0;border:none;background:transparent;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;color:$azul;cursor:pointer;svg{width:15px;height:15px;}&:hover{background:$fondo;}&.active{background:#E3ECFB;}&--danger{color:#DC2626;}}
+.gd-cell{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.gd-cell-remove{
+  flex-shrink:0;width:16px;height:16px;padding:0;border:none;border-radius:50%;
+  background:#FBEAEA;color:#C0392B;font-size:12px;line-height:1;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  &:hover{background:#F5D5D5;}
+}
+.gd-file-link{color:$verde;text-decoration:none;font-size:12px;display:inline-flex;align-items:center;gap:5px;svg{width:15px;height:15px;flex-shrink:0;}&:hover{text-decoration:underline;}}
+.gd-table-footer{background:#fff;border-top:1px solid $borde;font-size:13px;}
+.gd-info-box{background:#EDF8F9;border:1px solid #1596A0;font-size:13px;}
+.gd-info-icon{
+  width:32px;height:32px;flex-shrink:0;border-radius:8px;background:#fff;color:$verde;
+  display:inline-flex;align-items:center;justify-content:center;
+  svg{width:17px;height:17px;}
+}
+.gd-btn-ayuda{
+  flex-shrink:0;display:inline-flex;align-items:center;gap:6px;
+  background:#fff;border:1px solid #1596A0;color:#12657A;font-size:12.5px;font-weight:600;
+  border-radius:8px;padding:7px 14px;cursor:pointer;
+  svg{width:15px;height:15px;}
+  &:hover{background:#E3F4F5;}
+}
+.gd-btn-subir{background:#EAF1FF;color:$azul;border:1px solid #C9D5E3;font-size:11px;padding:4px 8px;border-radius:5px;&:hover{background:#dce8ff;}}
+.gd-help-list{display:flex;flex-direction:column;gap:14px;}
+.gd-help-item{
+  padding-bottom:14px;border-bottom:1px solid $borde;
+  &:last-child{border-bottom:none;padding-bottom:0;}
+  p{font-size:13px;color:#53657D;}
+}
+.gd-help-title{display:block;font-size:13.5px;font-weight:700;color:$txt;margin-bottom:4px;}
+.gd-badge-vigencia{
+  display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;
+  background:#EEF2F7;color:#53657D;
+  &--vigente{background:rgba(31,169,113,.12);color:$verde;}
+  &--por-vencer{background:#FEF3C7;color:#B45309;}
+  &--vencida{background:rgba(220,38,38,.1);color:#DC2626;}
+}
+.gd-hint{font-size:11.5px;color:#7A889B;margin-top:4px;}
+.gd-pass-cell{
+  display:flex;align-items:center;gap:4px;width:100%;
+  input{font-size:12px;padding:3px 8px;height:28px;min-width:110px;flex:1;
+    &:disabled{background:$fondo;color:$txt;opacity:1;}
+  }
+}
+.gd-pass-icon{
+  flex-shrink:0;width:24px;height:24px;padding:0;border:none;background:transparent;border-radius:5px;
+  display:inline-flex;align-items:center;justify-content:center;color:#53657D;cursor:pointer;
+  svg{width:14px;height:14px;}
+  &:hover{background:$fondo;}
+  &--confirm{color:$verde;}
+  &--confirm:disabled{opacity:.35;cursor:not-allowed;}
+  &--confirm:disabled:hover{background:transparent;}
+}

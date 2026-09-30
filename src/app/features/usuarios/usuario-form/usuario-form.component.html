@@ -1,0 +1,116 @@
+<div class="d-flex align-items-center mb-4"><h1 class="gd-page-title mb-0">{{esEdicion()?'Editar':'Nuevo'}} usuario</h1><a routerLink="/usuarios" class="btn btn-sm btn-outline-secondary ms-auto">← Volver</a></div>
+<div class="gd-card gd-form-card p-4">
+  @if (errorMessage()) {
+    <div class="alert alert-danger py-2 small" role="alert">{{ errorMessage() }}</div>
+  }
+  @if (cargandoDatos()) {
+    <div class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Cargando datos…</div>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <h2 class="gd-section-title">Datos personales</h2>
+      <div class="row" formGroupName="persona">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3"><label class="form-label" for="pNombre">Nombre(s) <span class="text-danger">*</span></label><input id="pNombre" type="text" class="form-control" formControlName="nombre" [class.is-invalid]="isPersonaInvalid('nombre')"/><div class="invalid-feedback">El nombre es obligatorio.</div></div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3"><label class="form-label" for="pApPaterno">Apellido paterno <span class="text-danger">*</span></label><input id="pApPaterno" type="text" class="form-control" formControlName="apellidoPaterno" [class.is-invalid]="isPersonaInvalid('apellidoPaterno')"/><div class="invalid-feedback">Obligatorio.</div></div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3"><label class="form-label" for="pApMaterno">Apellido materno <span class="text-danger">*</span></label><input id="pApMaterno" type="text" class="form-control" formControlName="apellidoMaterno" [class.is-invalid]="isPersonaInvalid('apellidoMaterno')"/><div class="invalid-feedback">Obligatorio.</div></div>
+
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3"><label class="form-label" for="pFecha">Fecha de nacimiento <span class="text-danger">*</span></label><input id="pFecha" type="date" class="form-control" formControlName="fechaNacimiento" [class.is-invalid]="isPersonaInvalid('fechaNacimiento')"/><div class="invalid-feedback">Fecha inválida.</div></div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3"><label class="form-label" for="pTipoDoc">Tipo de documento <span class="text-danger">*</span></label>
+          <select id="pTipoDoc" class="form-select" formControlName="tipoDocumentoId" [class.is-invalid]="isPersonaInvalid('tipoDocumentoId')">
+            <option [ngValue]="null">Seleccionar…</option>
+            @for (t of catalogos()?.tiposDocumento; track t.id) { <option [ngValue]="t.id">{{t.nombre}}</option> }
+          </select>
+          <div class="invalid-feedback">Selecciona un tipo de documento.</div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3"><label class="form-label" for="pPais">País <span class="text-danger">*</span></label>
+          <select id="pPais" class="form-select" formControlName="paisId" [class.is-invalid]="isPersonaInvalid('paisId')">
+            <option [ngValue]="null">Seleccionar…</option>
+            @for (p of catalogos()?.paises; track p.id) { <option [ngValue]="p.id">{{p.nombre}}</option> }
+          </select>
+          <div class="invalid-feedback">Selecciona un país.</div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3"><label class="form-label" for="pCurp">CURP <span class="text-danger">*</span></label><input id="pCurp" type="text" class="form-control text-uppercase" formControlName="curp" maxlength="18" [class.is-invalid]="isPersonaInvalid('curp')"/><div class="invalid-feedback">Debe tener 18 caracteres.</div></div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3"><label class="form-label" for="pRfc">RFC</label><input id="pRfc" type="text" class="form-control text-uppercase" formControlName="rfc" maxlength="13"/></div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3"><label class="form-label" for="pTelefono">Teléfono</label><input id="pTelefono" type="text" class="form-control" formControlName="telefono" maxlength="20"/></div>
+
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3"><label class="form-label" for="pEmail">Correo electrónico <span class="text-danger">*</span></label><input id="pEmail" type="email" class="form-control" formControlName="email" [class.is-invalid]="isPersonaInvalid('email')"/><div class="invalid-feedback">Correo inválido.</div></div>
+      </div>
+
+      <h2 class="gd-section-title">Cuenta de acceso</h2>
+      <div class="row">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3"><label class="form-label" for="uUsername">Usuario <span class="text-danger">*</span></label><input id="uUsername" type="text" class="form-control" formControlName="username" [class.is-invalid]="isInvalid('username')"/><div class="invalid-feedback">El usuario es obligatorio.</div></div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3"><label class="form-label" for="uRol">Rol <span class="text-danger">*</span></label>
+          <select id="uRol" class="form-select" formControlName="rolId" [class.is-invalid]="isInvalid('rolId')">
+            <option [ngValue]="null">Seleccionar…</option>
+            @for (r of rolesDisponibles(); track r.id) { <option [ngValue]="r.id">{{r.nombre}}</option> }
+          </select>
+          <div class="invalid-feedback">Selecciona un rol.</div>
+        </div>
+
+        @if (rolRequiereSubrol() && rolEsVisor()) {
+          <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3">
+            <label class="form-label" for="uSubrolVisor">Empresa <span class="text-danger">*</span></label>
+            <select id="uSubrolVisor" class="form-select" [class.is-invalid]="subrolesInvalido()"
+                    (change)="seleccionarSubrolVisor($any($event.target).value)">
+              <option value="" [selected]="subrolVisorSeleccionado() === ''">Seleccionar…</option>
+              @for (s of subrolesVisorDisponibles(); track s.id) {
+                <option [value]="s.clave" [selected]="subrolVisorSeleccionado() === s.clave">{{ s.nombre }}</option>
+              }
+            </select>
+            @if (subrolesInvalido()) {
+              <div class="invalid-feedback d-block">Selecciona una empresa (ARDUM o Empresas Chinas).</div>
+            }
+          </div>
+        } @else if (rolRequiereSubrol()) {
+          <div class="col-12 mb-3">
+            <label class="form-label d-block">Subroles <span class="text-danger">*</span></label>
+            <div class="d-flex flex-wrap gap-3">
+              @for (s of catalogos()?.subroles; track s.id) {
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" [id]="'uSubrol' + s.id"
+                         [checked]="subrolesSeleccionados().has(s.clave)"
+                         [class.is-invalid]="subrolesInvalido()"
+                         (change)="toggleSubrol(s.clave)"/>
+                  <label class="form-check-label" [for]="'uSubrol' + s.id">{{ s.nombre }}</label>
+                </div>
+              }
+            </div>
+            @if (subrolesInvalido()) {
+              <div class="text-danger small mt-1">Selecciona al menos un subrol (uno, dos o los tres).</div>
+            }
+          </div>
+        }
+
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3"><label class="form-label" for="uEstado">Estado <span class="text-danger">*</span></label>
+          <select id="uEstado" class="form-select" formControlName="estadoId" [class.is-invalid]="isInvalid('estadoId')">
+            <option [ngValue]="null">Seleccionar…</option>
+            @for (e of catalogos()?.estadosUsuario; track e.id) { <option [ngValue]="e.id">{{e.nombre}}</option> }
+          </select>
+          <div class="invalid-feedback">Selecciona un estado.</div>
+        </div>
+
+        <div class="col-12 col-md-6 mb-3">
+          <label class="form-label" for="uPass">Contraseña @if(esEdicion()){<span class="text-muted fw-normal">(dejar en blanco para no cambiar)</span>} @else {<span class="text-danger">*</span>}</label>
+          <div class="input-group">
+            <input id="uPass" [type]="mostrarPassword() ? 'text' : 'password'" class="form-control" formControlName="password" autocomplete="new-password" (input)="verificarPasswords()"/>
+            <button type="button" class="btn btn-outline-secondary gd-toggle-pass" (click)="mostrarPassword.set(!mostrarPassword())" [attr.aria-label]="mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+              <i class="fi" [class.fi-rr-eye]="!mostrarPassword()" [class.fi-rr-eye-crossed]="mostrarPassword()"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-12 col-md-6 mb-3">
+          <label class="form-label" for="uPass2">Confirmar contraseña</label>
+          <div class="input-group">
+            <input id="uPass2" [type]="mostrarConfirmarPassword() ? 'text' : 'password'" class="form-control" formControlName="confirmarPassword" autocomplete="new-password" (input)="verificarPasswords()" [class.is-invalid]="passwordsNoCoinciden()"/>
+            <button type="button" class="btn btn-outline-secondary gd-toggle-pass" (click)="mostrarConfirmarPassword.set(!mostrarConfirmarPassword())" [attr.aria-label]="mostrarConfirmarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+              <i class="fi" [class.fi-rr-eye]="!mostrarConfirmarPassword()" [class.fi-rr-eye-crossed]="mostrarConfirmarPassword()"></i>
+            </button>
+            @if (passwordsNoCoinciden()) { <div class="invalid-feedback">Las contraseñas no coinciden.</div> }
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 mt-2"><button type="submit" class="btn btn-primary gd-btn-primary" [disabled]="loading()">@if(loading()){<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>}Guardar</button><a routerLink="/usuarios" class="btn btn-outline-secondary">Cancelar</a></div>
+    </form>
+  }
+</div>

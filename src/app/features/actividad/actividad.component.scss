@@ -1,0 +1,6 @@
+$azul:#0B4DB8;$borde:#DDE5EF;$txt:#172B4D;$fondo:#F7F9FC;$enc:#DCEBEC;$enc-txt:#12335D;
+.gd-page-title{font-size:22px;font-weight:700;color:$txt;}
+.gd-card{background:#fff;border:1px solid $borde;border-radius:10px;overflow:hidden;}
+.gd-table{font-size:13px;color:$txt;width:100%;border-collapse:collapse;thead tr{background:$enc;}th{font-size:13px;font-weight:600;color:$enc-txt;padding:10px 14px;border-bottom:1px solid #C9D5E3;}td{padding:10px 14px;border-bottom:1px solid $borde;vertical-align:middle;}tbody tr:hover td{background:$fondo;}}
+.gd-table-footer{background:#fff;border-top:1px solid $borde;font-size:13px;}
+.gd-accion-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;}

@@ -1,0 +1,212 @@
+<nav aria-label="breadcrumb" class="gd-breadcrumb"><ol class="breadcrumb mb-0"><li class="breadcrumb-item"><a [routerLink]="['/empresas',empresaId()]">ARDUM</a></li><li class="breadcrumb-item">Documentos Fiscales</li><li class="breadcrumb-item active" aria-current="page">FIEL</li></ol></nav>
+<div class="d-flex align-items-start mb-4">
+  <div><h1 class="gd-page-title mb-1">FIEL</h1><p class="text-muted small mb-0">Documentos relacionados con la Firma Electrónica Avanzada (FIEL) de ARDUM.</p></div>
+  <div class="ms-auto d-flex gap-2">
+    <div class="input-group input-group-sm" style="width:200px"><input type="search" class="form-control" placeholder="Buscar en FIEL…" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="Buscar"/><span class="input-group-text" aria-hidden="true"><i class="fi fi-rr-search"></i></span></div>
+    <app-column-manager [columns]="columns()" (toggled)="toggleCol($event)"/>
+    <button *appOcultoParaVisor class="btn btn-sm btn-primary gd-btn-primary" (click)="openNuevo(modalNuevo)">＋ Nuevo registro</button>
+  </div>
+</div>
+@if (errorMessage()) {
+  <div class="alert alert-danger py-2 small" role="alert">{{ errorMessage() }}</div>
+}
+@if (vencidas().length || porVencer().length) {
+  <div class="alert alert-warning py-2 small d-flex align-items-center gap-2" role="alert">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+    <span>
+      @if (vencidas().length) { <strong>{{ vencidas().length }}</strong> FIEL {{ vencidas().length === 1 ? 'vencida' : 'vencidas' }}. }
+      @if (porVencer().length) { <strong>{{ porVencer().length }}</strong> {{ porVencer().length === 1 ? 'FIEL vence' : 'FIEL vencen' }} en los próximos 90 días. }
+      Revisa la columna <strong>Vigencia</strong> para renovarlas.
+    </span>
+  </div>
+}
+<div class="gd-card">
+  @if (loading()) {
+    <div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando…</span></div></div>
+  }
+  <div class="table-responsive" [hidden]="loading()">
+    <table class="table gd-table mb-0" aria-label="Registros FIEL"><thead><tr>@for(c of visibles();track c.key){<th scope="col"><span class="gd-th-inner">{{c.label}}<button type="button" class="gd-th-sort" aria-label="Ordenar columna"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button></span></th>}<th scope="col">Acciones</th></tr></thead>
+    <tbody>
+      @for(r of filtrados();track r.id){
+        <tr>
+          @for(c of visibles();track c.key){
+            <td>
+              <div class="gd-cell">
+                @switch(c.key){
+                  @case('propietario'){<span class="fw-medium">{{r.propietario?.nombre}}</span>}
+                  @case('clavePrivada'){@if(r.clavePrivadaDoc){<a class="gd-file-link" [href]="r.clavePrivadaDoc.rutaStorage" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg> {{r.clavePrivadaDoc.nombreArchivo}}</a>}@else{<app-file-upload label="clave .key" accept=".key" (fileSelected)="subirDocumento(r, 'clavePrivada', $event)"/>}}
+                  @case('certificado'){@if(r.certificadoDoc){<a class="gd-file-link" [href]="r.certificadoDoc.rutaStorage" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg> {{r.certificadoDoc.nombreArchivo}}</a>}@else{<app-file-upload label="certificado .cer" accept=".cer" (fileSelected)="subirDocumento(r, 'certificado', $event)"/>}}
+                  @case('contrasena'){
+                    <div class="gd-pass-cell">
+                      @if (r.contrasena) {
+                        <input type="{{ esContrasenaVisible(r.id) ? 'text' : 'password' }}" class="form-control form-control-sm" [value]="r.contrasena" disabled/>
+                        <button type="button" class="gd-pass-icon" [attr.aria-label]="esContrasenaVisible(r.id) ? 'Ocultar contraseña' : 'Ver contraseña'" [ngbTooltip]="esContrasenaVisible(r.id) ? 'Ocultar' : 'Ver contraseña'" (click)="toggleContrasenaVisible(r.id)">
+                          @if (esContrasenaVisible(r.id)) {
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                          } @else {
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-6.5 0-10-7-10-7a18.5 18.5 0 0 1 4.22-5.19M9.9 4.24A9.12 9.12 0 0 1 12 5c6.5 0 10 7 10 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>
+                          }
+                        </button>
+                      } @else {
+                        <input type="{{ esContrasenaVisible(r.id) ? 'text' : 'password' }}" class="form-control form-control-sm" placeholder="Capturar contraseña" maxlength="128" [value]="contrasenaDraftValue(r.id)" (input)="onContrasenaInput(r.id, $any($event.target).value)"/>
+                        <button type="button" class="gd-pass-icon" [attr.aria-label]="esContrasenaVisible(r.id) ? 'Ocultar contraseña' : 'Ver contraseña'" [ngbTooltip]="esContrasenaVisible(r.id) ? 'Ocultar' : 'Ver'" (click)="toggleContrasenaVisible(r.id)">
+                          @if (esContrasenaVisible(r.id)) {
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                          } @else {
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-6.5 0-10-7-10-7a18.5 18.5 0 0 1 4.22-5.19M9.9 4.24A9.12 9.12 0 0 1 12 5c6.5 0 10 7 10 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>
+                          }
+                        </button>
+                        <button type="button" class="gd-pass-icon gd-pass-icon--confirm" [disabled]="!contrasenaDraftValue(r.id).trim()" aria-label="Confirmar y bloquear contraseña" ngbTooltip="Confirmar" (click)="confirmarContrasena(r)">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                        </button>
+                      }
+                    </div>
+                  }
+                  @case('fechaCreacion'){{{r.fechaCreacion|date:'dd/MM/yyyy'}}}
+                  @case('fechaVencimiento'){{{r.fechaVencimiento|date:'dd/MM/yyyy'}}}
+                  @case('vigencia'){<span class="badge gd-badge-vigencia" [ngClass]="estadoVigencia(r.fechaVencimiento).clase">{{ estadoVigencia(r.fechaVencimiento).label }}</span>}
+                  @default{—}
+                }
+                @if (editingId() === r.id && cellHasValue(r, c)) {
+                  <button type="button" class="gd-cell-remove" [attr.aria-label]="'Quitar ' + c.label" [ngbTooltip]="c.key === 'contrasena' ? 'Quitar contraseña' : (c.type === 'file' ? 'Quitar documento' : 'Editar')" (click)="onCellRemove(r, c, modalNuevo, modalEliminar)">×</button>
+                }
+              </div>
+            </td>
+          }
+          <td>
+            <div class="d-flex gap-1">
+              <button *appOcultoParaVisor type="button" class="btn-icon" [class.active]="editingId() === r.id" aria-label="Editar" ngbTooltip="Editar" (click)="toggleEditar(r.id)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              </button>
+              <a class="btn-icon" [routerLink]="['/empresas', empresaId(), 'documentos', 'fiel', r.id]" aria-label="Ver" ngbTooltip="Ver">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </a>
+              <button *appOcultoParaVisor type="button" class="btn-icon btn-icon--danger" aria-label="Eliminar" ngbTooltip="Eliminar" (click)="confirmarEliminar(r, modalEliminar)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      }@empty{<tr><td [colSpan]="visibles().length+1" class="text-center py-4 text-muted">Sin registros FIEL.</td></tr>}
+    </tbody></table>
+  </div>
+  <div class="gd-table-footer d-flex align-items-center px-3 py-2"><span class="text-muted small">Mostrando 1 a {{filtrados().length}} de {{filtrados().length}} registros</span><div class="ms-auto d-flex align-items-center gap-3"><label class="text-muted small mb-0" for="psizeFiel">Filas:</label><select id="psizeFiel" class="form-select form-select-sm w-auto" [value]="pageSize()" (change)="pageSize.set(+$any($event.target).value)"><option value="10">10</option><option value="25" selected>25</option><option value="50">50</option></select><ngb-pagination [collectionSize]="filtrados().length" [(page)]="$any(page)" [pageSize]="pageSize()" size="sm"/></div></div>
+</div>
+<div class="gd-info-box d-flex align-items-center gap-2 p-3 rounded mt-3">
+  <span class="gd-info-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+  </span>
+  <p class="mb-0 small flex-grow-1">Puedes editar la información de cada registro, agregar nuevos documentos o columnas según tus necesidades.</p>
+  <button type="button" class="gd-btn-ayuda" (click)="abrirAyuda(modalAyuda)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><path d="M12 17h.01"/></svg>
+    Ayuda
+  </button>
+</div>
+
+<ng-template #modalNuevo let-modal>
+  <div class="modal-header"><h3 class="modal-title fs-6">{{ editando() ? 'Editar registro FIEL' : 'Nuevo registro FIEL' }}</h3><button type="button" class="btn-close" (click)="modal.dismiss()" aria-label="Cerrar"></button></div>
+  <div class="modal-body"><form [formGroup]="nuevoForm" novalidate>
+    <div class="mb-3">
+      <label class="form-label" for="fProp">Propietario <span class="text-danger">*</span></label>
+      <select id="fProp" class="form-select" formControlName="propietarioId" [class.is-invalid]="isInvalid('propietarioId')">
+        <option [ngValue]="null">Seleccionar…</option>
+        @for (p of propietarios(); track p.id) { <option [ngValue]="p.id">{{ p.nombre }}</option> }
+      </select>
+      <div class="invalid-feedback">Selecciona un propietario.</div>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label" for="fCre">Fecha creación</label>
+        <input id="fCre" type="date" class="form-control" formControlName="fechaCreacion"
+               [attr.min]="fechaCreacionMinima() || null" [attr.max]="fechaCreacionMaxima"
+               [class.is-invalid]="isInvalid('fechaCreacion')"/>
+        @if (editando()) {
+          <div class="invalid-feedback">La vigencia FIEL solo aplica desde el 1/ene/2022; no se permite una fecha de creación anterior.</div>
+        } @else {
+          <div class="invalid-feedback">Con esta fecha la FIEL ya estaría vencida (vigencia de 4 años). Usa una fecha posterior al {{ fechaCreacionMinima() | date:'dd/MM/yyyy' }}.</div>
+        }
+      </div>
+      <div class="col-md-6">
+        <label class="form-label" for="fVen">Fecha vencimiento</label>
+        <input id="fVen" type="date" class="form-control" formControlName="fechaVencimiento" [attr.min]="nuevoForm.get('fechaCreacion')?.value || null"/>
+        <p class="gd-hint mb-0">Se sugiere automáticamente: 4 años desde la fecha de creación (vigente a partir del 1/ene/2022). Puedes ajustarla manualmente.</p>
+      </div>
+    </div>
+  </form></div>
+  <div class="modal-footer"><button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cancelar</button><button type="button" class="btn btn-primary btn-sm gd-btn-primary" [disabled]="guardando()" (click)="guardar(modal)">{{ guardando() ? 'Guardando…' : 'Guardar' }}</button></div>
+</ng-template>
+
+<ng-template #modalEliminar let-modal>
+  <div class="modal-header">
+    <h3 class="modal-title fs-6">{{ aEliminar()?.columnKey ? 'Eliminar documento' : 'Eliminar registro' }}</h3>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (aEliminar()?.columnKey === 'contrasena') {
+      <p class="mb-0">¿Seguro que deseas eliminar la contraseña capturada de <strong>{{ aEliminar()?.registro?.propietario?.nombre }}</strong>? Podrás capturarla de nuevo después. Esta acción no se puede deshacer.</p>
+    } @else if (aEliminar()?.columnKey) {
+      <p class="mb-0">¿Seguro que deseas eliminar el documento <strong>{{ aEliminar()?.columnLabel }}</strong> de <strong>{{ aEliminar()?.registro?.propietario?.nombre }}</strong>? Esta acción no se puede deshacer.</p>
+    } @else {
+      <p class="mb-0">¿Seguro que deseas eliminar el registro FIEL de <strong>{{ aEliminar()?.registro?.propietario?.nombre }}</strong>? Esta acción no se puede deshacer.</p>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-danger btn-sm" (click)="eliminarConfirmado(modal)">Eliminar</button>
+  </div>
+</ng-template>
+
+<ng-template #modalAyuda let-modal>
+  <div class="modal-header">
+    <h3 class="modal-title fs-6">Ayuda · FIEL</h3>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <p class="text-muted small">Esta pantalla concentra la Firma Electrónica Avanzada (FIEL) de cada propietario. Estas son las acciones disponibles y cómo usarlas:</p>
+    <div class="gd-help-list">
+      <div class="gd-help-item">
+        <span class="gd-help-title">Buscar</span>
+        <p class="mb-0">Escribe en el buscador de la parte superior para filtrar la tabla por nombre del propietario.</p>
+      </div>
+      <div class="gd-help-item">
+        <span class="gd-help-title">Columnas</span>
+        <p class="mb-0">El botón de columnas te permite mostrar u ocultar las columnas de la tabla (Clave Privada, Certificado, Contraseña, Fecha de Creación, Fecha de Vencimiento, Vigencia) según lo que necesites consultar. La Contraseña ya no es un archivo: se captura como texto directamente en la tabla.</p>
+      </div>
+      <div class="gd-help-item">
+        <span class="gd-help-title">＋ Nuevo registro</span>
+        <p class="mb-0">Abre un formulario para dar de alta la FIEL de un propietario, con su fecha de creación y de vencimiento. La fecha de vencimiento se sugiere automáticamente con la regla vigente desde el 1 de enero de 2022: la FIEL tiene una vigencia de 4 años a partir de su fecha de creación; puedes ajustarla manualmente si el caso lo requiere. El calendario nunca permite una fecha de creación anterior al 1 de enero de 2022 (al crear o al editar). Además, para registros nuevos, tampoco permite elegir una fecha tan antigua que la FIEL ya estaría vencida hoy (ese límite avanza con el paso del tiempo).</p>
+      </div>
+      <div class="gd-help-item">
+        <span class="gd-help-title">Vigencia</span>
+        <p class="mb-0">Muestra el estado de la FIEL según su fecha de vencimiento: <strong>Vigente</strong>, <strong>Por vencer</strong> (90 días o menos, con el conteo de días) o <strong>Vencida</strong>. Cuando hay registros por vencer o vencidos, aparece un aviso en la parte superior de la pantalla para que sepas cuáles renovar.</p>
+      </div>
+      <div class="gd-help-item">
+        <span class="gd-help-title">Subir documentos</span>
+        <p class="mb-0">En las columnas de Clave Privada (.key) y Certificado (.cer), arrastra un archivo o haz clic en el recuadro para subirlo directamente desde la tabla.</p>
+      </div>
+      <div class="gd-help-item">
+        <span class="gd-help-title">Contraseña</span>
+        <p class="mb-0">Se captura directamente en la tabla: escribe la contraseña, usa el ícono del ojo para mostrarla u ocultarla mientras la escribes, y presiona la palomita para confirmarla. Al confirmar, la contraseña se guarda cifrada y el campo se bloquea (solo lectura); el ojo sigue disponible para volver a verla. Para capturar una distinta, activa el modo de edición de la fila (ícono de lápiz) y usa la "×" sobre la contraseña para eliminarla y volver a escribirla.</p>
+      </div>
+      <div class="gd-help-item">
+        <span class="gd-help-title">Editar (ícono de lápiz)</span>
+        <p class="mb-0">Activa el modo de edición en esa fila: aparece una pequeña "×" sobre cada campo. Al usarla sobre el propietario o las fechas se abre el formulario con los datos precargados para editarlos; al usarla sobre un documento o la contraseña ya capturada, la elimina (previa confirmación).</p>
+      </div>
+      <div class="gd-help-item">
+        <span class="gd-help-title">Ver (ícono de ojo)</span>
+        <p class="mb-0">Abre una vista con todo el detalle de la FIEL del propietario, donde también puedes hacer clic en un documento para ver su vista previa en una ventana modal.</p>
+      </div>
+      <div class="gd-help-item">
+        <span class="gd-help-title">Eliminar (ícono de bote de basura)</span>
+        <p class="mb-0">Elimina el registro FIEL completo. Siempre se pedirá confirmación antes de borrar cualquier dato.</p>
+      </div>
+      <div class="gd-help-item">
+        <span class="gd-help-title">Paginación</span>
+        <p class="mb-0">En la parte inferior de la tabla puedes cambiar cuántas filas se muestran por página y navegar entre páginas.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cerrar</button>
+  </div>
+</ng-template>

@@ -1,0 +1,20 @@
+<h1 class="gd-page-title mb-4">Dashboard — Empresas Chinas</h1>
+@if (errorMessage()) {
+  <div class="alert alert-danger py-2 small" role="alert">{{ errorMessage() }}</div>
+}
+@if (loading()) {
+  <div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando…</span></div></div>
+}
+<div class="row g-3 mb-4" [hidden]="loading()">
+  <div class="col-6 col-md-3"><div class="gd-kpi-card"><span class="gd-kpi-icon" aria-hidden="true"><i class="fi fi-rr-building"></i></span><div class="gd-kpi-val">{{ kpis().total | number }}</div><div class="gd-kpi-lbl">Total de empresas</div></div></div>
+  <div class="col-6 col-md-3"><div class="gd-kpi-card gd-kpi-card--blue"><span class="gd-kpi-icon"><i class="fi fi-rr-refresh"></i></span><div class="gd-kpi-val">{{ kpis().enProceso }}</div><div class="gd-kpi-lbl">En proceso</div></div></div>
+  <div class="col-6 col-md-3"><div class="gd-kpi-card gd-kpi-card--amber"><span class="gd-kpi-icon"><i class="fi fi-rr-hourglass"></i></span><div class="gd-kpi-val">{{ kpis().pendientes }}</div><div class="gd-kpi-lbl">Pendientes</div></div></div>
+  <div class="col-6 col-md-3"><div class="gd-kpi-card gd-kpi-card--green"><span class="gd-kpi-icon"><i class="fi fi-rr-check-circle"></i></span><div class="gd-kpi-val">{{ kpis().finalizadas }}</div><div class="gd-kpi-lbl">Finalizadas</div></div></div>
+</div>
+<div class="gd-card p-3" [hidden]="loading()">
+  <h2 class="gd-section-title mb-3">Progreso por etapa</h2>
+  <div class="table-responsive">
+    <table class="table gd-table mb-0" aria-label="Progreso por etapa"><thead><tr><th scope="col">Etapa</th><th scope="col">Empresas</th><th scope="col">Completadas</th><th scope="col">En proceso</th><th scope="col">Pendientes</th></tr></thead>
+    <tbody>@for(e of kpis().progresoPorEtapa;track e.etapa){<tr><td><a [routerLink]="['/empresas-chinas/etapa',e.etapa]" class="text-decoration-none fw-medium" style="color:#0B4DB8">Etapa {{e.etapa}}: {{e.nombre}}</a></td><td>{{e.empresas|number}}</td><td>{{e.completadas|number}}</td><td>{{e.enProceso|number}}</td><td>{{e.pendientes|number}}</td></tr>}@empty{<tr><td colspan="5" class="text-center py-4 text-muted">Sin empresas registradas.</td></tr>}</tbody></table>
+  </div>
+</div>

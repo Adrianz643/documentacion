@@ -1,0 +1,257 @@
+<!-- ETAPA 1 — Aprobación del nombre y estatutos -->
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="gd-breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a routerLink="/empresas-chinas/todas">Empresas Chinas</a></li>
+    <li class="breadcrumb-item active" aria-current="page">
+      Etapa 1: Aprobación del nombre de la empresa y estatutos
+    </li>
+  </ol>
+</nav>
+
+<!-- Page header -->
+<div class="d-flex align-items-center mb-3">
+  <span class="me-2 text-primary fs-5" aria-hidden="true"><i class="fi fi-rr-menu-burger"></i></span>
+  <div>
+    <h1 class="gd-page-title mb-0">
+      Etapa 1: Aprobación del nombre de la empresa y estatutos
+    </h1>
+    <p class="text-muted small mb-0">
+      Vista general por empresa de los requisitos y documentos correspondientes a la Etapa 1.
+    </p>
+  </div>
+  <div class="ms-auto d-flex align-items-center gap-2">
+    <!-- Búsqueda -->
+    <div class="input-group input-group-sm" style="width:220px">
+      <input type="search" class="form-control" placeholder="Buscar empresa…"
+             [value]="searchTerm()"
+             (input)="searchTerm.set($any($event.target).value)"
+             aria-label="Buscar empresa"/>
+      <span class="input-group-text" aria-hidden="true"><i class="fi fi-rr-search"></i></span>
+    </div>
+    <!-- Columnas -->
+    <app-column-manager [columns]="columnas()" (toggled)="toggleColumna($event)"/>
+    <!-- Agregar empresa -->
+    <button *appOcultoParaVisor class="btn btn-sm btn-primary gd-btn-primary" (click)="agregarEmpresa(modalNuevaEmpresa)">
+      <i class="fi fi-rr-plus"></i> Agregar empresa
+    </button>
+  </div>
+</div>
+
+@if (errorMessage()) {
+  <div class="alert alert-danger py-2 small" role="alert">{{ errorMessage() }}</div>
+}
+
+<!-- Loading -->
+@if (loading()) {
+  <div class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando…</span>
+    </div>
+  </div>
+} @else {
+  <!-- Tabla horizontal con scroll -->
+  <div class="gd-etapa-card">
+    <div class="table-responsive">
+      <table class="table gd-etapa-table mb-0" aria-label="Requisitos Etapa 1">
+        <thead>
+          <!-- Fila de encabezados -->
+          <tr>
+            <th class="gd-col-no" scope="col">No.</th>
+            <th class="gd-col-empresa" scope="col">Nombre de la empresa</th>
+            @for (req of requisitosVisibles(); track req.id) {
+              <th scope="col" style="min-width:100px; font-size:11px; text-align:center"
+                  [ngbTooltip]="req.descripcion" placement="top">
+                <div class="gd-req-header">
+                  <span class="gd-req-code">{{ req.codigo }}</span>
+                  <span class="gd-req-desc">{{ req.descripcion | slice:0:30 }}…</span>
+                </div>
+              </th>
+            }
+            <th scope="col" class="text-center" style="min-width:110px">Check List</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (empresa of pagedEmpresas; track empresa.id; let idx = $index) {
+            <tr>
+              <td class="text-muted text-center gd-col-no">
+                {{ (currentPage() - 1) * pageSize() + idx + 1 }}
+              </td>
+              <td class="gd-col-empresa fw-medium">
+                <a class="gd-empresa-link" [routerLink]="['/empresas-chinas', empresa.id]">{{ empresa.nombre }}</a>
+              </td>
+
+              @for (req of requisitosVisibles(); track req.id) {
+                <td class="text-center gd-req-cell">
+                  @let val = getReqValue(empresa, req.codigo);
+                  @if (val?.completado) {
+                    <!-- Archivo subido: muestra nombre + badge éxito -->
+                    <div class="gd-file-cell">
+                      <span class="gd-file-name" [ngbTooltip]="val?.documento?.nombreArchivo">
+                        <i class="fi fi-rr-document"></i> {{ val?.documento?.nombreArchivo | slice:0:15 }}
+                      </span>
+                      <span class="badge gd-badge-success" aria-label="Completo"><i class="fi fi-rr-check"></i></span>
+                    </div>
+                  } @else if (!auth.esVisor()) {
+                    <!-- Botón subir -->
+                    <button class="btn gd-btn-subir btn-sm"
+                            (click)="openUpload(modalSubir, empresa.id, req)"
+                            [attr.aria-label]="'Subir ' + req.descripcion">
+                      <span aria-hidden="true"><i class="fi fi-rr-cloud-upload"></i></span> Subir
+                    </button>
+                  } @else {
+                    <span class="text-muted small">Sin documento</span>
+                  }
+                </td>
+              }
+
+              <!-- Check List -->
+              <td class="text-center">
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                  <input type="checkbox"
+                         class="form-check-input gd-check"
+                         [checked]="empresa.checkList"
+                         [disabled]="auth.esVisor() || (!empresa.checkList && !todosRequisitosCompletos(empresa))"
+                         [ngbTooltip]="!empresa.checkList && !todosRequisitosCompletos(empresa) ? 'Completa todos los requisitos para habilitar el check list' : ''"
+                         (change)="toggleChecklist(empresa)"
+                         [attr.aria-label]="'Check list ' + empresa.nombre"/>
+                  <button type="button" class="gd-export-btn" ngbTooltip="Exportar expediente" (click)="exportar(empresa)" [attr.aria-label]="'Exportar expediente de ' + empresa.nombre">
+                    <i class="fi fi-rr-download"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+
+          @empty {
+            <tr>
+              <td [colSpan]="requisitosVisibles().length + 3" class="text-center py-4 text-muted">
+                No se encontraron empresas.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer paginación -->
+    <div class="gd-table-footer d-flex align-items-center px-3 py-2">
+      <span class="text-muted small">
+        Mostrando 1 a {{ pagedEmpresas.length }} de
+        {{ empresasFiltradas().length }} empresas
+      </span>
+      <div class="ms-auto d-flex align-items-center gap-3">
+        <label class="text-muted small mb-0" for="psizeEtapa">Filas por página:</label>
+        <select id="psizeEtapa" class="form-select form-select-sm w-auto"
+                [value]="pageSize()" (change)="pageSize.set(+$any($event.target).value)">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+        </select>
+        <ngb-pagination
+          [collectionSize]="empresasFiltradas().length"
+          [(page)]="$any(currentPage)"
+          [pageSize]="pageSize()"
+          [maxSize]="5"
+          size="sm"
+          aria-label="Paginación empresas etapa 1"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info box -->
+  <div class="gd-info-box d-flex align-items-start gap-2 p-3 rounded mt-3">
+    <span aria-hidden="true"><i class="fi fi-rr-info"></i></span>
+    <p class="mb-0 small">
+      En esta vista puedes subir, consultar y dar seguimiento a los documentos requeridos para cada
+      empresa en la Etapa 1. Utiliza la columna de Check List para identificar si todos los requisitos
+      han sido completados.
+    </p>
+  </div>
+}
+
+<!-- ══ MODAL: Subir documento / capturar valor ═════════════ -->
+<ng-template #modalSubir let-modal>
+  <div class="modal-header">
+    <h3 class="modal-title fs-6">{{ requisitoSeleccionado()?.tipoCampo === 'archivo' ? 'Subir documento' : 'Capturar valor' }}</h3>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <p class="text-muted small">{{ requisitoSeleccionado()?.codigo }} — {{ requisitoSeleccionado()?.descripcion }}</p>
+    <form [formGroup]="uploadForm" novalidate>
+      @if (requisitoSeleccionado()?.tipoCampo === 'archivo') {
+        <div class="mb-3">
+          <label class="form-label" for="fileInput">
+            Selecciona el archivo <span class="text-danger">*</span>
+          </label>
+          <input id="fileInput" type="file" class="form-control"
+                 accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.txt,.key,.cer"
+                 (change)="onFileChange($event)"
+                 [class.is-invalid]="uploadForm.get('archivo')?.invalid && uploadForm.get('archivo')?.touched"/>
+          <div class="form-text text-muted">
+            PDF, Word, Excel, PowerPoint, imágenes, .key, .cer — Máx. 10 MB
+          </div>
+          <div class="invalid-feedback">Selecciona un archivo para continuar.</div>
+        </div>
+      } @else {
+        <div class="mb-3">
+          <label class="form-label" for="valorTexto">Valor <span class="text-danger">*</span></label>
+          <input id="valorTexto" type="text" class="form-control" formControlName="valorTexto"
+                 [class.is-invalid]="uploadForm.get('valorTexto')?.invalid && uploadForm.get('valorTexto')?.touched"/>
+          <div class="invalid-feedback">Captura un valor para continuar.</div>
+        </div>
+      }
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-primary btn-sm gd-btn-primary" [disabled]="guardando()" (click)="subirDocumento(modal)">
+      {{ guardando() ? 'Guardando…' : (requisitoSeleccionado()?.tipoCampo === 'archivo' ? 'Subir documento' : 'Guardar') }}
+    </button>
+  </div>
+</ng-template>
+
+<!-- ══ MODAL: Nueva empresa china ═══════════════════════════ -->
+<ng-template #modalNuevaEmpresa let-modal>
+  <div class="modal-header">
+    <h3 class="modal-title fs-6">Nueva empresa china</h3>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="nuevaEmpresaForm" novalidate>
+      <div class="mb-3">
+        <label class="form-label" for="ecNombre">Nombre <span class="text-danger">*</span></label>
+        <input id="ecNombre" type="text" class="form-control" formControlName="nombre"
+               [class.is-invalid]="isInvalidNuevaEmpresa('nombre')"/>
+        <div class="invalid-feedback">El nombre es obligatorio.</div>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="ecRepLegal">Representante legal</label>
+          <input id="ecRepLegal" type="text" class="form-control" formControlName="representanteLegal"/>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="ecCorreo">Correo electrónico</label>
+          <input id="ecCorreo" type="email" class="form-control" formControlName="correoElectronico"
+                 [class.is-invalid]="isInvalidNuevaEmpresa('correoElectronico')"/>
+          <div class="invalid-feedback">Correo inválido.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="ecTelefono">Teléfono</label>
+          <input id="ecTelefono" type="tel" class="form-control" formControlName="telefono"/>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="ecFecha">Fecha de registro</label>
+          <input id="ecFecha" type="date" class="form-control" formControlName="fechaRegistro"/>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-primary btn-sm gd-btn-primary" [disabled]="guardando()" (click)="guardarNuevaEmpresa(modal)">
+      {{ guardando() ? 'Guardando…' : 'Agregar' }}
+    </button>
+  </div>
+</ng-template>

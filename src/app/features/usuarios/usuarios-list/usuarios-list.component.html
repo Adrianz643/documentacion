@@ -1,0 +1,52 @@
+<div class="d-flex align-items-center mb-4"><h1 class="gd-page-title mb-0">Usuarios</h1><div class="ms-auto d-flex gap-2"><div class="input-group input-group-sm" style="width:220px"><input type="search" class="form-control" placeholder="Buscar usuario…" [value]="search()" (input)="onSearchInput($any($event.target).value)" aria-label="Buscar"/><span class="input-group-text"><i class="fi fi-rr-search"></i></span></div><a routerLink="/usuarios/nuevo" class="btn btn-sm btn-primary gd-btn-primary">＋ Nuevo usuario</a></div></div>
+@if (errorMessage()) {
+  <div class="alert alert-danger py-2 small" role="alert">{{ errorMessage() }}</div>
+}
+<div class="gd-card"><div class="table-responsive"><table class="table gd-table mb-0" aria-label="Usuarios"><thead><tr><th scope="col">Nombre</th><th scope="col">Usuario</th><th scope="col">Correo</th><th scope="col">Rol</th><th scope="col">Subroles</th><th scope="col">Estado</th><th scope="col">Último acceso</th><th scope="col">Acciones</th></tr></thead>
+<tbody>
+@if (loading()) {
+  <tr><td colspan="8" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-2"></span>Cargando…</td></tr>
+} @else {
+  @for(u of usuarios(); track u.id){
+    <tr>
+      <td class="fw-medium">{{u.persona.apellidoPaterno}} {{u.persona.apellidoMaterno}} {{u.persona.nombre}}</td>
+      <td>{{u.username}}</td>
+      <td>{{u.persona.email}}</td>
+      <td><span class="badge" [style.background]="colorRol(u.rol.nombre)">{{u.rol.nombre}}</span></td>
+      <td>
+        @if (u.subroles.length) {
+          <div class="d-flex flex-wrap gap-1">
+            @for (s of u.subroles; track s) { <span class="badge bg-secondary">{{s}}</span> }
+          </div>
+        } @else {
+          <span class="text-muted small">—</span>
+        }
+      </td>
+      <td><span class="badge" [style.background]="colorEstado(u.estado.clave)">{{u.estado.nombre}}</span></td>
+      <td class="text-muted small">{{u.ultimoLogin ? (u.ultimoLogin | date:'short') : 'Nunca'}}</td>
+      <td><div class="d-flex gap-1"><a class="btn-icon" [routerLink]="['/usuarios',u.id,'editar']" ngbTooltip="Editar"><i class="fi fi-rr-edit"></i></a>
+        @if (auth.tienePermiso('usuarios.editar')) {
+          <button type="button" class="btn-icon btn-icon--danger" ngbTooltip="Eliminar" [attr.aria-label]="'Eliminar ' + u.username" (click)="confirmarEliminar(u, modalEliminar)"><i class="fi fi-rr-trash"></i></button>
+        }
+      </div></td>
+    </tr>
+  } @empty {
+    <tr><td colspan="8" class="text-center py-4 text-muted">No hay usuarios.</td></tr>
+  }
+}
+</tbody></table></div>
+<div class="gd-table-footer d-flex align-items-center px-3 py-2"><span class="text-muted small">{{total()}} usuarios</span><div class="ms-auto"><ngb-pagination [collectionSize]="total()" [page]="page()" (pageChange)="onPageChange($event)" [pageSize]="pageSize()" size="sm"/></div></div></div>
+
+<ng-template #modalEliminar let-modal>
+  <div class="modal-header">
+    <h3 class="modal-title fs-6">Eliminar usuario</h3>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <p class="mb-0 small">¿Seguro que deseas eliminar al usuario <strong>{{ aEliminar()?.username }}</strong>? Podrás recuperarlo desde la Papelera durante los próximos 30 días.</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-danger btn-sm" (click)="eliminarConfirmado(modal)">Eliminar</button>
+  </div>
+</ng-template>

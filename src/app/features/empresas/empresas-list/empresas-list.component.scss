@@ -1,0 +1,9 @@
+$azul:#0B4DB8;$borde:#DDE5EF;$txt:#172B4D;$fondo:#F7F9FC;
+.gd-page-title{font-size:22px;font-weight:700;color:$txt;}
+.gd-emp-card{background:#fff;border:1px solid $borde;border-radius:10px;}
+.gd-emp-icon{font-size:28px;}
+.gd-emp-nombre{font-size:16px;font-weight:700;color:$txt;}
+.gd-dot{width:8px;height:8px;background:#22C55E;border-radius:50%;display:inline-block;}
+.gd-emp-status{font-size:12px;color:#53657D;}
+.gd-btn-abrir{border:1px solid $borde;background:#fff;color:$txt;font-size:13px;border-radius:6px;&:hover{background:$fondo;}}
+.gd-btn-primary{background:$azul;border-color:$azul;color:#fff;font-size:13px;border-radius:8px;&:hover{background:#165DCC;}}

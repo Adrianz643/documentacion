@@ -1,0 +1,67 @@
+<header class="gd-header d-flex align-items-center px-3 gap-3">
+  @if (isDashboard()) {
+    <div class="gd-header-heading">
+      <h1 class="gd-header-title">Gestión Documental</h1>
+      <span class="gd-header-sub">Sistema de Administración</span>
+    </div>
+  }
+
+  <div class="ms-auto d-flex align-items-center gap-2">
+    @if (!isDashboard()) {
+      <!-- Búsqueda global -->
+      <div class="gd-search-wrap" [class.gd-search-wrap--open]="buscarAbierto()">
+        <input #buscarInput type="search" class="form-control form-control-sm gd-search-input"
+          placeholder="Buscar…" [value]="busqueda()"
+          (input)="busqueda.set($any($event.target).value)"
+          (keydown.escape)="cerrarBuscar()" aria-label="Buscar" />
+      </div>
+      <button type="button" class="gd-icon-btn" [class.active]="buscarAbierto()" aria-label="Buscar" ngbTooltip="Buscar" (click)="toggleBuscar()"><i class="fi fi-rr-search"></i></button>
+      <!-- Editar mi perfil -->
+      <a class="gd-icon-btn" routerLink="/perfil/editar" aria-label="Editar mi perfil" ngbTooltip="Editar mi perfil"><i class="fi fi-rr-settings"></i></a>
+    }
+    <!-- Notificaciones -->
+    <div ngbDropdown placement="bottom-end">
+      <button class="gd-icon-btn position-relative" ngbDropdownToggle aria-label="Notificaciones" (click)="notif.refrescar()">
+        <i class="fi fi-rr-bell"></i>
+        @if (notif.unread() > 0) {
+          <span class="gd-notif-badge">{{ notif.unread() }}</span>
+        }
+      </button>
+      <div ngbDropdownMenu class="p-2" style="min-width:320px; max-height:400px; overflow-y:auto">
+        <div class="d-flex justify-content-between align-items-center px-2 pt-1 pb-2">
+          <h6 class="mb-0" style="font-size:13px;font-weight:600">Notificaciones</h6>
+          @if (notif.unread() > 0) {
+            <button type="button" class="btn btn-link btn-sm p-0" style="font-size:11px" (click)="marcarTodasLeidas()">Marcar todas como leídas</button>
+          }
+        </div>
+        @for (n of notif.items(); track n.id) {
+          <div class="gd-notif-item px-2 py-2 d-flex align-items-start gap-2" [class.gd-notif-item--noleida]="!n.leida">
+            <button type="button" class="gd-notif-body flex-grow-1 text-start border-0 bg-transparent p-0" (click)="abrirNotificacion(n)">
+              <div class="small fw-semibold">{{ n.titulo }}</div>
+              <div class="small text-muted">{{ n.cuerpo }}</div>
+              <div class="text-muted" style="font-size:10px">{{ n.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+            </button>
+            <button type="button" class="btn-close" style="font-size:9px" aria-label="Eliminar notificación" ngbTooltip="Eliminar" (click)="eliminarNotificacion(n)"></button>
+          </div>
+        } @empty {
+          <p class="px-2 text-muted small mb-0">Sin notificaciones nuevas.</p>
+        }
+      </div>
+    </div>
+    <!-- Usuario -->
+    <div ngbDropdown placement="bottom-end">
+      <button class="gd-avatar-btn" ngbDropdownToggle aria-label="Mi cuenta">
+        <span class="gd-avatar">AM</span>
+        <div class="d-none d-md-block text-start">
+          <span class="gd-user-name">{{ auth.usuario()?.persona?.nombre ?? 'Administrador' }}</span>
+          <span class="gd-user-role">Rol: {{ auth.usuario()?.rol?.nombre ?? 'Administrador' }}</span>
+        </div>
+      </button>
+      <div ngbDropdownMenu>
+        <a ngbDropdownItem routerLink="/perfil">Mi perfil</a>
+        <hr class="dropdown-divider">
+        <button ngbDropdownItem (click)="logout()" class="text-danger">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+</header>

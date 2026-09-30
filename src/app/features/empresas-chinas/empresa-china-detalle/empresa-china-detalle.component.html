@@ -1,0 +1,108 @@
+<nav aria-label="breadcrumb" class="gd-breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a routerLink="/empresas-chinas/todas">Empresas Chinas</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ registro()?.nombre ?? 'Detalle' }}</li>
+  </ol>
+</nav>
+
+@if (loading()) {
+  <div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando…</span></div></div>
+} @else if (registro(); as e) {
+  <div class="d-flex align-items-center mb-4">
+    <div>
+      <h1 class="gd-page-title mb-1">{{ e.nombre }}</h1>
+      <p class="text-muted small mb-0">{{ e.codigo }}</p>
+    </div>
+    <div class="ms-auto d-flex gap-2">
+      @if (!auth.esVisor()) {
+        <button type="button" class="btn btn-sm btn-outline-danger" (click)="confirmarEliminar(modalEliminar)">Eliminar</button>
+      }
+      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="volver()">← Volver</button>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert alert-danger py-2 small" role="alert">{{ errorMessage() }}</div>
+  }
+
+  <div class="gd-card p-4 mb-4">
+    <h2 class="gd-section-title">Datos generales</h2>
+    <div class="gd-info-grid">
+      <div class="gd-info-item">
+        <span class="gd-info-label">Código</span>
+        <span class="gd-info-value">{{ e.codigo }}</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Etapa actual</span>
+        <span class="gd-info-value">Etapa {{ e.etapaActual }}</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Estado</span>
+        <span class="gd-badge" [class]="'gd-badge-' + e.estado">{{ estadoLabel(e.estado) }}</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Progreso</span>
+        <span class="gd-info-value">{{ e.progresoPct }}%</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Representante legal</span>
+        <span class="gd-info-value">{{ e.representanteLegal || '—' }}</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Correo electrónico</span>
+        <span class="gd-info-value">{{ e.correoElectronico || '—' }}</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Teléfono</span>
+        <span class="gd-info-value">{{ e.telefono || '—' }}</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Fecha de registro</span>
+        <span class="gd-info-value">{{ (e.fechaRegistro | date:'dd/MM/yyyy') || '—' }}</span>
+      </div>
+    </div>
+  </div>
+
+  @for (etapa of etapasDetalle(); track etapa.etapaNum; let last = $last) {
+    <div class="gd-card p-4" [class.mb-4]="!last">
+      <div class="gd-section-header">
+        <h2 class="gd-section-title-plain">Requisitos — Etapa {{ etapa.etapaNum }}</h2>
+        <span class="gd-badge" [class.gd-badge-cero]="!etapa.checkList">Check List: {{ etapa.checkList ? 'Completo' : 'Pendiente' }}</span>
+      </div>
+      <div class="gd-req-list">
+        @for (item of etapa.requisitosEstado; track item.req.id) {
+          <div class="gd-req-row">
+            <div>
+              <span class="gd-req-code">{{ item.req.codigo }}</span>
+              <span class="gd-req-desc">{{ item.req.descripcion }}</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              @if (item.valor?.documento?.createdAt) {
+                <span class="text-muted small">{{ item.valor?.documento?.createdAt | date:'dd/MM/yyyy' }}</span>
+              }
+              <span class="gd-badge" [class.gd-badge-cero]="!item.valor?.completado">
+                {{ item.valor?.completado ? 'Completado' : 'Pendiente' }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+} @else {
+  <div class="gd-card p-4 text-center text-muted">Empresa no encontrada.</div>
+}
+
+<ng-template #modalEliminar let-modal>
+  <div class="modal-header">
+    <h3 class="modal-title fs-6">Eliminar empresa china</h3>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <p class="mb-0 small">¿Seguro que deseas eliminar <strong>{{ registro()?.nombre }}</strong>? Podrás recuperarla desde la Papelera durante los próximos 30 días.</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-danger btn-sm" (click)="eliminarConfirmado(modal)">Eliminar</button>
+  </div>
+</ng-template>

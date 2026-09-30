@@ -1,0 +1,29 @@
+$azul:#0B4DB8;$borde:#DDE5EF;$txt:#172B4D;$muted:#7A889B;
+
+.gd-page-title{font-size:22px;font-weight:700;color:$txt;}
+.gd-card{background:#fff;border:1px solid $borde;border-radius:10px;}
+.gd-section-title{font-size:15px;font-weight:600;color:$txt;margin:0 0 16px;padding-bottom:8px;border-bottom:1px solid $borde;}
+
+.gd-perfil-header{display:flex;align-items:center;gap:16px;}
+.gd-perfil-avatar{width:64px;height:64px;border-radius:50%;background:$azul;color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;flex-shrink:0;}
+.gd-perfil-nombre{font-size:18px;font-weight:700;color:$txt;margin:0 0 4px;}
+.gd-perfil-rol{display:inline-flex;padding:3px 10px;border-radius:20px;background:rgba(11,77,184,.1);color:$azul;font-size:12px;font-weight:600;}
+
+.gd-info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px;}
+.gd-info-item{display:flex;flex-direction:column;gap:4px;}
+.gd-info-label{font-size:12px;font-weight:600;color:$muted;}
+.gd-info-value{font-size:14px;color:$txt;}
+
+.gd-permiso-badge{background:#F1F5FB;color:$azul;font-size:11px;font-weight:600;padding:5px 10px;border-radius:6px;}
+
+:host-context(.dark-theme) {
+  $d-borde: rgba(255,255,255,.1);
+  $d-txt: #E8ECF3;
+  $d-txt2: #9AA6B8;
+
+  .gd-page-title, .gd-perfil-nombre, .gd-section-title, .gd-info-value { color:$d-txt; }
+  .gd-card { background:#161D2B; border-color:$d-borde; }
+  .gd-section-title { border-bottom-color:$d-borde; }
+  .gd-info-label { color:$d-txt2; }
+  .gd-permiso-badge { background:#1A2233; }
+}

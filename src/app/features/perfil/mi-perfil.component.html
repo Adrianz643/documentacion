@@ -1,0 +1,48 @@
+<h1 class="gd-page-title mb-4">Mi perfil</h1>
+
+@if (auth.usuario(); as u) {
+  <div class="gd-card p-4 mb-4">
+    <div class="gd-perfil-header">
+      <span class="gd-perfil-avatar">{{ iniciales(u.persona.nombre, u.persona.apellidoPaterno) }}</span>
+      <div>
+        <h2 class="gd-perfil-nombre">{{ u.persona.nombre }} {{ u.persona.apellidoPaterno }} {{ u.persona.apellidoMaterno }}</h2>
+        <span class="gd-perfil-rol">{{ u.rol.nombre | titlecase }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="gd-card p-4 mb-4">
+    <h2 class="gd-section-title">Datos de la cuenta</h2>
+    <div class="gd-info-grid">
+      <div class="gd-info-item">
+        <span class="gd-info-label">Usuario</span>
+        <span class="gd-info-value">{{ u.username }}</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Correo electrónico</span>
+        <span class="gd-info-value">{{ u.persona.email }}</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Rol</span>
+        <span class="gd-info-value">{{ u.rol.nombre | titlecase }}</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Último acceso</span>
+        <span class="gd-info-value">{{ u.ultimoLogin ? (u.ultimoLogin | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="gd-card p-4">
+    <h2 class="gd-section-title">Permisos</h2>
+    <div class="d-flex flex-wrap gap-2">
+      @for (p of u.permisos; track p) {
+        <span class="badge gd-permiso-badge">{{ p }}</span>
+      } @empty {
+        <span class="text-muted small">Sin permisos asignados.</span>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="gd-card p-4 text-center text-muted">No fue posible cargar tu perfil.</div>
+}

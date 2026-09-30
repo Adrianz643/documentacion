@@ -1,0 +1,86 @@
+<div class="d-flex align-items-center mb-3">
+  <h1 class="gd-page-title mb-0">Todas las empresas chinas</h1>
+  <div class="ms-auto d-flex gap-2">
+    <div class="input-group input-group-sm" style="width:200px"><input type="search" class="form-control"
+        placeholder="Buscar empresa…" [value]="search()" (input)="search.set($any($event.target).value)"
+        aria-label="Buscar" /><span class="input-group-text"><i class="fi fi-rr-search"></i></span></div><button
+      class="btn btn-sm btn-primary gd-btn-primary" (click)="generarReporte()"><i class="fi fi-rr-download"></i> Generar reporte</button>
+  </div>
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-3">
+    <div class="gd-kpi text-center">
+      <div class="gd-kpi-val">{{ kpis().total | number }}</div>
+      <div class="gd-kpi-lbl">Total</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="gd-kpi text-center">
+      <div class="gd-kpi-val" style="color:#0B4DB8">{{ kpis().enProceso | number }}</div>
+      <div class="gd-kpi-lbl">En proceso</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="gd-kpi text-center">
+      <div class="gd-kpi-val" style="color:#F59E0B">{{ kpis().pendientes | number }}</div>
+      <div class="gd-kpi-lbl">Pendientes</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="gd-kpi text-center">
+      <div class="gd-kpi-val" style="color:#22C55E">{{ kpis().finalizadas | number }}</div>
+      <div class="gd-kpi-lbl">Finalizadas</div>
+    </div>
+  </div>
+</div>
+@if (errorMessage()) {
+  <div class="alert alert-danger py-2 small" role="alert">{{ errorMessage() }}</div>
+}
+<div class="gd-card">
+  @if (loading()) {
+    <div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando…</span></div></div>
+  }
+  <div class="table-responsive" [hidden]="loading()">
+    <table class="table gd-table mb-0" aria-label="Empresas chinas">
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Empresa</th>
+          <th scope="col">Representante</th>
+          <th scope="col">Etapa actual</th>
+          <th scope="col">Progreso</th>
+          <th scope="col">Estado</th>
+          <th scope="col">Última actualización</th>
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>@for(e of filtrados();track e.id){<tr>
+          <td class="text-muted font-monospace" style="font-size:12px">{{e.codigo}}</td>
+          <td class="fw-medium">{{e.nombre}}</td>
+          <td class="text-muted small">{{e.representanteLegal || '—'}}</td>
+          <td>Etapa {{e.etapaActual}}</td>
+          <td style="min-width:120px">
+            <div class="gd-progress">
+              <div class="gd-progress-bar" [style.width.%]="e.progresoPct"></div>
+            </div><span style="font-size:11px;color:#53657D">{{e.progresoPct}}%</span>
+          </td>
+          <td><span class="badge" [style.background]="estadoColor(e.estado)">{{e.estado|titlecase}}</span></td>
+          <td class="text-muted small">{{e.updatedAt|date:'dd/MM/yyyy HH:mm'}}</td>
+          <td>
+            <div class="d-flex gap-1">
+              <a class="btn-icon" [routerLink]="['/empresas-chinas',e.id]" ngbTooltip="Ver" aria-label="Ver empresa"><i class="fi fi-rr-eye"></i></a>
+              <button type="button" class="btn-icon" ngbTooltip="Generar reporte individual" aria-label="Generar reporte individual" (click)="generarReporteIndividual(e)"><i class="fi fi-rr-document"></i></button>
+              <button type="button" class="btn-icon" ngbTooltip="Descargar expediente" aria-label="Descargar expediente" (click)="descargarExpediente(e)"><i class="fi fi-rr-download"></i></button>
+            </div>
+          </td>
+        </tr>}@empty{<tr>
+          <td colspan="8" class="text-center py-4 text-muted">Sin empresas.</td>
+        </tr>}</tbody>
+    </table>
+  </div>
+  <div class="gd-table-footer d-flex align-items-center px-3 py-2"><span class="text-muted small">Mostrando
+      {{filtrados().length}} registros</span>
+    <div class="ms-auto"><ngb-pagination [collectionSize]="filtrados().length" [(page)]="$any(page)"
+        [pageSize]="pageSize()" size="sm" /></div>
+  </div>
+</div>

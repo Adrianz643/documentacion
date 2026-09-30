@@ -1,0 +1,353 @@
+$borde:  #E4E9F2;
+$fondo:  #F7F9FC;
+$txt:    #172B4D;
+$txt2:   #5B6B82;
+$txt3:   #8895A7;
+$azul:   #0B4DB8;
+
+$colors: (
+  blue:   (#EAF2FF, #DCEBFF, #2563EB),
+  green:  (#E9FAF0, #D8F5E4, #16A34A),
+  purple: (#F2ECFE, #E6D9FD, #7C3AED),
+  orange: (#FFF2E6, #FFE3C7, #EA7E1E),
+  teal:   (#E6F8F7, #D2F1EF, #0D9488),
+);
+
+.gd-dashboard {
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.gd-card {
+  background: #fff;
+  border: 1px solid $borde;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.gd-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: $txt;
+  margin: 0 0 16px;
+}
+
+// ---- Fila superior: bienvenida + promo ----
+.gd-top-row {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 20px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gd-welcome-card {
+  padding: 6px 0;
+}
+
+.gd-welcome-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: $txt;
+  margin: 0 0 8px;
+}
+
+.gd-welcome-sub {
+  font-size: 13px;
+  color: $txt2;
+  margin: 0 0 22px;
+  max-width: 480px;
+}
+
+.gd-stats-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.gd-stat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid $borde;
+  border-radius: 12px;
+  padding: 14px 20px;
+  min-width: 190px;
+}
+
+.gd-stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg { width: 20px; height: 20px; }
+
+  @each $name, $c in $colors {
+    &--#{$name} { background: nth($c, 2); color: nth($c, 3); }
+  }
+}
+
+.gd-stat-val { font-size: 24px; font-weight: 700; color: $txt; line-height: 1.1; }
+.gd-stat-lbl { font-size: 12.5px; color: $txt2; margin-top: 2px; }
+.gd-stat-sub { font-size: 11.5px; color: $txt3; margin-top: 1px; }
+
+.gd-promo-card {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  min-height: 280px;
+  min-width: 750px;
+  background: #0B2F6B url('/empresa.jpeg') center / cover no-repeat;
+  display: flex;
+  align-items: flex-end;
+}
+
+.gd-promo-overlay {
+  position: relative;
+  z-index: 1;
+  padding: 18px 20px;
+  margin: 14px;
+  border-radius: 10px;
+  background: rgba(6, 26, 63, .55);
+  backdrop-filter: blur(2px);
+}
+
+.gd-promo-title { font-size: 16px; font-weight: 700; color: #fff; margin: 0 0 4px; }
+.gd-promo-text  { font-size: 12px; color: rgba(255,255,255,.85); margin: 0; max-width: 320px; }
+
+// ---- Fila media: (accesos + empresas activas) | recientes ----
+.gd-mid-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 20px;
+  align-items: stretch;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gd-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.gd-recientes-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.gd-accesos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 12px;
+}
+
+.gd-acceso-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 16px 10px;
+  border-radius: 12px;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: transform .12s ease, border-color .12s ease;
+
+  &:hover { transform: translateY(-2px); }
+
+  @each $name, $c in $colors {
+    &--#{$name} {
+      background: nth($c, 1);
+      &:hover { border-color: nth($c, 3); }
+      .gd-acceso-icon { background: nth($c, 2); color: nth($c, 3); }
+    }
+  }
+}
+
+.gd-acceso-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  svg { width: 19px; height: 19px; }
+}
+
+.gd-acceso-label { font-size: 12.5px; font-weight: 600; color: $txt; }
+.gd-acceso-sub   { font-size: 11px; color: $txt2; }
+
+.gd-card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  .gd-section-title { margin-bottom: 0; }
+}
+
+.gd-ver-todos {
+  margin-left: auto;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: $azul;
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+}
+
+.gd-doc-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid $borde;
+  &:last-child { border-bottom: none; padding-bottom: 0; }
+}
+
+.gd-doc-icon {
+  position: relative;
+  width: 32px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.gd-doc-icon-page { width: 100%; height: 100%; }
+
+.gd-doc-tag {
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  transform: translateX(-50%);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  color: #fff;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.gd-doc-tag--pdf  { background: #E5484D; }
+.gd-doc-tag--img  { background: #7C3AED; }
+.gd-doc-tag--xls  { background: #1FA971; }
+.gd-doc-tag--doc  { background: #2563EB; }
+.gd-doc-tag--arch { background: #8895A7; }
+
+.gd-preview-img{display:block;max-width:100%;max-height:70vh;margin:0 auto;border-radius:8px;}
+.gd-preview-frame{width:100%;height:70vh;border:1px solid $borde;border-radius:8px;}
+.gd-preview-empty, .gd-preview-secure{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  padding:56px 24px;color:$txt3;text-align:center;
+  svg{width:40px;height:40px;color:#B7C0CC;margin-bottom:6px;}
+  p.fw-medium{color:$txt;}
+}
+.gd-preview-secure svg{color:#D97706;}
+
+.gd-doc-info { flex: 1; min-width: 0; }
+.gd-doc-name { font-size: 13px; font-weight: 600; color: $txt; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gd-doc-meta { font-size: 11.5px; color: $txt3; margin-top: 1px; }
+.gd-doc-right { text-align: right; flex-shrink: 0; }
+.gd-doc-date  { font-size: 11.5px; color: $txt2; }
+.gd-doc-size  { font-size: 11px; color: $txt3; margin-top: 1px; }
+
+.gd-doc-menu-wrap { flex-shrink: 0; }
+
+.gd-doc-menu {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: $txt3;
+  font-size: 15px;
+  line-height: 1;
+  border-radius: 6px;
+  cursor: pointer;
+  &:hover { background: $fondo; color: $txt2; }
+}
+
+// ---- Empresas activas ----
+.gd-empresas-grid {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.gd-empresa-tile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: $fondo;
+  border: 1px solid $borde;
+  border-radius: 12px;
+  padding: 14px 16px;
+  min-width: 260px;
+  flex: 1;
+}
+
+.gd-empresa-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  svg { width: 20px; height: 20px; }
+
+  @each $name, $c in $colors {
+    &--#{$name} { background: nth($c, 2); color: nth($c, 3); }
+  }
+}
+
+.gd-empresa-nombre { font-size: 13.5px; font-weight: 700; color: $txt; }
+.gd-empresa-status {
+  font-size: 11.5px; color: $txt2;
+  display: flex; align-items: center; gap: 5px; margin-top: 2px;
+}
+.gd-dot { width: 7px; height: 7px; background: #22C55E; border-radius: 50%; display: inline-block; }
+
+.gd-btn-abrir {
+  margin-left: auto;
+  border: 1px solid $borde;
+  background: #fff;
+  color: $txt;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 7px 14px;
+  text-decoration: none;
+  &:hover { background: $fondo; }
+}
+
+:host-context(.dark-theme) {
+  $d-borde: rgba(255,255,255,.08);
+  $d-fondo: #1A2233;
+  $d-txt: #E8ECF3;
+  $d-txt2: #9AA6B8;
+  $d-txt3: #6B7688;
+
+  .gd-card, .gd-stat, .gd-btn-abrir { background:#161D2B; border-color:$d-borde; }
+  .gd-section-title, .gd-welcome-title, .gd-stat-val,
+  .gd-acceso-label, .gd-doc-name, .gd-empresa-nombre, .gd-btn-abrir { color:$d-txt; }
+  .gd-welcome-sub, .gd-stat-lbl, .gd-acceso-sub, .gd-doc-date, .gd-doc-meta,
+  .gd-empresa-status { color:$d-txt2; }
+  .gd-stat-sub, .gd-doc-size { color:$d-txt3; }
+  .gd-doc-row { border-bottom-color:$d-borde; }
+  .gd-doc-menu { color:$d-txt3; &:hover{ background:$d-fondo; color:$d-txt2; } }
+  .gd-empresa-tile { background:$d-fondo; border-color:$d-borde; }
+  .gd-btn-abrir:hover { background:$d-fondo; }
+  .gd-preview-frame { border-color:$d-borde; }
+  .gd-preview-empty, .gd-preview-secure { color:$d-txt2; p.fw-medium { color:$d-txt; } }
+}

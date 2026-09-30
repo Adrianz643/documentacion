@@ -1,0 +1,73 @@
+<nav class="gd-sidebar" aria-label="Navegación principal">
+  <div class="gd-logo">
+    <img src="/logo.jpeg" alt="Hegewisch López Consultores" class="gd-logo-img" />
+  </div>
+  <ul class="gd-nav" role="list">
+    @for (item of navItems(); track item.label) {
+      <li>
+        @if (item.children) {
+          <a class="gd-nav-link" (click)="toggle(item.label)">
+            <i class="fi {{item.icon}}" aria-hidden="true"></i>
+            <span>{{item.label}}</span>
+            <span class="gd-chevron" [class.open]="isOpen(item.label)" aria-hidden="true">›</span>
+          </a>
+        } @else {
+          <a class="gd-nav-link" [routerLink]="item.route" routerLinkActive="active"
+             [routerLinkActiveOptions]="{exact: item.route==='/dashboard'}">
+            <i class="fi {{item.icon}}" aria-hidden="true"></i>
+            <span>{{item.label}}</span>
+          </a>
+        }
+        @if (item.children && isOpen(item.label)) {
+          <ul class="gd-subnav" role="list">
+            @for (c of item.children; track c.label) {
+              <li>
+                @if (c.children && c.route !== '#') {
+                  <a class="gd-nav-sub" [routerLink]="c.route" routerLinkActive="active" (click)="toggle(c.label)">
+                    <i class="fi {{c.icon}}" aria-hidden="true"></i> {{c.label}}
+                    <span class="gd-chevron" [class.open]="isOpen(c.label)" aria-hidden="true">›</span>
+                  </a>
+                } @else if (c.children) {
+                  <a class="gd-nav-sub" (click)="toggle(c.label)">
+                    <i class="fi {{c.icon}}" aria-hidden="true"></i> {{c.label}}
+                    <span class="gd-chevron" [class.open]="isOpen(c.label)" aria-hidden="true">›</span>
+                  </a>
+                } @else {
+                  <a class="gd-nav-sub" [routerLink]="c.route" routerLinkActive="active">
+                    <i class="fi {{c.icon}}" aria-hidden="true"></i> {{c.label}}
+                  </a>
+                }
+                @if (c.children && isOpen(c.label)) {
+                  <ul class="gd-subnav gd-subnav--deep" role="list">
+                    @for (d of c.children; track d.label) {
+                      <li>
+                        @if (d.children) {
+                          <a class="gd-nav-deep gd-nav-deep--parent" (click)="toggle(d.label)">
+                            {{d.label}}
+                            <span class="gd-chevron" [class.open]="isOpen(d.label)" aria-hidden="true">›</span>
+                          </a>
+                          @if (isOpen(d.label)) {
+                            <ul class="gd-subnav gd-subnav--deepest" role="list">
+                              @for (e of d.children; track e.label) {
+                                <li><a class="gd-nav-deep" [routerLink]="e.route" routerLinkActive="active">{{e.label}}</a></li>
+                              }
+                            </ul>
+                          }
+                        } @else {
+                          <a class="gd-nav-deep" [routerLink]="d.route" routerLinkActive="active">{{d.label}}</a>
+                        }
+                      </li>
+                    }
+                  </ul>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </li>
+    }
+  </ul>
+  <div class="gd-sidebar-footer">
+       <p class="gd-copy">© 2026 AdrianzZ643. Todos los derechos reservados.</p>
+  </div>
+</nav>

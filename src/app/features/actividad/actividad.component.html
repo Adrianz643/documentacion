@@ -1,0 +1,68 @@
+<div class="d-flex align-items-center mb-3">
+  <h1 class="gd-page-title mb-0">Actividad</h1>
+  <div class="ms-auto d-flex gap-2">
+    <select class="form-select form-select-sm w-auto" [value]="moduloFiltro()"
+      (change)="moduloFiltro.set($any($event.target).value); page.set(1)">
+      <option value="">Todos los módulos</option>
+      @for (m of modulos(); track m) {
+        <option [value]="m">{{ m }}</option>
+      }
+    </select>
+    <div class="input-group input-group-sm" style="width:220px">
+      <input type="search" class="form-control" placeholder="Buscar usuario o acción…" [value]="search()"
+        (input)="search.set($any($event.target).value); page.set(1)" aria-label="Buscar" />
+      <span class="input-group-text"><i class="fi fi-rr-search"></i></span>
+    </div>
+  </div>
+</div>
+
+@if (errorMessage()) {
+  <div class="alert alert-danger py-2 small" role="alert">{{ errorMessage() }}</div>
+}
+
+<div class="gd-card">
+  @if (loading()) {
+    <div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando…</span></div></div>
+  }
+  <div class="table-responsive" [hidden]="loading()">
+    <table class="table gd-table mb-0" aria-label="Actividad reciente">
+      <thead>
+        <tr>
+          <th scope="col">Acción</th>
+          <th scope="col">Usuario</th>
+          <th scope="col">Módulo</th>
+          <th scope="col">Descripción</th>
+          <th scope="col">Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (a of paginados(); track a.id) {
+          <tr>
+            <td>
+              <span class="gd-accion-badge" [style.background]="accionInfo(a.accion).color + '1a'"
+                [style.color]="accionInfo(a.accion).color">
+                <i [class]="'fi ' + accionInfo(a.accion).icon"></i> {{ accionInfo(a.accion).label }}
+              </span>
+            </td>
+            <td>
+              <div class="fw-medium">{{ a.usuario }}</div>
+              <div class="text-muted small">{{ a.rol }}</div>
+            </td>
+            <td>{{ a.modulo }}</td>
+            <td class="text-muted">{{ a.descripcion }}</td>
+            <td class="text-muted small text-nowrap">{{ a.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" class="text-center py-4 text-muted">Sin actividad registrada.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="gd-table-footer d-flex align-items-center px-3 py-2">
+    <span class="text-muted small">{{ filtrados().length }} registros</span>
+    <div class="ms-auto">
+      <ngb-pagination [collectionSize]="filtrados().length" [page]="page()" (pageChange)="page.set($event)"
+        [pageSize]="pageSize()" size="sm" />
+    </div>
+  </div>
+</div>

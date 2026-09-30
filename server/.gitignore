@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+*.log
+
+# Documentos y respaldos reales (datos personales, llaves FIEL, volcados de BD):
+# nunca deben subirse a un repositorio de git.
+uploads/
+backups/

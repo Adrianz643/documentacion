@@ -1,0 +1,452 @@
+<!-- ============================================================
+  DECLARACIONES — Template
+  Fiel al diseño: dos tablas (Mensuales / Cero), botón único para agregar
+  registros (con selector de tipo dentro del modal), agregar columna,
+  paginación, modal para nueva/editar fila y nueva columna.
+============================================================ -->
+
+<!-- Migas de pan -->
+<nav aria-label="breadcrumb" class="gd-breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item">
+      <a [routerLink]="['/empresas', empresaId()]">ARDUM</a>
+    </li>
+    <li class="breadcrumb-item">Documentos Fiscales</li>
+    <li class="breadcrumb-item active" aria-current="page">Declaraciones</li>
+  </ol>
+</nav>
+
+<!-- Page header -->
+<div class="gd-page-header d-flex align-items-center gap-3 mb-4">
+  <span class="gd-icon-bg" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+  </span>
+  <div>
+    <h1 class="gd-page-title mb-0">Declaraciones</h1>
+    <p class="text-muted small mb-0">
+      Consulta y administra la información de las declaraciones mensuales y en ceros de los propietarios.
+    </p>
+  </div>
+  <div class="ms-auto d-flex gap-2">
+    <div class="input-group input-group-sm" style="width:200px">
+      <input type="search" class="form-control" placeholder="Buscar propietario…" [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" aria-label="Buscar"/>
+      <span class="input-group-text" aria-hidden="true"><i class="fi fi-rr-search"></i></span>
+    </div>
+    <button *appOcultoParaVisor class="btn btn-primary gd-btn-primary" (click)="agregarFila(modalFila)">
+      <span aria-hidden="true">＋</span> Agregar registro
+    </button>
+  </div>
+</div>
+
+@if (errorMessage()) {
+  <div class="alert alert-danger py-2 small" role="alert">{{ errorMessage() }}</div>
+}
+
+<!-- ── TABLA DECLARACIONES MENSUALES ─────────────────────── -->
+<div class="gd-card mb-4">
+  <div class="gd-card-header d-flex align-items-center">
+    <span class="gd-icon-bg gd-icon-bg--sm me-2" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    </span>
+    <h2 class="gd-section-title mb-0">Declaraciones Mensuales</h2>
+    <div class="ms-auto d-flex gap-2">
+      <!-- Agregar columna -->
+      <button *appOcultoParaVisor class="btn btn-sm btn-outline-secondary" (click)="agregarColumna(modalColumna)"
+              ngbTooltip="Agregar nueva columna">
+        <span aria-hidden="true">＋</span> Agregar columna
+      </button>
+      <!-- Gestor de columnas -->
+      <div ngbDropdown>
+        <button class="btn btn-sm btn-outline-secondary" ngbDropdownToggle aria-label="Gestionar columnas">
+          ⊞ Columnas
+        </button>
+        <div ngbDropdownMenu class="gd-col-menu p-2" style="min-width:220px">
+          @for (col of columnasMensuales(); track col.key) {
+            <div class="form-check mb-1">
+              <input class="form-check-input" type="checkbox"
+                     [id]="'col_' + col.key"
+                     [checked]="col.visible"
+                     (change)="toggleColumna(col.key)"/>
+              <label class="form-check-label small" [for]="'col_' + col.key">
+                {{ col.label }}
+              </label>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando declaraciones…</span>
+      </div>
+    </div>
+  } @else {
+    <div class="table-responsive">
+      <table class="table gd-table mb-0" aria-label="Declaraciones mensuales">
+        <thead>
+          <tr>
+            @for (col of columnasVisibles(); track col.key) {
+              <th scope="col" [class.sortable]="col.sortable">
+                <span class="gd-th-inner">
+                  {{ col.label }}
+                  @if (col.sortable) {
+                    <button type="button" class="gd-th-sort" aria-label="Ordenar columna">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                    </button>
+                  }
+                </span>
+              </th>
+            }
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (decl of declaracionesMensuales(); track decl.id) {
+            <tr>
+              @for (col of columnasVisibles(); track col.key) {
+                <td>
+                  <div class="gd-cell">
+                    @switch (col.key) {
+                      @case ('propietario') {
+                        <span class="fw-medium">{{ decl.propietario?.nombre }}</span>
+                      }
+                      @case ('siguientePagoFrecuencia') {
+                        <span class="text-capitalize">{{ decl.siguientePagoFrecuencia }}</span>
+                      }
+                      @case ('fechaUltimoPago') {
+                        {{ decl.fechaUltimoPago | date:'dd/MM/yyyy' }}
+                      }
+                      @case ('fechaDeclaracion') {
+                        {{ decl.fechaDeclaracion | date:'dd/MM/yyyy' }}
+                      }
+                      @case ('comprobante') {
+                        @if (decl.comprobanteDoc) {
+                          <a [href]="decl.comprobanteDoc.rutaStorage"
+                             class="gd-file-link" target="_blank" rel="noopener">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                            {{ decl.comprobanteDoc.nombreArchivo }}
+                          </a>
+                        } @else {
+                          <app-file-upload label="comprobante" (fileSelected)="subirDocumento(decl, $event)"/>
+                        }
+                      }
+                      @default {
+                        —
+                      }
+                    }
+                    @if (editingId() === decl.id && cellHasValue(decl, col)) {
+                      <button type="button" class="gd-cell-remove" [attr.aria-label]="'Quitar ' + col.label" [ngbTooltip]="col.type === 'file' ? 'Quitar documento' : 'Editar'" (click)="onCellRemove(decl, col, modalFila, modalEliminar)">×</button>
+                    }
+                  </div>
+                </td>
+              }
+              <td>
+                <div class="d-flex gap-1">
+                  <button *appOcultoParaVisor type="button" class="btn btn-sm btn-icon" [class.active]="editingId() === decl.id" ngbTooltip="Editar" aria-label="Editar declaración" (click)="toggleEditar(decl.id)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                  </button>
+                  <a class="btn btn-sm btn-icon" [routerLink]="['/empresas', empresaId(), 'documentos', 'declaraciones', decl.id]" ngbTooltip="Ver" aria-label="Ver declaración">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </a>
+                  <button *appOcultoParaVisor type="button" class="btn btn-sm btn-icon btn-icon--danger" ngbTooltip="Eliminar" aria-label="Eliminar declaración" (click)="confirmarEliminar(decl, modalEliminar)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+          <!-- Estado vacío -->
+          @if (declaracionesMensuales().length === 0) {
+            <tr>
+              <td [colSpan]="columnasVisibles().length + 1" class="text-center py-4 text-muted">
+                No hay declaraciones mensuales registradas.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación mensuales -->
+    <div class="gd-table-footer d-flex align-items-center px-3 py-2">
+      <span class="text-muted small">
+        Mostrando 1 a {{ declaracionesMensuales().length }} de
+        {{ declaracionesMensuales().length }} registros
+      </span>
+      <div class="ms-auto d-flex align-items-center gap-3">
+        <label class="text-muted small mb-0" for="psizeMensual">Filas por página:</label>
+        <select id="psizeMensual" class="form-select form-select-sm w-auto"
+                [value]="pageSize()" (change)="pageSize.set(+$any($event.target).value)">
+          <option value="10">10</option>
+          <option value="25" selected>25</option>
+          <option value="50">50</option>
+        </select>
+        <ngb-pagination
+          [collectionSize]="declaracionesMensuales().length"
+          [(page)]="$any(currentPage)"
+          [pageSize]="pageSize()"
+          [maxSize]="5"
+          [rotate]="true"
+          [boundaryLinks]="true"
+          size="sm"
+          aria-label="Paginación declaraciones mensuales"/>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- ── TABLA DECLARACIONES EN CEROS ──────────────────────── -->
+<div class="gd-card mb-4">
+  <div class="gd-card-header d-flex align-items-center">
+    <span class="gd-icon-bg gd-icon-bg--sm me-2" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    </span>
+    <h2 class="gd-section-title mb-0">Declaraciones Mensuales (CERO)</h2>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table gd-table mb-0" aria-label="Declaraciones en ceros">
+      <thead>
+        <tr>
+          @for (col of columnasVisibles(); track col.key) {
+            <th scope="col">{{ col.label }}</th>
+          }
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (decl of declaracionesCero(); track decl.id) {
+          <tr>
+            @for (col of columnasVisibles(); track col.key) {
+              <td>
+                <div class="gd-cell">
+                  @switch (col.key) {
+                    @case ('propietario')        { <span class="fw-medium">{{ decl.propietario?.nombre }}</span> }
+                    @case ('siguientePagoFrecuencia') {
+                      <span class="text-capitalize">{{ decl.siguientePagoFrecuencia }}</span>
+                    }
+                    @case ('comprobante') {
+                      @if (decl.comprobanteDoc) {
+                        <a [href]="decl.comprobanteDoc.rutaStorage" class="gd-file-link" target="_blank" rel="noopener">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                          {{ decl.comprobanteDoc.nombreArchivo }}
+                        </a>
+                      } @else {
+                        <app-file-upload label="comprobante" (fileSelected)="subirDocumento(decl, $event)"/>
+                      }
+                    }
+                    @default { — }
+                  }
+                  @if (editingId() === decl.id && cellHasValue(decl, col)) {
+                    <button type="button" class="gd-cell-remove" [attr.aria-label]="'Quitar ' + col.label" [ngbTooltip]="col.type === 'file' ? 'Quitar documento' : 'Editar'" (click)="onCellRemove(decl, col, modalFila, modalEliminar)">×</button>
+                  }
+                </div>
+              </td>
+            }
+            <td>
+              <div class="d-flex gap-1">
+                <button *appOcultoParaVisor type="button" class="btn btn-sm btn-icon" [class.active]="editingId() === decl.id" aria-label="Editar" ngbTooltip="Editar" (click)="toggleEditar(decl.id)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                </button>
+                <a class="btn btn-sm btn-icon" [routerLink]="['/empresas', empresaId(), 'documentos', 'declaraciones', decl.id]" aria-label="Ver" ngbTooltip="Ver">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </a>
+                <button *appOcultoParaVisor type="button" class="btn btn-sm btn-icon btn-icon--danger" aria-label="Eliminar" ngbTooltip="Eliminar" (click)="confirmarEliminar(decl, modalEliminar)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+        @empty {
+          <tr>
+            <td [colSpan]="columnasVisibles().length + 1" class="text-center py-4 text-muted">
+              No hay declaraciones en ceros registradas.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <div class="gd-table-footer px-3 py-2">
+    <span class="text-muted small">Mostrando 1 a {{ declaracionesCero().length }} de {{ declaracionesCero().length }} registros</span>
+  </div>
+</div>
+
+<!-- ── INFO ──────────────────────────────────────────────── -->
+<div class="gd-info-box d-flex align-items-center gap-2 p-3 rounded">
+  <span class="gd-info-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+  </span>
+  <p class="mb-0 small flex-grow-1">
+    Puedes editar la información de cada registro, agregar nuevos registros o columnas según tus necesidades.
+  </p>
+  <button type="button" class="gd-btn-ayuda" (click)="abrirAyuda(modalAyuda)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><path d="M12 17h.01"/></svg>
+    Ayuda
+  </button>
+</div>
+
+<!-- ══ MODAL: Nueva / Editar declaración ═══════════════════ -->
+<ng-template #modalFila let-modal>
+  <div class="modal-header">
+    <h3 class="modal-title fs-6">
+      {{ editando() ? 'Editar declaración' : 'Nueva declaración' }}
+    </h3>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="filaForm" novalidate>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="tipoDecl">Tipo de declaración <span class="text-danger">*</span></label>
+          <select id="tipoDecl" class="form-select" formControlName="tipo">
+            <option value="mensual">Mensual</option>
+            <option value="mensual_cero">Mensual (Cero)</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="propietarioId">Propietario <span class="text-danger">*</span></label>
+          <select id="propietarioId" class="form-select"
+                  formControlName="propietarioId"
+                  [class.is-invalid]="isInvalid(filaForm, 'propietarioId')">
+            <option [ngValue]="null">Seleccionar…</option>
+            @for (p of propietarios(); track p.id) { <option [ngValue]="p.id">{{ p.nombre }}</option> }
+          </select>
+          <div class="invalid-feedback">Selecciona un propietario.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="frecuencia">Frecuencia de pago</label>
+          <select id="frecuencia" class="form-select" formControlName="siguientePagoFrecuencia">
+            <option value="mensual">Mensual</option>
+            <option value="bimestral">Bimestral</option>
+            <option value="anual">Anual</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="fechaUlPago">Fecha último pago</label>
+          <input id="fechaUlPago" type="date" class="form-control"
+                 formControlName="fechaUltimoPago"/>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="fechaDecl">Fecha declaración</label>
+          <input id="fechaDecl" type="date" class="form-control"
+                 formControlName="fechaDeclaracion"/>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-primary btn-sm gd-btn-primary" [disabled]="guardando()" (click)="guardarFila(modal)">
+      {{ guardando() ? 'Guardando…' : 'Guardar' }}
+    </button>
+  </div>
+</ng-template>
+
+<!-- ══ MODAL: Agregar columna ═══════════════════════════════ -->
+<ng-template #modalColumna let-modal>
+  <div class="modal-header">
+    <h3 class="modal-title fs-6">Nueva columna</h3>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="columnaForm" novalidate>
+      <div class="mb-3">
+        <label class="form-label" for="colNombre">Nombre de la columna <span class="text-danger">*</span></label>
+        <input id="colNombre" type="text" class="form-control"
+               formControlName="nombre" maxlength="120"
+               [class.is-invalid]="isInvalid(columnaForm, 'nombre')"
+               placeholder="Ej: RFC del propietario"/>
+        <div class="invalid-feedback">El nombre es obligatorio.</div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="colTipo">Tipo de dato</label>
+        <select id="colTipo" class="form-select" formControlName="tipo">
+          <option value="texto">Texto</option>
+          <option value="numero">Número</option>
+          <option value="fecha">Fecha</option>
+          <option value="archivo">Archivo</option>
+          <option value="boolean">Sí / No</option>
+        </select>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-primary btn-sm gd-btn-primary" (click)="guardarColumna(modal)">
+      Agregar columna
+    </button>
+  </div>
+</ng-template>
+
+<!-- ══ MODAL: Eliminar (registro o documento) ═══════════════ -->
+<ng-template #modalEliminar let-modal>
+  <div class="modal-header">
+    <h3 class="modal-title fs-6">{{ aEliminar()?.columnKey ? 'Eliminar documento' : 'Eliminar declaración' }}</h3>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (aEliminar()?.columnKey) {
+      <p class="mb-0">¿Seguro que deseas eliminar el documento <strong>{{ aEliminar()?.columnLabel }}</strong> de <strong>{{ aEliminar()?.registro?.propietario?.nombre }}</strong>? Esta acción no se puede deshacer.</p>
+    } @else {
+      <p class="mb-0">¿Seguro que deseas eliminar la declaración de <strong>{{ aEliminar()?.registro?.propietario?.nombre }}</strong>? Esta acción no se puede deshacer.</p>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-danger btn-sm" (click)="eliminarConfirmado(modal)">Eliminar</button>
+  </div>
+</ng-template>
+
+<!-- ══ MODAL: Ayuda ══════════════════════════════════════════ -->
+<ng-template #modalAyuda let-modal>
+  <div class="modal-header">
+    <h3 class="modal-title fs-6">Ayuda · Declaraciones</h3>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <p class="text-muted small">Esta pantalla concentra las declaraciones mensuales y en ceros de cada propietario. Estas son las acciones disponibles y cómo usarlas:</p>
+    <div class="gd-help-list">
+      <div class="gd-help-item">
+        <span class="gd-help-title">Buscar</span>
+        <p class="mb-0">Escribe en el buscador de la parte superior para filtrar ambas tablas por nombre del propietario.</p>
+      </div>
+      <div class="gd-help-item">
+        <span class="gd-help-title">＋ Agregar registro</span>
+        <p class="mb-0">Abre un formulario para dar de alta una declaración. Ahí mismo eliges si es "Mensual" o "Mensual (Cero)" y esa elección determina en qué tabla aparecerá la nueva fila.</p>
+      </div>
+      <div class="gd-help-item">
+        <span class="gd-help-title">＋ Agregar columna</span>
+        <p class="mb-0">Crea una columna adicional para la tabla de declaraciones mensuales, indicando su nombre y tipo de dato.</p>
+      </div>
+      <div class="gd-help-item">
+        <span class="gd-help-title">⊞ Columnas</span>
+        <p class="mb-0">Muestra u oculta las columnas de la tabla según lo que necesites consultar.</p>
+      </div>
+      <div class="gd-help-item">
+        <span class="gd-help-title">Editar (ícono de lápiz)</span>
+        <p class="mb-0">Activa el modo de edición en esa fila: aparece una pequeña "×" sobre cada campo. Al usarla sobre un campo normal se abre el formulario con los datos precargados para editarlos; al usarla sobre el comprobante, lo elimina (previa confirmación).</p>
+      </div>
+      <div class="gd-help-item">
+        <span class="gd-help-title">Ver (ícono de ojo)</span>
+        <p class="mb-0">Abre una vista con todo el detalle de la declaración, donde también puedes hacer clic en el comprobante para ver su vista previa en una ventana modal.</p>
+      </div>
+      <div class="gd-help-item">
+        <span class="gd-help-title">Eliminar (ícono de bote de basura)</span>
+        <p class="mb-0">Elimina la declaración completa. Siempre se pedirá confirmación antes de borrar cualquier dato.</p>
+      </div>
+      <div class="gd-help-item">
+        <span class="gd-help-title">Paginación</span>
+        <p class="mb-0">En la tabla de declaraciones mensuales puedes cambiar cuántas filas se muestran por página y navegar entre páginas.</p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cerrar</button>
+  </div>
+</ng-template>

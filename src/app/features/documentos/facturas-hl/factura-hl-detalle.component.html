@@ -1,0 +1,73 @@
+<nav aria-label="breadcrumb" class="gd-breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a [routerLink]="['/hl', 'facturas']">Facturas HL</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ registro()?.cliente ?? 'Detalle' }}</li>
+  </ol>
+</nav>
+
+@if (loading()) {
+  <div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando…</span></div></div>
+} @else if (registro(); as r) {
+  <div class="d-flex align-items-center mb-4">
+    <h1 class="gd-page-title mb-0">{{ r.cliente }}</h1>
+    <a [routerLink]="['/hl', 'facturas']" class="btn btn-sm btn-outline-secondary ms-auto">← Volver</a>
+  </div>
+
+  <div class="gd-card p-4 mb-4">
+    <h2 class="gd-section-title">Datos de la factura</h2>
+    <div class="gd-info-grid">
+      <div class="gd-info-item">
+        <span class="gd-info-label">Cliente</span>
+        <span class="gd-info-value">{{ r.cliente || '—' }}</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Fecha</span>
+        <span class="gd-info-value">{{ (r.fecha | date:'dd/MM/yyyy') || '—' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="gd-card p-4">
+    <h2 class="gd-section-title">Comprobante</h2>
+    <div class="gd-doc-list">
+      <div class="gd-doc-row">
+        <span class="gd-doc-row-label">Comprobante</span>
+        @if (r.comprobanteDoc) {
+          <button type="button" class="gd-file-link" (click)="abrirPreview(r.comprobanteDoc, modalPreview)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+            {{ r.comprobanteDoc.nombreArchivo }}
+          </button>
+        } @else {
+          <span class="gd-doc-empty">No subido</span>
+        }
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="gd-card p-4 text-center text-muted">Registro no encontrado.</div>
+}
+
+<ng-template #modalPreview let-modal>
+  @if (docPreview(); as doc) {
+    <div class="modal-header">
+      <h3 class="modal-title fs-6">{{ doc.nombreArchivo }}</h3>
+      <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+      @if (doc.rutaStorage && doc.mimeType.startsWith('image/')) {
+        <img [src]="doc.rutaStorage" [alt]="doc.nombreArchivo" class="gd-preview-img"/>
+      } @else if (doc.rutaStorage && doc.mimeType === 'application/pdf') {
+        <iframe [src]="doc.rutaStorage | safeUrl" class="gd-preview-frame" [title]="doc.nombreArchivo"></iframe>
+      } @else {
+        <div class="gd-preview-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          <p class="mb-1 fw-medium">Vista previa no disponible</p>
+          <p class="text-muted small mb-0">{{ doc.nombreArchivo }} · {{ doc.tamanoByes | fileSize }}</p>
+        </div>
+      }
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cerrar</button>
+    </div>
+  }
+</ng-template>

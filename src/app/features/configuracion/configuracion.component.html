@@ -1,0 +1,104 @@
+<div class="d-flex align-items-center mb-3">
+  <h1 class="gd-page-title mb-0">Configuración</h1>
+  <div class="ms-auto d-flex align-items-center gap-2">
+    @if (guardado()) {
+      <span class="text-success small"><i class="fi fi-rr-check"></i> Cambios guardados</span>
+    }
+    <button type="button" class="btn btn-sm btn-primary gd-btn-primary" (click)="guardar()">Guardar cambios</button>
+  </div>
+</div>
+
+<div class="gd-config-grid">
+  <div class="gd-card p-3">
+    <h2 class="gd-section-title mb-3"><i class="fi fi-rr-lock me-2"></i>Seguridad</h2>
+    <div class="form-check form-switch mb-3">
+      <input class="form-check-input" type="checkbox" role="switch" id="cfg2fa" [ngModel]="dosFactores()" (ngModelChange)="dosFactores.set($event)">
+      <label class="form-check-label small" for="cfg2fa">Autenticación de dos factores</label>
+    </div>
+    <div class="form-check form-switch mb-3">
+      <input class="form-check-input" type="checkbox" role="switch" id="cfgBloqueo" [ngModel]="bloqueoIntentos()" (ngModelChange)="bloqueoIntentos.set($event)">
+      <label class="form-check-label small" for="cfgBloqueo">Bloquear cuenta tras 5 intentos fallidos</label>
+    </div>
+    <div class="form-check form-switch">
+      <input class="form-check-input" type="checkbox" role="switch" id="cfgInactividad" [ngModel]="cerrarSesionInactividad()" (ngModelChange)="cerrarSesionInactividad.set($event)">
+      <label class="form-check-label small" for="cfgInactividad">Cerrar sesión automáticamente por inactividad</label>
+    </div>
+  </div>
+
+  <div class="gd-card p-3">
+    <h2 class="gd-section-title mb-3"><i class="fi fi-rr-bell me-2"></i>Notificaciones</h2>
+    <div class="form-check form-switch mb-3">
+      <input class="form-check-input" type="checkbox" role="switch" id="cfgNotifCorreo" [ngModel]="notifCorreo()" (ngModelChange)="notifCorreo.set($event)">
+      <label class="form-check-label small" for="cfgNotifCorreo">Notificarme por correo</label>
+    </div>
+    <div class="form-check form-switch mb-3">
+      <input class="form-check-input" type="checkbox" role="switch" id="cfgNotifAct" [ngModel]="notifActividad()" (ngModelChange)="notifActividad.set($event)">
+      <label class="form-check-label small" for="cfgNotifAct">Recibir resumen de actividad semanal</label>
+    </div>
+
+    @if (auth.tienePermiso('usuarios.editar')) {
+      <hr class="my-3">
+      <label class="form-label small mb-1" for="cfgDiasFiel">Avisar vencimiento de FIEL con anticipación de</label>
+      @if (cargandoAlertaFiel()) {
+        <div class="text-muted small"><span class="spinner-border spinner-border-sm me-2"></span>Cargando…</div>
+      } @else {
+        <div class="input-group input-group-sm" style="max-width: 220px;">
+          <input id="cfgDiasFiel" type="number" class="form-control" min="1" max="90"
+                 [ngModel]="diasAnticipacionFiel()"
+                 (change)="guardarAlertaFiel($any($event.target).valueAsNumber)"
+                 [disabled]="guardandoAlertaFiel()"/>
+          <span class="input-group-text">día(s)</span>
+        </div>
+        @if (guardandoAlertaFiel()) { <span class="spinner-border spinner-border-sm text-muted mt-2"></span> }
+        @if (errorAlertaFiel()) { <div class="text-danger small mt-1">{{ errorAlertaFiel() }}</div> }
+      }
+    }
+  </div>
+
+  <div class="gd-card p-3">
+    <h2 class="gd-section-title mb-3"><i class="fi fi-rr-settings me-2"></i>Apariencia</h2>
+    <div class="form-check form-switch d-flex align-items-center gap-2">
+      <input class="form-check-input" type="checkbox" role="switch" id="cfgOscuro" [ngModel]="modoOscuro()" (ngModelChange)="cambiarModoOscuro($event)" [disabled]="guardandoApariencia()">
+      <label class="form-check-label small" for="cfgOscuro">Modo oscuro</label>
+      @if (guardandoApariencia()) { <span class="spinner-border spinner-border-sm text-muted"></span> }
+    </div>
+    @if (errorApariencia()) { <div class="text-danger small mt-2">{{ errorApariencia() }}</div> }
+  </div>
+
+  @if (auth.tienePermiso('usuarios.editar')) {
+    <div class="gd-card p-3">
+      <div class="d-flex align-items-center mb-3">
+        <h2 class="gd-section-title mb-0"><i class="fi fi-rr-disk me-2"></i>Respaldos</h2>
+        <button type="button" class="btn btn-sm btn-outline-secondary ms-auto" [disabled]="cargandoBackup()" (click)="cargarEstadoBackup()">
+          <i class="fi fi-rr-refresh"></i>
+        </button>
+      </div>
+      @if (cargandoBackup()) {
+        <div class="text-center py-3"><span class="spinner-border spinner-border-sm text-muted"></span></div>
+      } @else if (errorBackup()) {
+        <div class="text-danger small">{{ errorBackup() }}</div>
+      } @else if (estadoBackup(); as e) {
+        @if (!e.timestamp) {
+          <p class="text-muted small mb-0">Todavía no se ha ejecutado ningún respaldo automático.</p>
+        } @else {
+          <div class="d-flex align-items-center gap-2 mb-2">
+            @if (e.exitoso) {
+              <span class="badge gd-badge-ok-full"><i class="fi fi-rr-check"></i> Correcto</span>
+            } @else {
+              <span class="badge gd-badge-error-full"><i class="fi fi-rr-cross"></i> Falló</span>
+            }
+            <span class="text-muted small">{{ e.timestamp | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          @if (e.exitoso) {
+            <div class="small text-muted">
+              Base de datos: {{ e.baseDatos?.bytes ?? 0 | fileSize }}
+              · Archivos: {{ e.uploads?.archivos ?? 0 }} ({{ e.uploads?.bytes ?? 0 | fileSize }})
+            </div>
+          } @else if (e.error) {
+            <div class="small text-danger">{{ e.error }}</div>
+          }
+        }
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,211 @@
+<div class="gd-dashboard">
+
+  <!-- Bienvenida + promo -->
+  <div class="gd-top-row">
+    <div class="gd-welcome-card">
+      <h1 class="gd-welcome-title">Bienvenido, Administrador</h1>
+      <p class="gd-welcome-sub">Gestiona y organiza los documentos de todas las empresas de forma segura y eficiente.</p>
+
+      <div class="gd-stats-row">
+        <div class="gd-stat">
+          <span class="gd-stat-icon gd-stat-icon--blue" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
+            </svg>
+          </span>
+          <div>
+            <div class="gd-stat-val">{{ stats().empresasActivas }}</div>
+            <div class="gd-stat-lbl">Empresas activas</div>
+            <div class="gd-stat-sub">{{ stats().empresas.join(', ') }}</div>
+          </div>
+        </div>
+
+        <div class="gd-stat">
+          <span class="gd-stat-icon gd-stat-icon--green" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="11" height="11" rx="1.5"/>
+              <path d="M5 15V5a2 2 0 0 1 2-2h10"/>
+            </svg>
+          </span>
+          <div>
+            <div class="gd-stat-val">{{ stats().documentosTotales | number }}</div>
+            <div class="gd-stat-lbl">Documentos totales</div>
+            <div class="gd-stat-sub">En todo el sistema</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gd-promo-card">
+      <div class="gd-promo-overlay">
+        <h2 class="gd-promo-title">Hegewisch López Consultores</h2>
+        <p class="gd-promo-text">Más de 30 años brindando soluciones jurídicas, fiscales y contables.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accesos rápidos + Empresas activas | Documentos recientes -->
+  <div class="gd-mid-row">
+    <div class="gd-left-col">
+    <div class="gd-card gd-accesos-card">
+      <h2 class="gd-section-title">Accesos rápidos</h2>
+      <div class="gd-accesos-grid">
+        @for (a of accesos(); track a.label) {
+          <a class="gd-acceso-tile" [class]="'gd-acceso-tile--' + a.color" [routerLink]="a.route">
+            <span class="gd-acceso-icon" aria-hidden="true">
+              @switch (a.icon) {
+                @case ('building') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="4" y="2" width="16" height="20" rx="1"/>
+                    <path d="M9 22v-4h6v4"/>
+                    <path d="M8 6h1M8 10h1M8 14h1M15 6h1M15 10h1M15 14h1"/>
+                  </svg>
+                }
+                @case ('folder') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
+                  </svg>
+                }
+                @case ('upload') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 18a4.5 4.5 0 0 1-1-8.9A6 6 0 0 1 17.8 8H18a4 4 0 0 1 .5 8"/>
+                    <path d="M12 12v8"/>
+                    <path d="m9 15 3-3 3 3"/>
+                  </svg>
+                }
+                @case ('users') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                }
+                @case ('shield') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22c5-1.5 8-5.5 8-11V5l-8-3-8 3v6c0 5.5 3 9.5 8 11z"/>
+                    <path d="m9 12 2 2 4-4"/>
+                  </svg>
+                }
+              }
+            </span>
+            <span class="gd-acceso-label">{{ a.label }}</span>
+            <span class="gd-acceso-sub">{{ a.sub }}</span>
+          </a>
+        }
+      </div>
+    </div>
+
+    <div class="gd-card gd-empresas-card">
+      <h2 class="gd-section-title">Empresas activas</h2>
+      <div class="gd-empresas-grid">
+        @for (e of empresasActivas(); track e.nombre) {
+          <div class="gd-empresa-tile">
+            <span class="gd-empresa-icon" [class]="'gd-empresa-icon--' + e.color" aria-hidden="true">
+              @switch (e.icon) {
+                @case ('building') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="4" y="2" width="16" height="20" rx="1"/>
+                    <path d="M9 22v-4h6v4"/>
+                    <path d="M8 6h1M8 10h1M8 14h1M15 6h1M15 10h1M15 14h1"/>
+                  </svg>
+                }
+                @case ('globe') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M3 12h18"/>
+                    <path d="M12 3a14 14 0 0 1 0 18"/>
+                    <path d="M12 3a14 14 0 0 0 0 18"/>
+                  </svg>
+                }
+              }
+            </span>
+            <div>
+              <div class="gd-empresa-nombre">{{ e.nombre }}</div>
+              <div class="gd-empresa-status"><span class="gd-dot"></span>Empresa activa</div>
+            </div>
+            <a [routerLink]="e.route" class="gd-btn-abrir">Abrir</a>
+          </div>
+        }
+      </div>
+    </div>
+    </div>
+
+    <div class="gd-card gd-recientes-card">
+      <div class="gd-card-header">
+        <h2 class="gd-section-title">Documentos recientes</h2>
+        <a routerLink="/empresas/1/documentos/personales" class="gd-ver-todos">Ver todos</a>
+      </div>
+      @if (loadingRecientes()) {
+        <div class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Cargando…</span></div></div>
+      }
+      @for (doc of recientes(); track doc.id) {
+        <div class="gd-doc-row">
+          <span class="gd-doc-icon" aria-hidden="true">
+            <svg class="gd-doc-icon-page" viewBox="0 0 24 28" fill="none">
+              <path d="M4 2h11l5 5v17a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="#EEF1F6" stroke="#C9D2E0" stroke-width="1"/>
+              <path d="M15 2v5h5" fill="#DCE2ED"/>
+            </svg>
+            <span class="gd-doc-tag" [class]="'gd-doc-tag--' + tagPorMime(doc.mimeType).toLowerCase()">{{ tagPorMime(doc.mimeType) }}</span>
+          </span>
+          <div class="gd-doc-info">
+            <div class="gd-doc-name">{{ doc.nombreArchivo }}</div>
+            <div class="gd-doc-meta">{{ doc.modulo }} · Subido por {{ doc.subidoPorNombre }}</div>
+          </div>
+          <div class="gd-doc-right">
+            <div class="gd-doc-date">{{ doc.createdAt | date:'dd/MM/yyyy' }}</div>
+            <div class="gd-doc-size">{{ doc.tamanoBytes | fileSize }}</div>
+          </div>
+          <div ngbDropdown container="body" class="gd-doc-menu-wrap">
+            <button type="button" class="gd-doc-menu" ngbDropdownToggle aria-label="Más opciones">⋮</button>
+            <div ngbDropdownMenu>
+              <button type="button" ngbDropdownItem (click)="abrirPreview(doc, modalPreview)">Vista previa</button>
+              @if (doc.ruta) {
+                <a ngbDropdownItem [routerLink]="doc.ruta">Ir al módulo</a>
+              }
+            </div>
+          </div>
+        </div>
+      } @empty {
+        @if (!loadingRecientes()) {
+          <p class="text-muted small text-center py-3 mb-0">Sin documentos recientes.</p>
+        }
+      }
+    </div>
+  </div>
+
+</div>
+
+<ng-template #modalPreview let-modal>
+  @if (docPreview(); as doc) {
+    <div class="modal-header">
+      <h3 class="modal-title fs-6">{{ doc.nombreArchivo }}</h3>
+      <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+      @if (esArchivoSensible(doc)) {
+        <div class="gd-preview-secure">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <p class="mb-1 fw-medium">Vista previa no disponible por seguridad</p>
+          <p class="text-muted small mb-0">Por la naturaleza de este documento ({{ doc.nombreArchivo }}), no es posible mostrar una visualización previa.</p>
+        </div>
+      } @else if (doc.rutaStorage && doc.mimeType.startsWith('image/')) {
+        <img [src]="doc.rutaStorage" [alt]="doc.nombreArchivo" class="gd-preview-img"/>
+      } @else if (doc.rutaStorage && doc.mimeType === 'application/pdf') {
+        <iframe [src]="doc.rutaStorage | safeUrl" class="gd-preview-frame" [title]="doc.nombreArchivo"></iframe>
+      } @else {
+        <div class="gd-preview-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          <p class="mb-1 fw-medium">Vista previa no disponible</p>
+          <p class="text-muted small mb-0">{{ doc.nombreArchivo }} · {{ doc.tamanoBytes | fileSize }}</p>
+        </div>
+      }
+    </div>
+    <div class="modal-footer">
+      @if (doc.ruta) {
+        <a class="btn btn-outline-primary btn-sm" [routerLink]="doc.ruta" (click)="modal.dismiss()">Ir al módulo</a>
+      }
+      <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cerrar</button>
+    </div>
+  }
+</ng-template>

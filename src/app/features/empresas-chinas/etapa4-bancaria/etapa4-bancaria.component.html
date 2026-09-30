@@ -1,0 +1,134 @@
+<nav aria-label="breadcrumb" class="gd-breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a routerLink="/empresas-chinas/todas">Empresas Chinas</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Etapa 4: Apertura de cuenta bancaria corporativa</li>
+  </ol>
+</nav>
+<div class="d-flex align-items-center mb-3">
+  <span class="me-2 text-primary fs-5" aria-hidden="true"><i class="fi fi-rr-bank"></i></span>
+  <div>
+    <h1 class="gd-page-title mb-0">Etapa 4: Apertura de cuenta bancaria corporativa</h1>
+    <p class="text-muted small mb-0">Vista general por empresa de los requisitos y documentos correspondientes a la Etapa 4.</p>
+  </div>
+  <div class="ms-auto d-flex align-items-center gap-2">
+    <div class="input-group input-group-sm" style="width:200px"><input type="search" class="form-control" placeholder="Buscar empresa…" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="Buscar"/><span class="input-group-text"><i class="fi fi-rr-search"></i></span></div>
+    <app-column-manager [columns]="columnas()" (toggled)="toggleColumna($event)"/>
+    <button *appOcultoParaVisor class="btn btn-sm btn-primary gd-btn-primary" (click)="agregarEmpresa(modalNuevaEmpresa)">＋ Agregar empresa</button>
+  </div>
+</div>
+@if (errorMessage()) {
+  <div class="alert alert-danger py-2 small" role="alert">{{ errorMessage() }}</div>
+}
+<div class="gd-card">
+  <div class="table-responsive">
+    <table class="table gd-etapa-table mb-0" aria-label="Etapa 4">
+      <thead><tr>
+        <th scope="col" style="width:40px">No.</th>
+        <th scope="col" style="min-width:160px">Nombre de la empresa</th>
+        @for (req of requisitosVisibles(); track req.id) { <th scope="col" style="min-width:110px;font-size:11px;text-align:center">{{req.descripcion}}</th> }
+        <th scope="col" class="text-center" style="min-width:110px">Check List</th>
+      </tr></thead>
+      <tbody>
+        @for (emp of filtrados(); track emp.id; let i = $index) {
+          <tr>
+            <td class="text-center text-muted">{{i+1}}</td>
+            <td class="fw-medium" style="font-size:12px">
+              <a class="gd-empresa-link" [routerLink]="['/empresas-chinas', emp.id]">{{emp.nombre}}</a>
+            </td>
+            @for (req of requisitosVisibles(); track req.id) {
+              <td class="text-center" style="padding:6px 4px">
+                @let val = getReqValue(emp, req.codigo);
+                @if (val?.completado) {
+                  <span class="badge gd-badge-ok"><i class="fi fi-rr-check"></i></span>
+                } @else if (!auth.esVisor()) {
+                  <button class="btn gd-btn-subir btn-sm" (click)="openUpload(modalSubir, emp.id, req)" [attr.aria-label]="'Subir '+req.descripcion"><i class="fi fi-rr-cloud-upload"></i> Subir</button>
+                } @else {
+                  <span class="text-muted small">Sin documento</span>
+                }
+              </td>
+            }
+            <td class="text-center">
+              <div class="d-flex align-items-center justify-content-center gap-2">
+                <input type="checkbox" class="form-check-input" [checked]="emp.checkList" [disabled]="auth.esVisor()" (change)="toggleChecklist(emp)" [attr.aria-label]="'Check list '+emp.nombre"/>
+                <button type="button" class="gd-export-btn" ngbTooltip="Exportar expediente" (click)="exportar(emp)" [attr.aria-label]="'Exportar expediente de ' + emp.nombre">
+                  <i class="fi fi-rr-download"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+        @empty { <tr><td [colSpan]="requisitosVisibles().length+3" class="text-center py-4 text-muted">Sin empresas.</td></tr> }
+      </tbody>
+    </table>
+  </div>
+  <div class="gd-table-footer d-flex align-items-center px-3 py-2">
+    <span class="text-muted small">Mostrando {{filtrados().length}} empresas</span>
+    <div class="ms-auto d-flex align-items-center gap-3">
+      <label class="text-muted small mb-0" for="psize4">Filas:</label>
+      <select id="psize4" class="form-select form-select-sm w-auto" [value]="pageSize()" (change)="pageSize.set(+$any($event.target).value)"><option value="10">10</option><option value="25">25</option></select>
+      <ngb-pagination [collectionSize]="filtrados().length" [(page)]="$any(page)" [pageSize]="pageSize()" size="sm"/>
+    </div>
+  </div>
+</div>
+<div class="gd-info-box d-flex gap-2 p-3 rounded mt-3"><span><i class="fi fi-rr-info"></i></span><p class="mb-0 small">En esta vista puedes subir, consultar y dar seguimiento a los documentos requeridos para la Etapa 4. Utiliza Check List para identificar si todos los requisitos fueron completados.</p></div>
+
+<ng-template #modalSubir let-modal>
+  <div class="modal-header"><h3 class="modal-title fs-6">{{ requisitoSeleccionado()?.tipoCampo === 'archivo' ? 'Subir documento' : 'Capturar valor' }}</h3><button type="button" class="btn-close" (click)="modal.dismiss()" aria-label="Cerrar"></button></div>
+  <div class="modal-body">
+    <p class="text-muted small">{{ requisitoSeleccionado()?.codigo }} — {{ requisitoSeleccionado()?.descripcion }}</p>
+    <form [formGroup]="uploadForm" novalidate>
+    @if (requisitoSeleccionado()?.tipoCampo === 'archivo') {
+    <div class="mb-3"><label class="form-label" for="fArch4">Archivo <span class="text-danger">*</span></label>
+    <input id="fArch4" type="file" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt" (change)="onFile($event)" [class.is-invalid]="uploadForm.get('archivo')?.invalid&&uploadForm.get('archivo')?.touched"/>
+    <div class="form-text">PDF, Word, Excel, Imágenes — Máx. 10 MB</div><div class="invalid-feedback">Selecciona un archivo.</div></div>
+    } @else {
+    <div class="mb-3"><label class="form-label" for="valorTexto4">Valor <span class="text-danger">*</span></label>
+    <input id="valorTexto4" type="text" class="form-control" formControlName="valorTexto" [class.is-invalid]="uploadForm.get('valorTexto')?.invalid&&uploadForm.get('valorTexto')?.touched"/>
+    <div class="invalid-feedback">Captura un valor para continuar.</div></div>
+    }
+  </form></div>
+  <div class="modal-footer"><button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cancelar</button><button type="button" class="btn btn-primary btn-sm gd-btn-primary" [disabled]="guardando()" (click)="subir(modal)">{{ guardando() ? 'Guardando…' : (requisitoSeleccionado()?.tipoCampo === 'archivo' ? 'Subir' : 'Guardar') }}</button></div>
+</ng-template>
+
+<ng-template #modalNuevaEmpresa let-modal>
+  <div class="modal-header">
+    <h3 class="modal-title fs-6">Nueva empresa china</h3>
+    <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="nuevaEmpresaForm" novalidate>
+      <div class="mb-3">
+        <label class="form-label" for="ecNombre4">Nombre <span class="text-danger">*</span></label>
+        <input id="ecNombre4" type="text" class="form-control" formControlName="nombre"
+               [class.is-invalid]="isInvalidNuevaEmpresa('nombre')"/>
+        <div class="invalid-feedback">El nombre es obligatorio.</div>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="ecRepLegal4">Representante legal</label>
+          <input id="ecRepLegal4" type="text" class="form-control" formControlName="representanteLegal"/>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="ecCorreo4">Correo electrónico</label>
+          <input id="ecCorreo4" type="email" class="form-control" formControlName="correoElectronico"
+                 [class.is-invalid]="isInvalidNuevaEmpresa('correoElectronico')"/>
+          <div class="invalid-feedback">Correo inválido.</div>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="ecTelefono4">Teléfono</label>
+          <input id="ecTelefono4" type="tel" class="form-control" formControlName="telefono"/>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="ecFecha4">Fecha de registro</label>
+          <input id="ecFecha4" type="date" class="form-control" formControlName="fechaRegistro"/>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cancelar</button>
+    <button type="button" class="btn btn-primary btn-sm gd-btn-primary" [disabled]="guardando()" (click)="guardarNuevaEmpresa(modal)">
+      {{ guardando() ? 'Guardando…' : 'Agregar' }}
+    </button>
+  </div>
+</ng-template>

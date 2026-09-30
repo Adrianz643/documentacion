@@ -1,0 +1,88 @@
+$encabezado-tabla: #DCEBEC;
+$texto-encabezado: #12335D;
+$azul-botones:     #0B4DB8;
+$azul-hover:       #165DCC;
+$texto-principal:  #172B4D;
+$borde:            #DDE5EF;
+$borde-fuerte:     #C9D5E3;
+$fondo:            #FFFFFF;
+$fondo-secundario: #F7F9FC;
+$fondo-informativo:#EDF8F9;
+$teal:             #1596A0;
+$exito:            #22C55E;
+
+.gd-page-title { font-size: 18px; font-weight: 700; color: $texto-principal; }
+
+.gd-breadcrumb {
+  margin-bottom: 14px;
+  .breadcrumb-item { font-size: 13px; color: #7A889B;
+    a { color: $azul-botones; text-decoration: none; &:hover { text-decoration: underline; } }
+    &.active { color: $texto-principal; }
+  }
+}
+
+.gd-btn-primary {
+  background: $azul-botones; border-color: $azul-botones; font-size: 13px; border-radius: 8px;
+  &:hover { background: $azul-hover; border-color: $azul-hover; }
+}
+
+.gd-etapa-card {
+  background: $fondo; border: 1px solid $borde; border-radius: 10px; overflow: hidden;
+}
+
+.gd-etapa-table {
+  font-size: 12px; color: $texto-principal; border-collapse: collapse;
+
+  thead tr { background: $encabezado-tabla; }
+  th {
+    font-size: 11px; font-weight: 600; color: $texto-encabezado;
+    padding: 10px 6px; border-bottom: 1px solid $borde-fuerte;
+    vertical-align: top; text-align: center;
+  }
+  td { padding: 10px 6px; border-bottom: 1px solid $borde; vertical-align: middle; }
+  tbody tr:hover td { background: $fondo-secundario; }
+}
+
+.gd-col-no     { width: 40px; text-align: center; }
+.gd-col-empresa { width: 160px; font-size: 12px; }
+
+.gd-empresa-link {
+  color: inherit; text-decoration: none; cursor: pointer;
+  &:hover { text-decoration: underline; }
+}
+
+.gd-export-btn {
+  width: 22px; height: 22px; padding: 0; border: none; background: transparent;
+  border-radius: 5px; color: $azul-botones; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 12px;
+  &:hover { background: $fondo-secundario; }
+}
+
+.gd-req-header {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  .gd-req-code { font-weight: 700; font-size: 11px; color: $texto-encabezado; }
+  .gd-req-desc { font-size: 10px; color: #53657D; line-height: 1.2; text-align: center; }
+}
+
+.gd-req-cell { padding: 6px 4px; }
+
+.gd-file-cell {
+  display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px;
+  .gd-file-name { color: $azul-botones; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+.gd-badge-success { background: lighten($exito, 40%); color: darken($exito, 20%); font-size: 10px; }
+
+.gd-btn-subir {
+  background: #fff; color: #53657D; border: 1px solid #D9D9D9;
+  font-size: 10px; padding: 3px 7px; border-radius: 5px;
+  &:hover { background: #F7F9FC; }
+}
+
+.gd-check { width: 16px; height: 16px; cursor: pointer; }
+
+.gd-table-footer { background: $fondo; border-top: 1px solid $borde; font-size: 13px; }
+
+.gd-info-box {
+  background: $fondo-informativo; border: 1px solid $teal; font-size: 12px; color: $texto-principal;
+}

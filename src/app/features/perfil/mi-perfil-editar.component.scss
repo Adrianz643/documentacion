@@ -1,0 +1,30 @@
+$azul:#0B4DB8;$borde:#DDE5EF;$txt:#172B4D;
+.gd-page-title{font-size:22px;font-weight:700;color:$txt;}
+.gd-card{background:#fff;border:1px solid $borde;border-radius:10px;}
+.gd-form-card{width:100%;}
+.gd-btn-primary{background:$azul;border-color:$azul;font-size:13px;font-weight:500;border-radius:8px;&:hover{background:#165DCC;border-color:#165DCC;}&:disabled{opacity:.7;}}
+.gd-section-title{font-size:14px;font-weight:700;color:$txt;margin:0 0 16px;padding-bottom:8px;border-bottom:1px solid $borde;&:not(:first-child){margin-top:8px;}}
+.gd-toggle-pass{border-color:#CED4DA;color:#6B7280;&:hover{color:$txt;background:#F7F9FC;}}
+
+:host-context(.dark-theme) {
+  $d-borde: rgba(255,255,255,.1);
+  $d-fondo: #1A2233;
+  $d-txt: #E8ECF3;
+  $d-txt2: #9AA6B8;
+
+  .gd-page-title, .gd-section-title { color:$d-txt; }
+  .gd-card { background:#161D2B; border-color:$d-borde; }
+  .gd-section-title { border-bottom-color:$d-borde; }
+  .form-label { color:$d-txt2; }
+  .form-control, .form-select {
+    background:$d-fondo; border-color:rgba(255,255,255,.14); color:$d-txt;
+    &::placeholder { color:#6B7688; }
+    &:focus { background:$d-fondo; color:$d-txt; }
+  }
+  .form-select option { background:$d-fondo; color:$d-txt; }
+  .gd-toggle-pass { border-color:rgba(255,255,255,.14); color:$d-txt2; background:$d-fondo;
+    &:hover { color:$d-txt; background:#212B40; } }
+  .btn-outline-secondary { border-color:rgba(255,255,255,.2); color:$d-txt2;
+    &:hover { background:$d-fondo; color:$d-txt; } }
+  .text-muted { color:$d-txt2 !important; }
+}

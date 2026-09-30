@@ -1,0 +1,147 @@
+/* Global styles */
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  transition: background-color .15s ease;
+}
+
+body.dark-theme {
+  background: #0F1420;
+}
+
+/*
+ * Seguridad global: .gd-page-title es el encabezado de pagina en practicamente
+ * todas las pantallas (se repite igual en cada feature) y normalmente se pinta
+ * directo sobre el fondo principal, sin una tarjeta blanca detras. Si el fondo
+ * se oscurece pero esta clase no se retematiza pantalla por pantalla, el texto
+ * queda con su color oscuro original sobre un fondo oscuro y se vuelve
+ * ilegible. Esta regla evita ese caso en cualquier pantalla, incluidas las que
+ * aun no tienen su propio ajuste de modo oscuro.
+ */
+body.dark-theme .gd-page-title {
+  color: #E8ECF3 !important;
+}
+
+/*
+ * Mismo razonamiento que .gd-page-title: .text-muted (Bootstrap) y .gd-breadcrumb
+ * se repiten identicos en la mayoria de las pantallas para subtitulos y migas de
+ * pan que tampoco estan dentro de una tarjeta blanca.
+ */
+body.dark-theme .text-muted {
+  color: #8792A6 !important;
+}
+
+body.dark-theme .gd-breadcrumb .breadcrumb-item {
+  color: #6B7688 !important;
+
+  a {
+    color: #5B9BFF !important;
+  }
+
+  &.active {
+    color: #C7D0DE !important;
+  }
+}
+
+/*
+ * Estandarizacion global de botones (todas las pantallas excepto login, que
+ * usa sus propias clases .gd-login-btn/.gd-login-forgot y no lleva .btn).
+ * Iguala alto, relleno vertical, tipografia y radio de borde de cualquier
+ * .btn para que botones como "Cancelar" (btn-secondary/btn-outline-secondary)
+ * luzcan con el mismo borde/alto que "Guardar" (btn-primary/gd-btn-primary),
+ * sin forzar el ancho: el largo sigue variando segun el texto de cada boton.
+ * Se excluyen los botones compactos/solo-icono que por diseno son mas
+ * pequenos (icono de fila, cerrar modal, mostrar/ocultar contraseña, subir
+ * documento en tablas y el selector de empresa del header).
+ */
+.btn:not(.btn-icon):not(.btn-close):not(.gd-toggle-pass):not(.gd-btn-subir):not(.gd-empresa-btn) {
+  height: 34px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Paginador (ngb-pagination) */
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+}
+
+.pagination .page-item {
+  margin: 0;
+}
+
+.pagination .page-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  border: none;
+  border-radius: 50%;
+  background-color: transparent;
+  color: #172B4D;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  transition: background-color .15s ease, color .15s ease;
+}
+
+.pagination .page-item:not(.disabled):not(.active) .page-link:hover {
+  background-color: rgba(11, 77, 184, .08);
+  color: #0B4DB8;
+}
+
+.pagination .page-item:not(.disabled) .page-link:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(11, 77, 184, .2);
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #0B4DB8;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 0 0 6px rgba(11, 77, 184, .14);
+}
+
+.pagination .page-item.disabled .page-link {
+  background-color: transparent;
+  color: #B7C0CC;
+  cursor: default;
+}
+
+.pagination-sm .page-link {
+  min-width: 26px;
+  height: 26px;
+  font-size: 12.5px;
+}
+
+body.dark-theme {
+  .pagination .page-link {
+    color: #C7D0DE;
+  }
+  .pagination .page-item:not(.disabled):not(.active) .page-link:hover {
+    background-color: rgba(91, 155, 255, .12);
+    color: #5B9BFF;
+  }
+  .pagination .page-item.active .page-link {
+    background-color: #5B9BFF;
+    color: #0F1420;
+    box-shadow: 0 0 0 6px rgba(91, 155, 255, .18);
+  }
+  .pagination .page-item.disabled .page-link {
+    color: #4A5468;
+  }
+}

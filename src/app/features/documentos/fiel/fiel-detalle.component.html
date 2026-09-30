@@ -1,0 +1,107 @@
+<nav aria-label="breadcrumb" class="gd-breadcrumb">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a [routerLink]="['/empresas', empresaId()]">ARDUM</a></li>
+    <li class="breadcrumb-item"><a [routerLink]="['/empresas', empresaId(), 'documentos', 'fiel']">FIEL</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ registro()?.propietario?.nombre ?? 'Detalle' }}</li>
+  </ol>
+</nav>
+
+@if (loading()) {
+  <div class="text-center py-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando…</span></div></div>
+} @else if (registro(); as r) {
+  <div class="d-flex align-items-center mb-4">
+    <h1 class="gd-page-title mb-0">{{ r.propietario?.nombre }}</h1>
+    <a [routerLink]="['/empresas', empresaId(), 'documentos', 'fiel']" class="btn btn-sm btn-outline-secondary ms-auto">← Volver</a>
+  </div>
+
+  <div class="gd-card p-4 mb-4">
+    <h2 class="gd-section-title">Datos de la FIEL</h2>
+    <div class="gd-info-grid">
+      <div class="gd-info-item">
+        <span class="gd-info-label">Propietario</span>
+        <span class="gd-info-value">{{ r.propietario?.nombre || '—' }}</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Fecha de creación</span>
+        <span class="gd-info-value">{{ (r.fechaCreacion | date:'dd/MM/yyyy') || '—' }}</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Fecha de vencimiento</span>
+        <span class="gd-info-value">{{ (r.fechaVencimiento | date:'dd/MM/yyyy') || '—' }}</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Vigencia</span>
+        <span class="badge gd-badge-vigencia" [ngClass]="estadoVigencia(r.fechaVencimiento).clase">{{ estadoVigencia(r.fechaVencimiento).label }}</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Contraseña</span>
+        @if (r.contrasena) {
+          <div class="gd-pass-cell">
+            <span class="gd-info-value font-monospace">{{ contrasenaVisible() ? r.contrasena : '••••••••' }}</span>
+            <button type="button" class="gd-pass-icon" [attr.aria-label]="contrasenaVisible() ? 'Ocultar contraseña' : 'Ver contraseña'" (click)="toggleContrasenaVisible()">
+              @if (contrasenaVisible()) {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              } @else {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-6.5 0-10-7-10-7a18.5 18.5 0 0 1 4.22-5.19M9.9 4.24A9.12 9.12 0 0 1 12 5c6.5 0 10 7 10 7a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22"/></svg>
+              }
+            </button>
+          </div>
+        } @else {
+          <span class="gd-info-value">—</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="gd-card p-4">
+    <h2 class="gd-section-title">Documentos</h2>
+    <div class="gd-doc-list">
+      @for (d of documentos(); track d.key) {
+        <div class="gd-doc-row">
+          <span class="gd-doc-row-label">{{ d.label }}</span>
+          @if (d.doc) {
+            <button type="button" class="gd-file-link" (click)="abrirPreview(d.doc, modalPreview)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+              {{ d.doc.nombreArchivo }}
+            </button>
+          } @else {
+            <span class="gd-doc-empty">No subido</span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="gd-card p-4 text-center text-muted">Registro no encontrado.</div>
+}
+
+<ng-template #modalPreview let-modal>
+  @if (docPreview(); as doc) {
+    <div class="modal-header">
+      <h3 class="modal-title fs-6">{{ doc.nombreArchivo }}</h3>
+      <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+    </div>
+    <div class="modal-body">
+      @if (esArchivoSensible(doc)) {
+        <div class="gd-preview-secure">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <p class="mb-1 fw-medium">Vista previa no disponible por seguridad</p>
+          <p class="text-muted small mb-0">Por la naturaleza de este documento ({{ doc.nombreArchivo }}), no es posible mostrar una visualización previa.</p>
+        </div>
+      } @else if (doc.rutaStorage && doc.mimeType.startsWith('image/')) {
+        <img [src]="doc.rutaStorage" [alt]="doc.nombreArchivo" class="gd-preview-img"/>
+      } @else if (doc.rutaStorage && doc.mimeType === 'application/pdf') {
+        <iframe [src]="doc.rutaStorage | safeUrl" class="gd-preview-frame" [title]="doc.nombreArchivo"></iframe>
+      } @else {
+        <div class="gd-preview-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          <p class="mb-1 fw-medium">Vista previa no disponible</p>
+          <p class="text-muted small mb-0">{{ doc.nombreArchivo }} · {{ doc.tamanoByes | fileSize }}</p>
+        </div>
+      }
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cerrar</button>
+    </div>
+  }
+</ng-template>

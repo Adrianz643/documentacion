@@ -1,0 +1,43 @@
+{
+  "name": "gestion-documental-hegewisch",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test",
+    "server:install": "npm install --prefix server",
+    "server:dev": "npm run dev --prefix server",
+    "server:build": "npm run build --prefix server",
+    "dev": "concurrently -n web,api -c blue.bold,green.bold \"npm run start\" \"npm run server:dev\"",
+    "build:all": "npm run build && npm run server:build"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^21.2.0",
+    "@angular/common": "^21.2.0",
+    "@angular/compiler": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/localize": "^21.2.0",
+    "@angular/platform-browser": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "@ng-bootstrap/ng-bootstrap": "^20.0.0",
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.8",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
+    "jszip": "^3.10.2",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.16.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.2.19",
+    "@angular/cli": "^21.2.19",
+    "@angular/compiler-cli": "^21.2.0",
+    "concurrently": "^9.1.0",
+    "typescript": "~5.9.2"
+  }
+}
