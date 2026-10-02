@@ -49,7 +49,9 @@
             }
             <td class="text-center">
               <div class="d-flex align-items-center justify-content-center gap-2">
-                <input type="checkbox" class="form-check-input" [checked]="emp.checkList" [disabled]="auth.esVisor()" (change)="toggleChecklist(emp)" [attr.aria-label]="'Check list '+emp.nombre"/>
+                <span class="badge" [class.gd-badge-ok]="emp.checkList" [class.gd-badge-cero]="!emp.checkList">
+                  {{ emp.checkList ? 'Completo' : 'Pendiente' }}
+                </span>
                 <button type="button" class="gd-export-btn" ngbTooltip="Exportar expediente" (click)="exportar(emp)" [attr.aria-label]="'Exportar expediente de ' + emp.nombre">
                   <i class="fi fi-rr-download"></i>
                 </button>

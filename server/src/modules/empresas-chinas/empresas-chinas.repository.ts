@@ -333,6 +333,18 @@ export async function eliminarValor(
   }
 }
 
+async function contarRequisitosEtapa(empresaChinaId: number, etapaNum: number): Promise<{ total: number; completados: number }> {
+  const [rows] = await pool.execute<ProgresoRow[]>(
+    `SELECT
+       (SELECT COUNT(*) FROM etapa_requisitos WHERE etapa_num = ?) AS total,
+       (SELECT COUNT(*) FROM empresa_china_requisitos ecr
+          INNER JOIN etapa_requisitos er ON er.id = ecr.requisito_id
+          WHERE er.etapa_num = ? AND ecr.empresa_china_id = ? AND ecr.completado = 1 AND ecr.deleted_at IS NULL) AS completados`,
+    [etapaNum, etapaNum, empresaChinaId],
+  );
+  return rows[0] ?? { total: 0, completados: 0 };
+}
+
 export async function recalcularProgreso(empresaChinaId: number, actorId: number): Promise<void> {
   const [empresaRows] = await pool.execute<RowDataPacket[]>(
     `SELECT etapa_actual FROM empresas_chinas WHERE id = ? LIMIT 1`,
@@ -341,19 +353,20 @@ export async function recalcularProgreso(empresaChinaId: number, actorId: number
   const etapaActual = empresaRows[0]?.etapa_actual as number | undefined;
   if (!etapaActual) return;
 
-  const [progresoRows] = await pool.execute<ProgresoRow[]>(
-    `SELECT
-       (SELECT COUNT(*) FROM etapa_requisitos WHERE etapa_num = ?) AS total,
-       (SELECT COUNT(*) FROM empresa_china_requisitos ecr
-          INNER JOIN etapa_requisitos er ON er.id = ecr.requisito_id
-          WHERE er.etapa_num = ? AND ecr.empresa_china_id = ? AND ecr.completado = 1 AND ecr.deleted_at IS NULL) AS completados`,
-    [etapaActual, etapaActual, empresaChinaId],
-  );
-  const { total, completados } = progresoRows[0] ?? { total: 0, completados: 0 };
+  const { total, completados } = await contarRequisitosEtapa(empresaChinaId, etapaActual);
   const progresoPct = total > 0 ? Math.round((completados / total) * 100) : 0;
 
   await pool.execute<ResultSetHeader>(
     `UPDATE empresas_chinas SET progreso_pct = ?, modificado_por = ? WHERE id = ?`,
     [progresoPct, actorId, empresaChinaId],
   );
+}
+
+// El check list de una etapa no es un valor que el usuario capture a mano: se deriva de si
+// ya se completaron todos los requisitos de esa etapa para esa empresa. Se recalcula cada
+// vez que se sube o se elimina un requisito (ver empresas-chinas.service.ts).
+export async function recalcularChecklist(empresaChinaId: number, etapaNum: number, actorId: number): Promise<void> {
+  const { total, completados } = await contarRequisitosEtapa(empresaChinaId, etapaNum);
+  const completada = total > 0 && completados === total;
+  await upsertChecklist(empresaChinaId, etapaNum, completada, actorId);
 }

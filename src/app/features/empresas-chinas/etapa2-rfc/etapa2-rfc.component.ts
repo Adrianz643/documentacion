@@ -121,16 +121,6 @@ export class Etapa2RfcComponent implements OnInit {
     });
   }
 
-  toggleChecklist(empresa: FilaEtapaChina) {
-    const nuevoValor = !empresa.checkList;
-    this.empresas.update(es => es.map(e => e.id === empresa.id ? { ...e, checkList: nuevoValor } : e));
-    this.service.actualizarChecklist(empresa.id, ETAPA_NUM, nuevoValor).subscribe({
-      error: () => {
-        this.empresas.update(es => es.map(e => e.id === empresa.id ? { ...e, checkList: !nuevoValor } : e));
-        this.errorMessage.set('No fue posible actualizar el check list.');
-      },
-    });
-  }
 
   getReqValue(empresa: FilaEtapaChina, codigo: string): EmpresaChinaRequisito | undefined {
     return empresa.requisitos[codigo];

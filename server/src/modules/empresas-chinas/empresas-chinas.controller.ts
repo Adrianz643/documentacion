@@ -5,7 +5,6 @@ import { HttpError } from '../../utils/httpError';
 import * as service from './empresas-chinas.service';
 import {
   parseCodigoParam,
-  parseCompletadaBody,
   parseCrearEmpresaChinaInput,
   parseEtapaNumParam,
   parseIdParam,
@@ -56,15 +55,6 @@ export const eliminarHandler = asyncHandler(async (req: Request, res: Response) 
   if (!req.auth) throw new HttpError(401, 'No autenticado');
   const id = parseIdParam(req.params.id);
   await service.eliminar(id, req.auth.sub);
-  res.status(204).send();
-});
-
-export const actualizarChecklistHandler = asyncHandler(async (req: Request, res: Response) => {
-  if (!req.auth) throw new HttpError(401, 'No autenticado');
-  const id = parseIdParam(req.params.id);
-  const etapaNum = parseEtapaNumParam(req.params.etapaNum);
-  const completada = parseCompletadaBody(req.body);
-  await service.actualizarChecklist(id, etapaNum, completada, req.auth.sub);
   res.status(204).send();
 });
 

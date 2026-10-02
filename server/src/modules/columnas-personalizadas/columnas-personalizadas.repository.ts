@@ -18,6 +18,23 @@ export async function findByEmpresaSeccion(empresaId: number, seccion: string): 
   return rows;
 }
 
+export async function findById(id: number): Promise<ColumnaPersonalizadaRow | null> {
+  const [rows] = await pool.execute<ColumnaPersonalizadaRow[]>(
+    `SELECT id, empresa_id, seccion, nombre, tipo, orden
+     FROM columnas_personalizadas
+     WHERE id = ? AND deleted_at IS NULL LIMIT 1`,
+    [id],
+  );
+  return rows[0] ?? null;
+}
+
+export async function eliminar(id: number, actorId: number): Promise<void> {
+  await pool.execute<ResultSetHeader>(
+    `UPDATE columnas_personalizadas SET deleted_at = NOW(), modificado_por = ? WHERE id = ?`,
+    [actorId, id],
+  );
+}
+
 export async function crear(input: CrearColumnaPersonalizadaInput, actorId: number): Promise<number> {
   const [ordenRows] = await pool.execute<OrdenMaximoRow[]>(
     `SELECT COALESCE(MAX(orden), 0) AS maximo FROM columnas_personalizadas

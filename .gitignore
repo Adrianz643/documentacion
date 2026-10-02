@@ -44,3 +44,6 @@ Thumbs.db
 
 # Paquete de export sin uso claro / regenerable con el build
 /gestion-documental-hegewisch.zip
+
+# Configuracion local de Claude Code (no es parte del proyecto)
+/.claude/

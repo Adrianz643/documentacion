@@ -64,11 +64,3 @@ export function parseCrearEmpresaChinaInput(body: unknown): CrearEmpresaChinaInp
     fechaRegistro: (fechaRegistro as string) || null,
   };
 }
-
-export function parseCompletadaBody(body: unknown): boolean {
-  const b = (body ?? {}) as Body;
-  if (typeof b.completada !== 'boolean') {
-    throw new HttpError(400, 'completada debe ser true o false');
-  }
-  return b.completada;
-}

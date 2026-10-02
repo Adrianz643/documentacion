@@ -106,16 +106,12 @@
                 </td>
               }
 
-              <!-- Check List -->
+              <!-- Check List: se calcula solo cuando todos los requisitos estan completos -->
               <td class="text-center">
                 <div class="d-flex align-items-center justify-content-center gap-2">
-                  <input type="checkbox"
-                         class="form-check-input gd-check"
-                         [checked]="empresa.checkList"
-                         [disabled]="auth.esVisor() || (!empresa.checkList && !todosRequisitosCompletos(empresa))"
-                         [ngbTooltip]="!empresa.checkList && !todosRequisitosCompletos(empresa) ? 'Completa todos los requisitos para habilitar el check list' : ''"
-                         (change)="toggleChecklist(empresa)"
-                         [attr.aria-label]="'Check list ' + empresa.nombre"/>
+                  <span class="badge" [class.gd-badge-success]="empresa.checkList" [class.gd-badge-pendiente]="!empresa.checkList">
+                    {{ empresa.checkList ? 'Completo' : 'Pendiente' }}
+                  </span>
                   <button type="button" class="gd-export-btn" ngbTooltip="Exportar expediente" (click)="exportar(empresa)" [attr.aria-label]="'Exportar expediente de ' + empresa.nombre">
                     <i class="fi fi-rr-download"></i>
                   </button>

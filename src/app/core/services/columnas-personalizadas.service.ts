@@ -17,4 +17,8 @@ export class ColumnasPersonalizadasService {
   crear(empresaId: number, seccion: string, nombre: string, tipo: TipoCampo): Observable<ColumnaPersonalizada[]> {
     return this.http.post<ColumnaPersonalizada[]>(this.base, { empresaId, seccion, nombre, tipo });
   }
+
+  eliminar(id: number): Observable<ColumnaPersonalizada[]> {
+    return this.http.delete<ColumnaPersonalizada[]>(`${this.base}/${id}`);
+  }
 }

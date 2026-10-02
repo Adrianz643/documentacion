@@ -3,7 +3,6 @@ import { requireAuth } from '../../middlewares/auth.middleware';
 import { requirePermission } from '../../middlewares/permission.middleware';
 import { requireSubrol } from '../../middlewares/subrol.middleware';
 import {
-  actualizarChecklistHandler,
   crearHandler,
   detalleHandler,
   eliminarHandler,
@@ -25,7 +24,6 @@ router.get('/kpis', requireAuth, requirePermission('documentos.leer'), requireSu
 router.post('/', requireAuth, requirePermission('documentos.crear'), requireSubrol('EMPRESAS_CHINAS'), crearHandler);
 router.get('/:id', requireAuth, requirePermission('documentos.leer'), requireSubrol('EMPRESAS_CHINAS'), detalleHandler);
 router.delete('/:id', requireAuth, requirePermission('documentos.editar'), requireSubrol('EMPRESAS_CHINAS'), eliminarHandler);
-router.put('/:id/checklist/:etapaNum', requireAuth, requirePermission('documentos.editar'), requireSubrol('EMPRESAS_CHINAS'), actualizarChecklistHandler);
 router.post(
   '/:id/requisitos/:codigo',
   requireAuth,

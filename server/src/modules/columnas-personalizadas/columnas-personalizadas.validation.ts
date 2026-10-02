@@ -13,6 +13,14 @@ export function parseEmpresaIdQuery(value: unknown): number {
   return empresaId;
 }
 
+export function parseIdParam(value: unknown): number {
+  const id = Number(value);
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new HttpError(400, 'Id invalido');
+  }
+  return id;
+}
+
 export function parseSeccionQuery(value: unknown): string {
   if (typeof value !== 'string' || !value.trim()) {
     throw new HttpError(400, 'seccion es requerida');

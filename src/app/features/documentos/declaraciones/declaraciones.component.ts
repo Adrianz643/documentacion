@@ -17,7 +17,10 @@ import { CampoDeclaracion, DeclaracionesService } from '../../../core/services/d
 import { PropietarioService } from '../../../core/services/propietario.service';
 import { ColumnasPersonalizadasService } from '../../../core/services/columnas-personalizadas.service';
 
-const SECCION = 'declaraciones';
+const SECCION_MENSUAL = 'declaraciones';
+const SECCION_CERO = 'declaraciones_cero';
+
+type TablaDeclaraciones = 'mensual' | 'cero';
 
 const COLUMNAS_BASE: TableColumn[] = [
   { key: 'propietario',             label: 'Nombre del Propietario',      visible: true,  sortable: true,  type: 'text'     },
@@ -67,33 +70,41 @@ export class DeclaracionesComponent implements OnInit {
   guardando      = signal(false);
   declaraciones  = signal<Declaracion[]>([]);
   propietarios   = signal<Propietario[]>([]);
-  searchTerm     = signal('');
   pageSize       = signal(25);
   currentPage    = signal(1);
 
   editingId  = signal<number | null>(null);
   editando   = signal<Declaracion | null>(null);
   aEliminar  = signal<{ registro: Declaracion; columnKey?: string; columnLabel?: string } | null>(null);
+  columnaAEliminar = signal<{ tabla: TablaDeclaraciones; col: TableColumn } | null>(null);
 
+  // Filtros y columnas: independientes por tabla, cada una con su propio buscador,
+  // su propio set de columnas (base + personalizadas) y su propia sección en el backend.
+  searchTermMensual = signal('');
+  searchTermCero    = signal('');
   columnasMensuales = signal<TableColumn[]>([...COLUMNAS_BASE]);
+  columnasCero      = signal<TableColumn[]>([...COLUMNAS_BASE]);
 
-  // Datos separados por tipo (con filtro de búsqueda por propietario)
   declaracionesMensuales = computed(() => this.filtrarPorBusqueda(
-    this.declaraciones().filter(d => d.tipo === 'mensual')
+    this.declaraciones().filter(d => d.tipo === 'mensual'),
+    this.searchTermMensual(),
   ));
   declaracionesCero = computed(() => this.filtrarPorBusqueda(
-    this.declaraciones().filter(d => d.tipo === 'mensual_cero')
+    this.declaraciones().filter(d => d.tipo === 'mensual_cero'),
+    this.searchTermCero(),
   ));
 
-  private filtrarPorBusqueda(lista: Declaracion[]): Declaracion[] {
-    const q = this.searchTerm().toLowerCase();
+  private filtrarPorBusqueda(lista: Declaracion[], termino: string): Declaracion[] {
+    const q = termino.toLowerCase();
     return q ? lista.filter(d => (d.propietario?.nombre ?? '').toLowerCase().includes(q)) : lista;
   }
 
   // Formulario para nueva/editar fila
   filaForm!: FormGroup;
 
-  // Formulario para nueva columna
+  // Formulario para nueva columna (compartido por el modal; sabe a cuál tabla
+  // aplica gracias a tablaColumnaActiva, fijada al abrir el modal desde cada tabla)
+  tablaColumnaActiva = signal<TablaDeclaraciones>('mensual');
   columnaForm = this.fb.group({
     nombre: ['', [Validators.required, Validators.maxLength(120)]],
     tipo:   ['texto', Validators.required]
@@ -104,7 +115,8 @@ export class DeclaracionesComponent implements OnInit {
     this.initFilaForm();
     this.cargar();
     this.cargarPropietarios();
-    this.cargarColumnasPersonalizadas();
+    this.cargarColumnasPersonalizadas('mensual');
+    this.cargarColumnasPersonalizadas('cero');
   }
 
   private initFilaForm() {
@@ -133,8 +145,10 @@ export class DeclaracionesComponent implements OnInit {
     });
   }
 
-  private cargarColumnasPersonalizadas(): void {
-    this.columnasSvc.listar(this.empresaId(), SECCION).subscribe({
+  private cargarColumnasPersonalizadas(tabla: TablaDeclaraciones): void {
+    const seccion = tabla === 'mensual' ? SECCION_MENSUAL : SECCION_CERO;
+    const destino = tabla === 'mensual' ? this.columnasMensuales : this.columnasCero;
+    this.columnasSvc.listar(this.empresaId(), seccion).subscribe({
       next: (columnas) => {
         const extra: TableColumn[] = columnas.map(c => ({
           key: `custom_${c.id}`,
@@ -143,7 +157,7 @@ export class DeclaracionesComponent implements OnInit {
           sortable: false,
           type: mapTipoColumnaATableType(c.tipo),
         }));
-        this.columnasMensuales.set([...COLUMNAS_BASE, ...extra]);
+        destino.set([...COLUMNAS_BASE, ...extra]);
       },
       error: () => this.errorMessage.set('No fue posible cargar las columnas personalizadas.'),
     });
@@ -232,7 +246,8 @@ export class DeclaracionesComponent implements OnInit {
     });
   }
 
-  agregarColumna(modalRef: any) {
+  agregarColumna(tabla: TablaDeclaraciones, modalRef: any) {
+    this.tablaColumnaActiva.set(tabla);
     this.columnaForm.reset({ tipo: 'texto' });
     this.modal.open(modalRef, { centered: true, size: 'sm' });
   }
@@ -243,7 +258,10 @@ export class DeclaracionesComponent implements OnInit {
       return;
     }
     const v = this.columnaForm.getRawValue();
-    this.columnasSvc.crear(this.empresaId(), SECCION, v.nombre!, v.tipo as TipoCampo).subscribe({
+    const tabla = this.tablaColumnaActiva();
+    const seccion = tabla === 'mensual' ? SECCION_MENSUAL : SECCION_CERO;
+    const destino = tabla === 'mensual' ? this.columnasMensuales : this.columnasCero;
+    this.columnasSvc.crear(this.empresaId(), seccion, v.nombre!, v.tipo as TipoCampo).subscribe({
       next: (columnas) => {
         const extra: TableColumn[] = columnas.map(c => ({
           key: `custom_${c.id}`,
@@ -252,20 +270,53 @@ export class DeclaracionesComponent implements OnInit {
           sortable: false,
           type: mapTipoColumnaATableType(c.tipo),
         }));
-        this.columnasMensuales.set([...COLUMNAS_BASE, ...extra]);
+        destino.set([...COLUMNAS_BASE, ...extra]);
         modalInstance.close();
       },
       error: () => this.errorMessage.set('No fue posible agregar la columna.'),
     });
   }
 
-  toggleColumna(key: string) {
-    this.columnasMensuales.update(cols =>
-      cols.map(c => c.key === key ? { ...c, visible: !c.visible } : c)
-    );
+  toggleColumnaMensual(key: string) {
+    this.columnasMensuales.update(cols => cols.map(c => c.key === key ? { ...c, visible: !c.visible } : c));
   }
 
-  columnasVisibles = computed(() => this.columnasMensuales().filter(c => c.visible));
+  toggleColumnaCero(key: string) {
+    this.columnasCero.update(cols => cols.map(c => c.key === key ? { ...c, visible: !c.visible } : c));
+  }
+
+  columnasVisiblesMensuales = computed(() => this.columnasMensuales().filter(c => c.visible));
+  columnasVisiblesCero      = computed(() => this.columnasCero().filter(c => c.visible));
+
+  // Solo las columnas personalizadas (key "custom_<id>") se pueden borrar; las base no.
+  confirmarEliminarColumna(tabla: TablaDeclaraciones, col: TableColumn, ref: any) {
+    this.columnaAEliminar.set({ tabla, col });
+    this.modal.open(ref, { centered: true });
+  }
+
+  eliminarColumnaConfirmada(modalInstance: any) {
+    const objetivo = this.columnaAEliminar();
+    if (!objetivo) { modalInstance.close(); return; }
+
+    const id = Number(objetivo.col.key.replace('custom_', ''));
+    const destino = objetivo.tabla === 'mensual' ? this.columnasMensuales : this.columnasCero;
+    this.errorMessage.set(null);
+    this.columnasSvc.eliminar(id).subscribe({
+      next: (columnas) => {
+        const extra: TableColumn[] = columnas.map(c => ({
+          key: `custom_${c.id}`,
+          label: c.nombre,
+          visible: true,
+          sortable: false,
+          type: mapTipoColumnaATableType(c.tipo),
+        }));
+        destino.set([...COLUMNAS_BASE, ...extra]);
+        this.columnaAEliminar.set(null);
+      },
+      error: () => this.errorMessage.set('No fue posible eliminar la columna.'),
+    });
+    modalInstance.close();
+  }
 
   isInvalid(form: FormGroup, field: string) {
     const ctrl = form.get(field);

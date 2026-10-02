@@ -139,26 +139,6 @@ export class Etapa1AprobacionComponent implements OnInit {
     });
   }
 
-  todosRequisitosCompletos(empresa: FilaEtapaChina): boolean {
-    const requisitos = this.requisitos();
-    return requisitos.length > 0 && requisitos.every(r => this.getReqValue(empresa, r.codigo)?.completado);
-  }
-
-  toggleChecklist(empresa: FilaEtapaChina) {
-    const nuevoValor = !empresa.checkList;
-    if (nuevoValor && !this.todosRequisitosCompletos(empresa)) {
-      this.errorMessage.set('No puedes marcar el check list hasta completar todos los requisitos.');
-      return;
-    }
-    this.empresas.update(es => es.map(e => e.id === empresa.id ? { ...e, checkList: nuevoValor } : e));
-    this.service.actualizarChecklist(empresa.id, ETAPA_NUM, nuevoValor).subscribe({
-      error: () => {
-        this.empresas.update(es => es.map(e => e.id === empresa.id ? { ...e, checkList: !nuevoValor } : e));
-        this.errorMessage.set('No fue posible actualizar el check list.');
-      },
-    });
-  }
-
   agregarEmpresa(modalRef: any) {
     this.nuevaEmpresaForm.reset();
     this.modal.open(modalRef, { centered: true, size: 'md' });

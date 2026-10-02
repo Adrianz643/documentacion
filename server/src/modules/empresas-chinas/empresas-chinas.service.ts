@@ -225,27 +225,6 @@ export async function eliminar(id: number, actorId: number): Promise<void> {
   });
 }
 
-export async function actualizarChecklist(
-  empresaChinaId: number,
-  etapaNum: number,
-  completada: boolean,
-  actorId: number,
-): Promise<void> {
-  const empresa = await repository.findEmpresaById(empresaChinaId);
-  if (!empresa) {
-    throw new HttpError(404, 'Empresa no encontrada');
-  }
-  await repository.upsertChecklist(empresaChinaId, etapaNum, completada, actorId);
-  void actividadService.registrar({
-    usuarioId: actorId,
-    modulo: 'EMPRESAS_CHINAS',
-    accion: 'editar',
-    descripcion: `${completada ? 'Completó' : 'Desmarcó'} el checklist de la etapa ${etapaNum} de "${empresa.nombre}"`,
-    referenciaTabla: 'empresas_chinas',
-    referenciaId: empresaChinaId,
-  });
-}
-
 export async function subirRequisito(
   empresaChinaId: number,
   requisitoCodigo: string,
@@ -294,6 +273,7 @@ export async function subirRequisito(
   }
 
   await repository.recalcularProgreso(empresaChinaId, actorId);
+  await repository.recalcularChecklist(empresaChinaId, requisito.etapa_num, actorId);
 
   void actividadService.registrar({
     usuarioId: actorId,
@@ -323,6 +303,7 @@ export async function eliminarRequisito(
   // purgue desde Papelera.
   await repository.eliminarValor(empresaChinaId, requisito.id, actorId);
   await repository.recalcularProgreso(empresaChinaId, actorId);
+  await repository.recalcularChecklist(empresaChinaId, requisito.etapa_num, actorId);
 
   void actividadService.registrar({
     usuarioId: actorId,

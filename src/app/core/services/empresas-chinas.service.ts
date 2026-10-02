@@ -60,10 +60,6 @@ export class EmpresasChinasService {
     return this.http.delete<void>(`${this.base}/${id}`);
   }
 
-  actualizarChecklist(id: number, etapaNum: number, completada: boolean): Observable<void> {
-    return this.http.put<void>(`${this.base}/${id}/checklist/${etapaNum}`, { completada });
-  }
-
   subirArchivo(id: number, codigo: string, file: File): Observable<EmpresaChinaDetalle> {
     const form = new FormData();
     form.append('archivo', file, file.name);
