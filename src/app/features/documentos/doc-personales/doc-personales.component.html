@@ -39,6 +39,7 @@
             </th>
           }
           <th scope="col">Acciones</th>
+          <th scope="col" class="text-center" style="min-width:110px">Check List</th>
         </tr></thead>
         <tbody>
           @for (r of filtrados(); track r.id) {
@@ -75,9 +76,19 @@
                   </button>
                 </div>
               </td>
+              <td class="text-center">
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                  <span class="badge" [class.gd-badge-success]="checkListCompleto(r)" [class.gd-badge-pendiente]="!checkListCompleto(r)">
+                    {{ checkListCompleto(r) ? 'Completo' : 'Pendiente' }}
+                  </span>
+                  <button type="button" class="gd-export-btn" ngbTooltip="Exportar expediente" (click)="exportar(r)" [attr.aria-label]="'Exportar expediente de ' + r.propietario.nombre">
+                    <i class="fi fi-rr-download"></i>
+                  </button>
+                </div>
+              </td>
             </tr>
           } @empty {
-            <tr><td [colSpan]="visibles().length + 1" class="text-center py-4 text-muted">No se encontraron registros.</td></tr>
+            <tr><td [colSpan]="visibles().length + 2" class="text-center py-4 text-muted">No se encontraron registros.</td></tr>
           }
         </tbody>
       </table>
