@@ -29,6 +29,30 @@ export const loginHandler = asyncHandler(async (req: Request, res: Response) => 
   res.status(200).json(resultado);
 });
 
+export const forgotPasswordHandler = asyncHandler(async (req: Request, res: Response) => {
+  const { usuario } = req.body as { usuario?: unknown };
+
+  if (typeof usuario !== 'string' || !usuario.trim()) {
+    throw new HttpError(400, 'usuario es requerido');
+  }
+
+  await authService.solicitarRecuperacion({ usuario });
+
+  res.status(200).json({ message: 'Si el usuario existe, se envió un correo con instrucciones' });
+});
+
+export const resetPasswordHandler = asyncHandler(async (req: Request, res: Response) => {
+  const { token, password } = req.body as { token?: unknown; password?: unknown };
+
+  if (typeof token !== 'string' || !token.trim() || typeof password !== 'string' || !password) {
+    throw new HttpError(400, 'token y password son requeridos');
+  }
+
+  await authService.restablecerPassword({ token, password });
+
+  res.status(200).json({ message: 'Contraseña actualizada correctamente' });
+});
+
 export const logoutHandler = asyncHandler(async (req: Request, res: Response) => {
   const header = req.get('authorization') ?? '';
   const token = header.startsWith(BEARER_PREFIX) ? header.slice(BEARER_PREFIX.length) : null;

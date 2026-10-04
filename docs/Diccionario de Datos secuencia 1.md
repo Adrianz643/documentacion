@@ -98,7 +98,7 @@ Perfiles que agrupan privilegios de acceso para la autorización.
 | Columna | Tipo de Dato | Nulo | Default | Llave / Índice | Descripción |
 | :--- | :--- | :---: | :---: | :---: | :--- |
 | `id` | `INT UNSIGNED` | NO | AUTO_INCREMENT | **PK** | Identificador único del rol. |
-| `nombre` | `VARCHAR(50)` | NO | — | **UQ** | Nombre del rol (`superadmin`, `admin`, `editor`, `viewer`). |
+| `nombre` | `VARCHAR(50)` | NO | — | **UQ** | Nombre del rol (`superadmin`, `admin`, `editor`, `Visor`). |
 | `descripcion` | `VARCHAR(255)` | SÍ | `NULL` | — | Descripción funcional de las capacidades del rol. |
 | `activo` | `TINYINT(1)` | NO | `1` | — | Estado operativo del rol (`1` = Habilitado). |
 | `creado_por` | `INT UNSIGNED` | SÍ | `NULL` | — | ID de usuario creador. |

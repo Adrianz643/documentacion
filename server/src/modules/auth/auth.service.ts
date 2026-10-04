@@ -1,17 +1,23 @@
 import bcrypt from 'bcryptjs';
+import { randomBytes } from 'node:crypto';
 import { pool } from '../../config/database';
+import { env } from '../../config/env';
 import { HttpError } from '../../utils/httpError';
 import { decodeTokenExpiration, signAuthToken } from '../../utils/jwt';
 import { hashToken } from '../../utils/crypto';
+import { enviarCorreoRecuperacionPassword } from '../../services/mail.service';
 import type { UsuarioAuthRow } from '../../types/db.types';
 import * as aparienciaRepository from '../apariencia/apariencia.repository';
 import * as authRepository from './auth.repository';
-import type { LoginInput, LoginResult, UsuarioAutenticadoDTO } from './auth.types';
+import type { ForgotPasswordInput, LoginInput, LoginResult, ResetPasswordInput, UsuarioAutenticadoDTO } from './auth.types';
 
 const MAX_INTENTOS_FALLIDOS = 5;
 const MINUTOS_BLOQUEO = 15;
 const ESTADO_ACTIVO = 'ACTIVO';
 const MOTIVO_CIERRE_LOGOUT = 'LOGOUT';
+const BCRYPT_ROUNDS = 10;
+const RESET_TOKEN_HORAS_VALIDEZ = 2;
+const RESET_PASSWORD_MIN_LARGO = 8;
 
 function mapUsuarioADTO(
   row: UsuarioAuthRow,
@@ -150,4 +156,43 @@ export async function login(input: LoginInput): Promise<LoginResult> {
 
 export async function logout(token: string): Promise<void> {
   await authRepository.cerrarSesionPorTokenHash(hashToken(token), MOTIVO_CIERRE_LOGOUT);
+}
+
+/**
+ * Siempre resuelve sin lanzar (ni confirmar ni negar si el usuario existe),
+ * para no permitir enumeracion de usuarios desde este endpoint publico.
+ */
+export async function solicitarRecuperacion(input: ForgotPasswordInput): Promise<void> {
+  const usuarioOCorreo = input.usuario.trim();
+  if (!usuarioOCorreo) return;
+
+  const usuario = await authRepository.findUsuarioActivoPorUsernameOEmail(usuarioOCorreo);
+  if (!usuario) return;
+
+  const tokenEnClaro = randomBytes(32).toString('hex');
+  const expiresAt = new Date(Date.now() + RESET_TOKEN_HORAS_VALIDEZ * 60 * 60 * 1000);
+
+  await authRepository.guardarResetToken(usuario.usuario_id, hashToken(tokenEnClaro), expiresAt);
+
+  const resetUrl = `${env.appUrl}/reset-password?token=${tokenEnClaro}`;
+  try {
+    await enviarCorreoRecuperacionPassword(usuario.persona_email, usuario.persona_nombre, resetUrl);
+  } catch (error) {
+    console.error('No fue posible enviar el correo de recuperacion de contrasena:', error);
+  }
+}
+
+export async function restablecerPassword(input: ResetPasswordInput): Promise<void> {
+  if (!input.token || !input.password || input.password.length < RESET_PASSWORD_MIN_LARGO) {
+    throw new HttpError(400, `La contraseña debe tener al menos ${RESET_PASSWORD_MIN_LARGO} caracteres`);
+  }
+
+  const usuario = await authRepository.findUsuarioActivoPorResetTokenHash(hashToken(input.token));
+  if (!usuario) {
+    throw new HttpError(400, 'El enlace de recuperación es inválido o ya expiró');
+  }
+
+  const passwordHash = await bcrypt.hash(input.password, BCRYPT_ROUNDS);
+  await authRepository.restablecerPasswordYLimpiarToken(usuario.usuario_id, passwordHash);
+  await authRepository.cerrarSesionesActivasDeUsuario(usuario.usuario_id);
 }

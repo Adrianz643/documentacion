@@ -142,12 +142,28 @@ export interface FielPorVencerRow extends RowDataPacket {
   fiel_id: number;
   propietario_id: number;
   propietario_nombre: string;
+  propietario_email: string | null;
   empresa_id: number;
   dias_restantes: number;
+  fecha_vencimiento: Date;
 }
 
 export interface UsuarioActivoRow extends RowDataPacket {
   id: number;
+}
+
+/**
+ * Fila usada por el flujo de recuperacion de contrasena: busca por username
+ * o por el correo de la persona vinculada, solo entre usuarios activos.
+ */
+export interface UsuarioRecuperacionRow extends RowDataPacket {
+  usuario_id: number;
+  persona_nombre: string;
+  persona_email: string;
+}
+
+export interface UsuarioPorResetTokenRow extends RowDataPacket {
+  usuario_id: number;
 }
 
 export interface DeclaracionRow extends RowDataPacket {

@@ -264,7 +264,7 @@ INSERT IGNORE INTO roles (nombre, descripcion) VALUES
     ('superadmin', 'Acceso total al sistema y configuraciones'),
     ('admin', 'Administración de usuarios y expedientes generales'),
     ('editor', 'Captura, foliado y modificación de documentos'),
-    ('viewer', 'Consulta y visualización de expedientes sin permisos de edición');
+    ('Visor', 'Consulta y visualización de expedientes sin permisos de edición');
 
 INSERT IGNORE INTO permisos (nombre, modulo, accion, descripcion) VALUES
     ('auth.login', 'AUTH', 'LOGIN', 'Iniciar sesión en el aplicativo'),
@@ -329,10 +329,10 @@ SELECT r.id, p.id FROM roles r JOIN permisos p ON 1=1
 WHERE r.nombre = 'editor'
   AND p.nombre IN ('auth.login','usuarios.leer','documentos.crear','documentos.leer','documentos.editar');
 
--- viewer: consulta y visualizacion sin permisos de edicion
+-- Visor: consulta y visualizacion sin permisos de edicion
 INSERT IGNORE INTO permisos_rol (rol_id, permiso_id)
 SELECT r.id, p.id FROM roles r JOIN permisos p ON 1=1
-WHERE r.nombre = 'viewer'
+WHERE r.nombre = 'Visor'
   AND p.nombre IN ('auth.login','documentos.leer');
 
 -- ---------------------------------------------------------------------

@@ -15,6 +15,7 @@ export const env = {
   isProduction: process.env.NODE_ENV === 'production',
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:4200',
   angularDistPath: process.env.ANGULAR_DIST_PATH ?? null,
+  appUrl: process.env.APP_URL ?? 'http://localhost:4200',
   db: {
     host: required('DB_HOST'),
     port: Number(process.env.DB_PORT ?? 3306),
@@ -29,6 +30,14 @@ export const env = {
   },
   security: {
     fielContrasenaKey: required('FIEL_CONTRASENA_KEY'),
+  },
+  mail: {
+    host: process.env.SMTP_HOST ?? null,
+    port: Number(process.env.SMTP_PORT ?? 587),
+    secure: process.env.SMTP_SECURE === 'true',
+    user: process.env.SMTP_USER ?? null,
+    pass: process.env.SMTP_PASS ?? null,
+    from: process.env.EMAIL_FROM ?? 'Gestión Documental <no-reply@gdprod.local>',
   },
   backups: {
     dir: process.env.BACKUPS_DIR ?? path.join(__dirname, '../../backups'),

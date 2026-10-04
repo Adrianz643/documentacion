@@ -32,3 +32,12 @@ export interface LoginResult {
   token: string;
   usuario: UsuarioAutenticadoDTO;
 }
+
+export interface ForgotPasswordInput {
+  usuario: string;
+}
+
+export interface ResetPasswordInput {
+  token: string;
+  password: string;
+}
