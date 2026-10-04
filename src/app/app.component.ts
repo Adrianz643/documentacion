@@ -35,8 +35,10 @@ import { HeaderComponent } from './shared/components/header/header.component';
 export class AppComponent {
   private router = inject(Router);
 
+  private static readonly RUTAS_SIN_CHROME = ['/login', '/forgot-password', '/reset-password'];
+
   private isChromeRoute(url: string): boolean {
-    return !url.startsWith('/login');
+    return !AppComponent.RUTAS_SIN_CHROME.some(ruta => url.startsWith(ruta));
   }
 
   showChrome = toSignal(
