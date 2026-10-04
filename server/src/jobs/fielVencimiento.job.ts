@@ -1,7 +1,9 @@
+import type { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 import { pool } from '../config/database';
 import type { FielPorVencerRow, UsuarioActivoRow } from '../types/db.types';
 import * as notificacionesRepository from '../modules/notificaciones/notificaciones.repository';
 import * as configuracionRepository from '../modules/configuracion/configuracion.repository';
+import { enviarCorreoAlertaFielVencimiento } from '../services/mail.service';
 
 const TIPO_NOTIFICACION = 'FIEL_VENCIMIENTO';
 const ORIGEN_TABLA = 'fiel_registros';
@@ -14,7 +16,9 @@ async function findFielPorVencer(diasAnticipacion: number): Promise<FielPorVence
        fr.id AS fiel_id,
        p.id AS propietario_id,
        p.nombre AS propietario_nombre,
+       p.email AS propietario_email,
        p.empresa_id,
+       fr.fecha_vencimiento,
        DATEDIFF(fr.fecha_vencimiento, CURDATE()) AS dias_restantes
      FROM fiel_registros fr
      INNER JOIN propietarios p ON p.id = fr.propietario_id
@@ -24,6 +28,40 @@ async function findFielPorVencer(diasAnticipacion: number): Promise<FielPorVence
     [diasAnticipacion],
   );
   return rows;
+}
+
+async function yaSeEnvioAvisoEmail(fielId: number, diasRestantes: number): Promise<boolean> {
+  const [rows] = await pool.execute<RowDataPacket[]>(
+    `SELECT 1 FROM fiel_avisos_email_log WHERE fiel_id = ? AND dias_restantes = ? LIMIT 1`,
+    [fielId, diasRestantes],
+  );
+  return rows.length > 0;
+}
+
+async function registrarAvisoEmailEnviado(fielId: number, diasRestantes: number, emailDestino: string): Promise<void> {
+  await pool.execute<ResultSetHeader>(
+    `INSERT IGNORE INTO fiel_avisos_email_log (fiel_id, dias_restantes, email_destino) VALUES (?, ?, ?)`,
+    [fielId, diasRestantes, emailDestino],
+  );
+}
+
+async function enviarAvisoEmailSiCorresponde(registro: FielPorVencerRow): Promise<void> {
+  const { fiel_id: fielId, propietario_email: email, propietario_nombre: nombreTitular, dias_restantes: diasRestantes, fecha_vencimiento: fechaVencimiento } = registro;
+  if (!email) return;
+
+  const yaEnviado = await yaSeEnvioAvisoEmail(fielId, diasRestantes);
+  if (yaEnviado) return;
+
+  try {
+    await enviarCorreoAlertaFielVencimiento(email, {
+      nombreTitular,
+      diasRestantes,
+      fechaVencimiento: new Date(fechaVencimiento).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' }),
+    });
+    await registrarAvisoEmailEnviado(fielId, diasRestantes, email);
+  } catch (error) {
+    console.error(`No fue posible enviar el correo de aviso de FIEL (fiel_id=${fielId}):`, error);
+  }
 }
 
 async function findUsuariosActivos(): Promise<number[]> {
@@ -48,6 +86,8 @@ async function procesarFielPorVencer(registro: FielPorVencerRow, usuariosIds: nu
   const { fiel_id: fielId, propietario_nombre: propietarioNombre, empresa_id: empresaId, dias_restantes: diasRestantes } = registro;
   const ruta = `/empresas/${empresaId}/documentos/fiel/${fielId}`;
   const { titulo, cuerpo } = construirMensaje(diasRestantes, propietarioNombre);
+
+  await enviarAvisoEmailSiCorresponde(registro);
 
   for (const usuarioId of usuariosIds) {
     if (diasRestantes > 0) {

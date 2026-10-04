@@ -63,6 +63,14 @@ export class AuthService {
     );
   }
 
+  forgotPassword(usuario: string) {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/forgot-password`, { usuario });
+  }
+
+  resetPassword(token: string, password: string) {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/reset-password`, { token, password });
+  }
+
   logout() {
     const habiaSesion = !!this._token();
     this.clearSesionLocal();
