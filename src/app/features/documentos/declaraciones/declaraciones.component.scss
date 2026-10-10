@@ -131,6 +131,13 @@ $exito:             #22C55E;
   &:hover { text-decoration: underline; color: $azul-hover; }
 }
 
+.gd-file-date {
+  display: block;
+  font-size: 11px;
+  color: #7A889B;
+  margin-top: 2px;
+}
+
 // -- Footer de tabla (paginación + filas por página) --------
 .gd-table-footer {
   background: $fondo;

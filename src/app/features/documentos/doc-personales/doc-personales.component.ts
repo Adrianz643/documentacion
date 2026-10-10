@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { NgbModal, NgbTooltipModule, NgbDropdownModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
@@ -13,7 +13,7 @@ import { CampoDocumentoPersonal, DocumentosPersonalesService } from '../../../co
 @Component({
   selector: 'app-doc-personales',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, NgbTooltipModule, NgbDropdownModule, NgbPaginationModule, ColumnManagerComponent, FileUploadComponent, OcultoParaVisorDirective],
+  imports: [CommonModule, DatePipe, ReactiveFormsModule, RouterLink, NgbTooltipModule, NgbDropdownModule, NgbPaginationModule, ColumnManagerComponent, FileUploadComponent, OcultoParaVisorDirective],
   templateUrl: './doc-personales.component.html',
   styleUrl: './doc-personales.component.scss'
 })

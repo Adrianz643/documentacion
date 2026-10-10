@@ -69,6 +69,7 @@ $exito:            #22C55E;
 .gd-file-cell {
   display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px;
   .gd-file-name { color: $azul-botones; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .gd-file-date { color: #7A889B; }
 }
 
 .gd-badge-success { background: lighten($exito, 40%); color: darken($exito, 20%); font-size: 10px; }

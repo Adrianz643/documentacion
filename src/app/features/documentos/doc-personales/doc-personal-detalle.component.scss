@@ -21,6 +21,7 @@ $azul:#0B4DB8;$borde:#DDE5EF;$txt:#172B4D;$fondo:#F7F9FC;$verde:#1FA971;$muted:#
 .gd-doc-row-label{font-size:13px;font-weight:600;color:$txt;}
 .gd-file-link{background:none;border:none;padding:0;cursor:pointer;color:$verde;text-decoration:none;font-size:13px;display:inline-flex;align-items:center;gap:6px;svg{width:16px;height:16px;flex-shrink:0;}&:hover{text-decoration:underline;}}
 .gd-doc-empty{font-size:13px;color:$muted;}
+.gd-file-date{display:block;font-size:11px;color:$muted;margin-top:2px;}
 
 .gd-preview-img{display:block;max-width:100%;max-height:70vh;margin:0 auto;border-radius:8px;}
 .gd-preview-frame{width:100%;height:70vh;border:1px solid $borde;border-radius:8px;}
@@ -43,6 +44,7 @@ $azul:#0B4DB8;$borde:#DDE5EF;$txt:#172B4D;$fondo:#F7F9FC;$verde:#1FA971;$muted:#
   .gd-doc-row { border-bottom-color:$d-borde; }
   .gd-doc-row-label { color:$d-txt; }
   .gd-doc-empty { color:$d-txt2; }
+  .gd-file-date { color:$d-txt2; }
   .gd-preview-frame { border-color:$d-borde; }
   .gd-preview-empty { color:$d-txt2; }
   .gd-breadcrumb .breadcrumb-item { color:#6B7688; &.active { color:#C7D0DE; } }

@@ -1,23 +1,40 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
-import { NgbModal, NgbTooltipModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbTooltipModule, NgbDropdownModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Factura, Propietario, TableColumn } from '../../../core/models';
+import { Factura, Propietario, TableColumn, TipoCampo } from '../../../core/models';
 import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
-import { ColumnManagerComponent } from '../../../shared/components/column-manager/column-manager.component';
 import { OcultoParaVisorDirective } from '../../../shared/directives/oculto-para-visor.directive';
 import { CampoFactura, FacturasService } from '../../../core/services/facturas.service';
 import { PropietarioService } from '../../../core/services/propietario.service';
+import { ColumnasPersonalizadasService } from '../../../core/services/columnas-personalizadas.service';
+
+const SECCION = 'facturas';
+
+const COLUMNAS_BASE: TableColumn[] = [
+  {key:'propietario',label:'Nombre del Propietario',visible:true,sortable:true,type:'text'},
+  {key:'fecha',label:'Fecha',visible:true,sortable:true,type:'date'},
+  {key:'comprobante',label:'Comprobante',visible:true,sortable:false,type:'file'},
+];
+
+function mapTipoColumnaATableType(tipo: string): TableColumn['type'] {
+  switch (tipo) {
+    case 'fecha':   return 'date';
+    case 'archivo': return 'file';
+    default:        return 'text';
+  }
+}
 
 @Component({ selector:'app-facturas', standalone:true,
-  imports:[CommonModule,DatePipe,ReactiveFormsModule,RouterLink,NgbTooltipModule,NgbPaginationModule,FileUploadComponent,ColumnManagerComponent,OcultoParaVisorDirective],
+  imports:[CommonModule,DatePipe,ReactiveFormsModule,RouterLink,NgbTooltipModule,NgbDropdownModule,NgbPaginationModule,FileUploadComponent,OcultoParaVisorDirective],
   templateUrl:'./facturas.component.html', styleUrl:'./facturas.component.scss' })
 export class FacturasComponent implements OnInit {
   private route=inject(ActivatedRoute); private modal=inject(NgbModal); private fb=inject(FormBuilder);
   private facturasSvc = inject(FacturasService);
   private propietarioSvc = inject(PropietarioService);
+  private columnasSvc = inject(ColumnasPersonalizadasService);
 
   empresaId=signal(0); loading=signal(false); errorMessage=signal<string | null>(null); guardando=signal(false);
   search=signal(''); page=signal(1); pageSize=signal(25);
@@ -26,15 +43,17 @@ export class FacturasComponent implements OnInit {
   editingId = signal<number | null>(null);
   editando  = signal<Factura | null>(null);
   aEliminar = signal<{ registro: Factura; columnKey?: string; columnLabel?: string } | null>(null);
+  columnaAEliminar = signal<TableColumn | null>(null);
 
-  columns=signal<TableColumn[]>([
-    {key:'propietario',label:'Nombre del Propietario',visible:true,sortable:true,type:'text'},
-    {key:'fecha',label:'Fecha',visible:true,sortable:true,type:'date'},
-    {key:'comprobante',label:'Comprobante',visible:true,sortable:false,type:'file'},
-  ]);
+  columns=signal<TableColumn[]>([...COLUMNAS_BASE]);
   visibles=computed(()=>this.columns().filter(c=>c.visible));
   filtrados=computed(()=>{const q=this.search().toLowerCase();return q?this.registros().filter(r=>r.propietario?.nombre.toLowerCase().includes(q)):this.registros();});
   nuevoForm = this.fb.group({ propietarioId: this.fb.control<number | null>(null, Validators.required), fecha:['',Validators.required] });
+
+  columnaForm = this.fb.group({
+    nombre: ['', [Validators.required, Validators.maxLength(120)]],
+    tipo:   ['texto', Validators.required]
+  });
 
   ngOnInit(){
     this.empresaId.set(Number(this.route.snapshot.paramMap.get('empresaId')??1));
@@ -43,6 +62,78 @@ export class FacturasComponent implements OnInit {
       next: (propietarios) => this.propietarios.set(propietarios),
       error: () => this.errorMessage.set('No fue posible cargar los propietarios.'),
     });
+    this.cargarColumnasPersonalizadas();
+  }
+
+  private cargarColumnasPersonalizadas(): void {
+    this.columnasSvc.listar(this.empresaId(), SECCION).subscribe({
+      next: (columnas) => {
+        const extra: TableColumn[] = columnas.map(c => ({
+          key: `custom_${c.id}`,
+          label: c.nombre,
+          visible: true,
+          sortable: false,
+          type: mapTipoColumnaATableType(c.tipo),
+        }));
+        this.columns.set([...COLUMNAS_BASE, ...extra]);
+      },
+      error: () => this.errorMessage.set('No fue posible cargar las columnas personalizadas.'),
+    });
+  }
+
+  agregarColumna(modalRef: any) {
+    this.columnaForm.reset({ tipo: 'texto' });
+    this.modal.open(modalRef, { centered: true, size: 'sm' });
+  }
+
+  guardarColumna(modalInstance: any) {
+    if (this.columnaForm.invalid) {
+      this.columnaForm.markAllAsTouched();
+      return;
+    }
+    const v = this.columnaForm.getRawValue();
+    this.columnasSvc.crear(this.empresaId(), SECCION, v.nombre!, v.tipo as TipoCampo).subscribe({
+      next: (columnas) => {
+        const extra: TableColumn[] = columnas.map(c => ({
+          key: `custom_${c.id}`,
+          label: c.nombre,
+          visible: true,
+          sortable: false,
+          type: mapTipoColumnaATableType(c.tipo),
+        }));
+        this.columns.set([...COLUMNAS_BASE, ...extra]);
+        modalInstance.close();
+      },
+      error: () => this.errorMessage.set('No fue posible agregar la columna.'),
+    });
+  }
+
+  confirmarEliminarColumna(col: TableColumn, ref: any) {
+    this.columnaAEliminar.set(col);
+    this.modal.open(ref, { centered: true });
+  }
+
+  eliminarColumnaConfirmada(modalInstance: any) {
+    const col = this.columnaAEliminar();
+    if (!col) { modalInstance.close(); return; }
+
+    const id = Number(col.key.replace('custom_', ''));
+    this.errorMessage.set(null);
+    this.columnasSvc.eliminar(id).subscribe({
+      next: (columnas) => {
+        const extra: TableColumn[] = columnas.map(c => ({
+          key: `custom_${c.id}`,
+          label: c.nombre,
+          visible: true,
+          sortable: false,
+          type: mapTipoColumnaATableType(c.tipo),
+        }));
+        this.columns.set([...COLUMNAS_BASE, ...extra]);
+        this.columnaAEliminar.set(null);
+      },
+      error: () => this.errorMessage.set('No fue posible eliminar la columna.'),
+    });
+    modalInstance.close();
   }
 
   private cargar(): void {
@@ -120,6 +211,7 @@ export class FacturasComponent implements OnInit {
   }
 
   isInvalid(f:string){const c=this.nuevoForm.get(f);return c?.invalid&&c?.touched;}
+  isInvalidColumna(f:string){const c=this.columnaForm.get(f);return c?.invalid&&c?.touched;}
 
   confirmarEliminar(r: Factura, ref: any) {
     this.aEliminar.set({ registro: r });
