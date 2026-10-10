@@ -47,11 +47,11 @@
       <tbody>
         @for (e of paginados(); track e.modulo + '-' + e.id) {
           <tr>
-            <td>
+            <td class="gd-col-elemento">
               <div class="d-flex align-items-center gap-2">
                 <i [class]="'fi ' + iconoTipo(e.tipo)" class="text-muted"></i>
-                <div>
-                  <div class="fw-medium">{{ e.nombre }}</div>
+                <div class="gd-elemento-info">
+                  <div class="fw-medium gd-elemento-nombre" [title]="e.nombre">{{ e.nombre }}</div>
                   <div class="text-muted small">{{ e.tipo }}</div>
                 </div>
               </div>

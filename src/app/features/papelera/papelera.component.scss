@@ -6,3 +6,6 @@ $borde:#DDE5EF;$txt:#172B4D;$fondo:#F7F9FC;$enc:#DCEBEC;$enc-txt:#12335D;
 .gd-info-box{background:#EDF8F9;border:1px solid #1596A0;font-size:12px;}
 .btn-icon{width:30px;height:30px;padding:0;border:none;background:transparent;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;&:hover{background:$fondo;}&--danger:hover{background:#FEE2E2;color:#DC2626;}}
 .gd-badge-expira{background:#EEF2F7;color:#53657D;font-size:11px;font-weight:600;&--pronto{background:#FEF3C7;color:#B45309;}}
+.gd-col-elemento{max-width:280px;}
+.gd-elemento-info{min-width:0;}
+.gd-elemento-nombre{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
