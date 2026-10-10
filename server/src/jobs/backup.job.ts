@@ -62,8 +62,12 @@ async function volcarBaseDatos(destino: string): Promise<{ archivo: string; byte
   }
 
   const buffer = await fs.readFile(archivoSalida);
+  // La imagen runner (Alpine) solo tiene disponible el cliente mysqldump de
+  // MariaDB (paquete apk mysql-client), cuyo encabezado dice "MariaDB dump"
+  // en vez de "MySQL dump" aunque el volcado en si es un SQL estandar,
+  // compatible con el servidor MySQL 8 real.
   const encabezado = buffer.toString('utf8', 0, Math.min(buffer.length, 4096));
-  if (!encabezado.includes('MySQL dump')) {
+  if (!encabezado.includes('MySQL dump') && !encabezado.includes('MariaDB dump')) {
     throw new Error('El volcado de la base de datos no tiene el encabezado esperado (posible fallo silencioso de mysqldump)');
   }
 
