@@ -51,9 +51,13 @@ const VALOR_JOIN = `
   WHERE ecr.deleted_at IS NULL
 `;
 
+// ORDER BY id (no por codigo): codigo es VARCHAR y un ORDER BY textual
+// ordena "1.10" antes que "1.2" (comparacion caracter a caracter). El id
+// autoincremental preserva el orden de insercion del catalogo, que es el
+// orden real de las etapas.
 export async function findRequisitosPorEtapa(etapaNum: number): Promise<EtapaRequisitoRow[]> {
   const [rows] = await pool.execute<EtapaRequisitoRow[]>(
-    `SELECT id, etapa_num, codigo, descripcion, tipo_campo FROM etapa_requisitos WHERE etapa_num = ? ORDER BY codigo`,
+    `SELECT id, etapa_num, codigo, descripcion, tipo_campo FROM etapa_requisitos WHERE etapa_num = ? ORDER BY id`,
     [etapaNum],
   );
   return rows;
@@ -61,7 +65,7 @@ export async function findRequisitosPorEtapa(etapaNum: number): Promise<EtapaReq
 
 export async function findTodosRequisitos(): Promise<EtapaRequisitoRow[]> {
   const [rows] = await pool.execute<EtapaRequisitoRow[]>(
-    `SELECT id, etapa_num, codigo, descripcion, tipo_campo FROM etapa_requisitos ORDER BY etapa_num, codigo`,
+    `SELECT id, etapa_num, codigo, descripcion, tipo_campo FROM etapa_requisitos ORDER BY etapa_num, id`,
   );
   return rows;
 }
