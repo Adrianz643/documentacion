@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { NgbModal, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -15,7 +15,7 @@ const ETAPA_NUM = 2;
 @Component({
   selector: 'app-etapa2-rfc',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, NgbPaginationModule, NgbTooltipModule, ColumnManagerComponent, OcultoParaVisorDirective],
+  imports: [CommonModule, DatePipe, ReactiveFormsModule, RouterLink, NgbPaginationModule, NgbTooltipModule, ColumnManagerComponent, OcultoParaVisorDirective],
   templateUrl: './etapa2-rfc.component.html',
   styleUrl: './etapa2-rfc.component.scss'
 })
