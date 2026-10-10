@@ -131,11 +131,11 @@
                       }
                       @case ('comprobante') {
                         @if (decl.comprobanteDoc) {
-                          <div>
+                          <div class="gd-file-wrap">
                             <a [href]="decl.comprobanteDoc.rutaStorage"
-                               class="gd-file-link" target="_blank" rel="noopener">
+                               class="gd-file-link" target="_blank" rel="noopener" [title]="decl.comprobanteDoc.nombreArchivo">
                               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-                              {{ decl.comprobanteDoc.nombreArchivo }}
+                              <span class="gd-file-text">{{ decl.comprobanteDoc.nombreArchivo }}</span>
                             </a>
                             <span class="gd-file-date">{{ decl.comprobanteDoc.createdAt | date:'dd/MM/yyyy' }}</span>
                           </div>
@@ -276,10 +276,10 @@
                     }
                     @case ('comprobante') {
                       @if (decl.comprobanteDoc) {
-                        <div>
-                          <a [href]="decl.comprobanteDoc.rutaStorage" class="gd-file-link" target="_blank" rel="noopener">
+                        <div class="gd-file-wrap">
+                          <a [href]="decl.comprobanteDoc.rutaStorage" class="gd-file-link" target="_blank" rel="noopener" [title]="decl.comprobanteDoc.nombreArchivo">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-                            {{ decl.comprobanteDoc.nombreArchivo }}
+                            <span class="gd-file-text">{{ decl.comprobanteDoc.nombreArchivo }}</span>
                           </a>
                           <span class="gd-file-date">{{ decl.comprobanteDoc.createdAt | date:'dd/MM/yyyy' }}</span>
                         </div>

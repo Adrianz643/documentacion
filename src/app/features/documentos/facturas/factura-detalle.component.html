@@ -34,10 +34,10 @@
       <div class="gd-doc-row">
         <span class="gd-doc-row-label">Comprobante</span>
         @if (r.comprobanteDoc) {
-          <div>
-            <button type="button" class="gd-file-link" (click)="abrirPreview(r.comprobanteDoc, modalPreview)">
+          <div class="gd-file-wrap">
+            <button type="button" class="gd-file-link" (click)="abrirPreview(r.comprobanteDoc, modalPreview)" [title]="r.comprobanteDoc.nombreArchivo">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-              {{ r.comprobanteDoc.nombreArchivo }}
+              <span class="gd-file-text">{{ r.comprobanteDoc.nombreArchivo }}</span>
             </button>
             <span class="gd-file-date">{{ r.comprobanteDoc.createdAt | date:'dd/MM/yyyy' }}</span>
           </div>
