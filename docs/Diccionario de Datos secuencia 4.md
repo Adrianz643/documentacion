@@ -9,7 +9,7 @@
 
 | Capa | Tabla | Tipo | Descripción |
 | :--- | :--- | :--- | :--- |
-| **Capa 1** | `etapa_requisitos` | Catálogo | Requisitos fijos de las 5 etapas de constitución (17+5+7+4+3 = 36 filas). |
+| **Capa 1** | `etapa_requisitos` | Catálogo | Requisitos fijos de las 5 etapas de constitución (17+8+11+8+3 = 47 filas, reemplazo definitivo del 2026-10-09). |
 | **Capa 2** | `empresas_chinas` | Maestra | Empresa china en proceso de constitución (equivalente a `propietarios` en ARDUM). |
 | **Capa 3** | `empresa_china_requisitos` | Transaccional | Valor/documento capturado por una empresa china para un requisito de una etapa. |
 | **Capa 3** | `empresa_china_etapa_checklist` | Transaccional | Marca de "Check List completo" por empresa china y etapa. |
@@ -106,4 +106,6 @@ Marca si el "Check List" de una etapa quedó completo para una empresa china (ch
 ## Semilla de Datos
 
 - `empresas`: se agrega la fila `id = 2` (`Empresas Chinas`, tipo `china`, slug `empresas-chinas`), como contraparte de ARDUM (`id = 1`) ya sembrada en la Secuencia 2.
-- `etapa_requisitos`: 36 filas — 17 de la Etapa 1, 5 de la Etapa 2, 7 de la Etapa 3, 4 de la Etapa 4 y 3 de la Etapa 5 — tomadas de los catálogos que ya operaba el frontend (`etapaN-data.service.ts`), más el ajuste posterior (2026-09-18) que agregó `2.5 Acta Constitutiva`, `3.5 Certificado (.cer)`, `3.6 Llave privada (.key)` y `3.7 Contraseña capturable` (ver AJUSTE POSTERIOR en `Secuencia 4 - empresas chinas.sql`). Ninguna de estas altas modificó la estructura de la tabla: `etapa_requisitos` ya es genérica (etapa_num + codigo + descripcion + tipo_campo), así que el frontend y el backend soportan cualquier requisito nuevo — incluyendo subir archivo — sin cambios de código.
+- `etapa_requisitos`: 47 filas vigentes (17 Etapa 1, 8 Etapa 2, 11 Etapa 3, 8 Etapa 4, 3 Etapa 5). El catálogo original de 36 filas (2026-09) fue **reemplazado por completo el 2026-10-09** con la lista definitiva del cliente — ver AJUSTE POSTERIOR (2026-10-09) en `Secuencia 4 - empresas chinas.sql`. En ese reemplazo también se corrigió: (1) una doble codificación UTF-8 (mojibake) que había quedado en los `INSERT` ejecutados por SSH sin `--default-character-set=utf8mb4`, y (2) el orden de visualización — el backend (`empresas-chinas.repository.ts`) ordenaba por `codigo` como texto (`"1.10"` antes que `"1.2"`), ahora ordena por `id` para respetar el orden real de las etapas.
+
+**Nota:** al momento del reemplazo ya existían 3 `empresas_chinas` reales en producción (ninguna con `etapa_actual` mayor a 1) y 2 filas de `empresa_china_requisitos` ligadas al requisito retirado `3.7 Contraseña capturable` — el cliente confirmó que eran datos de prueba y se limpiaron junto con el catálogo.

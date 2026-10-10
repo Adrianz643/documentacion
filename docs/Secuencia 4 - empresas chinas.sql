@@ -190,3 +190,74 @@ INSERT IGNORE INTO etapa_requisitos (etapa_num, codigo, descripcion, tipo_campo)
     (3, '3.5', 'Certificado (.cer)',     'archivo'),
     (3, '3.6', 'Llave privada (.key)',   'archivo'),
     (3, '3.7', 'Contraseña capturable',  'texto');
+
+-- ---------------------------------------------------------------------
+-- AJUSTE POSTERIOR (2026-10-09): reemplazo completo del catálogo de
+-- etapa_requisitos con la lista definitiva entregada por el cliente
+-- (reemplaza todos los INSERT anteriores de esta secuencia, incluido el
+-- UPDATE del 2026-09-12). Pasa de 36 a 47 filas: Etapa 1 se queda en 17
+-- (reescritos), Etapa 2 pasa de 5 a 8, Etapa 3 de 7 a 11, Etapa 4 de 4 a
+-- 8 y Etapa 5 se mantiene en 3 (reescritos).
+--
+-- De paso se corrigio un bug de orden: el backend
+-- (empresas-chinas.repository.ts) ordenaba por `codigo` como texto, lo
+-- que mostraba "1.10" antes que "1.2" (comparacion caracter a caracter).
+-- Ahora ordena por `id`, que preserva el orden de insercion; por eso es
+-- importante insertar estas filas en el orden exacto en que deben
+-- mostrarse.
+--
+-- Como en este punto 0 empresas_chinas existian en producción (ningun
+-- empresa_china_requisitos dependia de los ids viejos), se vacia la
+-- tabla completa antes de volver a sembrarla.
+-- ---------------------------------------------------------------------
+DELETE FROM etapa_requisitos;
+ALTER TABLE etapa_requisitos AUTO_INCREMENT = 1;
+
+INSERT INTO etapa_requisitos (etapa_num, codigo, descripcion, tipo_campo) VALUES
+    (1, '1.1',  'Aprobación del nombre de la empresa',                                            'archivo'),
+    (1, '1.2',  'Una cuenta de correo electrónico',                                                'texto'),
+    (1, '1.3',  'Un número de teléfono celular mexicano',                                          'texto'),
+    (1, '1.4',  'Copia de Identificación China',                                                   'archivo'),
+    (1, '1.5',  'Acta de Matrimonio apostillada',                                                  'archivo'),
+    (1, '1.6',  'Identificación de representantes legales',                                        'archivo'),
+    (1, '1.7',  'Comprobante de domicilio de representantes legales',                              'archivo'),
+    (1, '1.8',  'Constancia de situación fiscal de los representantes legales',                    'archivo'),
+    (1, '1.9',  'CURP Mexicano',                                                                   'archivo'),
+    (1, '1.10', 'Datos Generales PLD',                                                              'archivo'),
+    (1, '1.11', 'Formato de notaría con los datos de la sociedad a constituir',                    'archivo'),
+    (1, '1.12', 'Actividad Económica',                                                              'archivo'),
+    (1, '1.13', 'Carta Poder',                                                                      'archivo'),
+    (1, '1.14', 'Traducción de Certificado notarial apostillado',                                  'archivo'),
+    (1, '1.15', 'Comisionario Mexicano: INE CURP RFC comprobante',                                 'archivo'),
+    (1, '1.16', 'Firma de representante legal en los estatus sociales',                            'texto'),
+    (1, '1.17', 'Acta Constitutiva Registro Comercio Publico',                                     'archivo'),
+    (2, '2.1',  'Agenda cita para tramitar el RFC',                                                 'archivo'),
+    (2, '2.2',  'Acuse de cita impreso',                                                            'archivo'),
+    (2, '2.3',  'Comprobante de domicilio de la empresa',                                           'archivo'),
+    (2, '2.4',  'Acta constitutiva',                                                                'archivo'),
+    (2, '2.5',  'Identificación del representante legal',                                           'archivo'),
+    (2, '2.6',  'Una cuenta de correo electrónico',                                                 'texto'),
+    (2, '2.7',  'Un número de teléfono celular mexicano',                                           'texto'),
+    (2, '2.8',  'Situación fiscal',                                                                 'archivo'),
+    (3, '3.1',  'Agenda cita de firma electrónica',                                                 'archivo'),
+    (3, '3.2',  'Acuse de cita',                                                                    'archivo'),
+    (3, '3.3',  'Constancia de situación fiscal de la empresa',                                    'archivo'),
+    (3, '3.4',  'Comprobante de domicilio de la empresa',                                           'archivo'),
+    (3, '3.5',  'Acta constitutiva',                                                                'archivo'),
+    (3, '3.6',  'Identificación del representante legal',                                           'archivo'),
+    (3, '3.7',  'Memoria USB',                                                                      'texto'),
+    (3, '3.8',  'Un correo electrónico',                                                            'texto'),
+    (3, '3.9',  'Un número de teléfono mexicano',                                                   'texto'),
+    (3, '3.10', 'Un representante legal en México lleva los documentos necesarios a la autoridad fiscal para solicitar RFC', 'texto'),
+    (3, '3.11', 'Firma electrónica de la empresa',                                                  'archivo'),
+    (4, '4.1',  'Acta constitutiva',                                                                'archivo'),
+    (4, '4.2',  'Constancia de situación fiscal',                                                   'archivo'),
+    (4, '4.3',  'Pasaporte o tarjeta de residencia del representante legal',                       'archivo'),
+    (4, '4.4',  'Comprobante de domicilio del representante legal',                                'archivo'),
+    (4, '4.5',  'Comprobante de domicilio de la empresa',                                           'archivo'),
+    (4, '4.6',  'Numero de celular para banca electrónica',                                         'texto'),
+    (4, '4.7',  'Solicitud de cuenta bancaria',                                                     'archivo'),
+    (4, '4.8',  'Cuenta bancario y banca móvil',                                                    'archivo'),
+    (5, '5.1',  'Registro ante el IMSS',                                                            'archivo'),
+    (5, '5.2',  'Registro nacional de inversiones extranjeras RNIE',                                'archivo'),
+    (5, '5.3',  'Registro internos corporativos',                                                   'archivo');
