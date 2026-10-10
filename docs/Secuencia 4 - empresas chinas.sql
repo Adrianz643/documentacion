@@ -213,6 +213,14 @@ INSERT IGNORE INTO etapa_requisitos (etapa_num, codigo, descripcion, tipo_campo)
 DELETE FROM etapa_requisitos;
 ALTER TABLE etapa_requisitos AUTO_INCREMENT = 1;
 
+-- Tipo de documento generico usado por TODOS los requisitos tipo 'archivo'
+-- de este modulo (server/src/modules/empresas-chinas/empresas-chinas.
+-- repository.ts, TIPO_DOCUMENTO_CLAVE). Faltaba desde el inicio de esta
+-- secuencia -- sin el, cualquier intento de subir un archivo en Empresas
+-- Chinas respondia 500 ("El tipo de documento no esta configurado").
+INSERT INTO tipos_documento (clave, nombre) VALUES
+    ('REQUISITO_EMPRESA_CHINA', 'Requisito de Empresa China');
+
 INSERT INTO etapa_requisitos (etapa_num, codigo, descripcion, tipo_campo) VALUES
     (1, '1.1',  'Aprobación del nombre de la empresa',                                            'archivo'),
     (1, '1.2',  'Una cuenta de correo electrónico',                                                'texto'),
