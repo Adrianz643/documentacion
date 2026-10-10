@@ -143,6 +143,8 @@ $colors: (
   min-width: 0;
 }
 
+.modal-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
 .gd-recientes-card {
   display: flex;
   flex-direction: column;

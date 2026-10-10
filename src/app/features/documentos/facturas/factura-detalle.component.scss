@@ -16,6 +16,7 @@ $azul:#0B4DB8;$borde:#DDE5EF;$txt:#172B4D;$verde:#1FA971;$muted:#7A889B;
 }
 .gd-doc-row-label{font-size:13px;font-weight:600;color:$txt;}
 .gd-file-wrap{min-width:0;}
+.modal-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
 .gd-file-link{background:none;border:none;padding:0;cursor:pointer;color:$verde;text-decoration:none;font-size:13px;display:inline-flex;align-items:center;gap:6px;min-width:0;svg{width:16px;height:16px;flex-shrink:0;}&:hover{text-decoration:underline;}}
 .gd-file-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
 .gd-doc-empty{font-size:13px;color:$muted;}
