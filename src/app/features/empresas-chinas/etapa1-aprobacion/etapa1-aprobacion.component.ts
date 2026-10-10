@@ -1,7 +1,7 @@
 import {
   Component, inject, signal, computed, OnInit
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { NgbModal, NgbTooltipModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
@@ -19,6 +19,7 @@ const ETAPA_NUM = 1;
   standalone: true,
   imports: [
     CommonModule,
+    DatePipe,
     ReactiveFormsModule,
     RouterLink,
     NgbTooltipModule,

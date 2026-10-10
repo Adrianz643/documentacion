@@ -91,6 +91,9 @@
                       <span class="gd-file-name" [ngbTooltip]="val?.documento?.nombreArchivo">
                         <i class="fi fi-rr-document"></i> {{ val?.documento?.nombreArchivo | slice:0:15 }}
                       </span>
+                      @if (val?.documento) {
+                        <span class="gd-file-date">{{ val?.documento?.createdAt | date:'dd/MM/yyyy' }}</span>
+                      }
                       <span class="badge gd-badge-success" aria-label="Completo"><i class="fi fi-rr-check"></i></span>
                     </div>
                   } @else if (!auth.esVisor()) {

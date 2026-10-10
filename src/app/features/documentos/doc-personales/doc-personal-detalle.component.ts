@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Documento, DocumentoPersonal } from '../../../core/models';
@@ -10,7 +10,7 @@ import { DocumentosPersonalesService } from '../../../core/services/documentos-p
 @Component({
   selector: 'app-doc-personal-detalle',
   standalone: true,
-  imports: [CommonModule, RouterLink, SafeUrlPipe, FileSizePipe],
+  imports: [CommonModule, DatePipe, RouterLink, SafeUrlPipe, FileSizePipe],
   templateUrl: './doc-personal-detalle.component.html',
   styleUrl: './doc-personal-detalle.component.scss'
 })
