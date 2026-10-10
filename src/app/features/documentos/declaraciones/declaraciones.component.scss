@@ -120,6 +120,8 @@ $exito:             #22C55E;
 }
 
 // -- Enlace de archivo --------------------------------------
+.gd-file-wrap { min-width: 0; }
+
 .gd-file-link {
   color: $azul-botones;
   text-decoration: none;
@@ -127,8 +129,16 @@ $exito:             #22C55E;
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  min-width: 0;
 
   &:hover { text-decoration: underline; color: $azul-hover; }
+}
+
+.gd-file-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .gd-file-date {

@@ -140,11 +140,13 @@ $colors: (
   display: flex;
   flex-direction: column;
   gap: 20px;
+  min-width: 0;
 }
 
 .gd-recientes-card {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .gd-accesos-grid {
