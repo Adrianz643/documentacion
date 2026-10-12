@@ -25,29 +25,11 @@ penales y administrativas en materia de propiedad intelectual.
 
 USE gdprod;
 
--- ---------------------------------------------------------------------
--- 1. RECUPERACIÓN DE CONTRASEÑA
--- Se agregan dos columnas a usuarios (igual que intentos_fallidos /
--- bloqueado_hasta: estado de autenticacion embebido en la propia fila).
--- Se guarda el HASH SHA-256 del token (no el token en claro), igual que
--- sesiones.token, para que una fuga de la BD no permita restablecer
--- contraseñas de terceros.
--- ---------------------------------------------------------------------
 
 ALTER TABLE usuarios
     ADD COLUMN reset_token_hash       VARCHAR(128) NULL AFTER bloqueado_hasta,
     ADD COLUMN reset_token_expires_at DATETIME     NULL AFTER reset_token_hash;
 
--- ---------------------------------------------------------------------
--- 2. BITÁCORA DE AVISOS DE FIEL POR CORREO (anti-spam)
--- El job server/src/jobs/fielVencimiento.job.ts ya revisaba cada 60s las
--- FIEL por vencer para la campanita in-app, con su propia deduplicacion
--- por (origen, usuario, dias_restantes) en la tabla notificaciones. Esa
--- tabla no aplica aqui porque el destinatario del correo es el titular
--- (propietarios.email), no un usuario interno del sistema (usuarios.id).
--- Esta tabla evita reenviar el mismo aviso de email para el mismo
--- fiel_registro en el mismo umbral de dias_restantes.
--- ---------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS fiel_avisos_email_log (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

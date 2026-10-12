@@ -1,11 +1,6 @@
 import { createHash, createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
 import { env } from '../config/env';
 
-/**
- * sesiones.token es VARCHAR(255) y un JWT con arreglo de permisos puede superarlo.
- * Se persiste el hash SHA-256 del token (64 caracteres) en lugar del JWT en claro,
- * evitando truncamientos y no dejando tokens validos en texto plano en la base de datos.
- */
 export function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
 }
@@ -22,12 +17,6 @@ function claveSecreta(): Buffer {
   return clave;
 }
 
-/**
- * Cifrado reversible (AES-256-GCM) para datos sensibles que la UI debe poder
- * mostrar de nuevo en claro (p. ej. la contraseña de la FIEL), a diferencia de
- * hashToken que es de un solo sentido. iv y authTag se concatenan con el
- * cifrado y se guardan como un unico string base64 en la base de datos.
- */
 export function encryptSecret(texto: string): string {
   const iv = randomBytes(IV_BYTES);
   const cipher = createCipheriv(ALGORITMO_SECRETO, claveSecreta(), iv);

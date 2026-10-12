@@ -28,9 +28,6 @@ penales y administrativas en materia de propiedad intelectual.
 
 USE gdprod;
 
--- ---------------------------------------------------------------------
--- 1. CAPA 3: FACTURAS HL (Transaccional)
--- ---------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS facturas_hl (
     id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -48,18 +45,3 @@ CREATE TABLE IF NOT EXISTS facturas_hl (
     INDEX idx_facturas_hl_deleted  (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ---------------------------------------------------------------------
--- NOTA — Bucket de empresas para los comprobantes:
--- `documentos.empresa_id` es NOT NULL, así que al subir un comprobante de
--- Factura HL se necesita una fila en `empresas` para referenciar. Se usa
--- la fila id=3 ('Hegewisch Lopez', tipo 'nacional', slug 'hl'), agregada
--- directamente en la base (igual que el resto de `empresas`, que tampoco
--- se siembra por INSERT en este snapshot — ver Secuencia 2). Esa fila es
--- solo un bucket técnico: el frontend no la expone como "empresa"
--- navegable, no tiene propietarios propios y no aparece en el listado de
--- Empresas.
---
--- El comprobante reutiliza el tipo de documento 'COMPROBANTE' del catálogo
--- `tipos_documento` (mismo que usan `declaraciones` y `facturas` de ARDUM),
--- sin requerir una clave nueva.
--- ---------------------------------------------------------------------

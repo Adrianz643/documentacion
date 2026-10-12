@@ -36,10 +36,6 @@ async function verificarAsignacionRol(rolId: number, actorRol: string): Promise<
   }
 }
 
-// Los subroles (ARDUM/ARDUM HL/Empresas Chinas) solo aplican a editor/visor: admin y
-// superadmin siempre tienen acceso total y no persisten filas en usuario_subroles. El
-// visor es de una sola empresa a la vez (ARDUM o Empresas Chinas, nunca ARDUM HL); el
-// editor puede combinar varias.
 async function resolverSubrolIdsParaGuardar(rolId: number, subrolesClaves: string[]): Promise<number[]> {
   const rolNombre = await usuariosRepository.findRolNombreById(rolId);
   const requiereSubrol = !!rolNombre && ROLES_CON_SUBROL.has(rolNombre.toLowerCase());
@@ -164,8 +160,6 @@ export async function actualizarPerfilPropio(
       modificadoPor: actorId,
     });
 
-    // El rol y el estado nunca se tocan aqui: este endpoint es autoservicio, no administra
-    // permisos ni el estado de la cuenta, solo los datos propios del usuario.
     const passwordHash = input.password ? await bcrypt.hash(input.password, BCRYPT_ROUNDS) : null;
     await usuariosRepository.actualizarUsuario(connection, usuarioId, {
       username: input.username,

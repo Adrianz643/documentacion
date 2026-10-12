@@ -1,6 +1,6 @@
 import * as papeleraRepository from '../modules/papelera/papelera.repository';
 
-const INTERVALO_REVISION_MS = 60 * 60 * 1000; // cada hora
+const INTERVALO_REVISION_MS = 60 * 60 * 1000;
 
 let ejecutando = false;
 

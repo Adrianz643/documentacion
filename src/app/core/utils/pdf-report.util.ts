@@ -1,11 +1,9 @@
 import { jsPDF } from 'jspdf';
 
-/** Relación de aspecto real de public/logo.jpeg (ancho x alto en px). */
 const LOGO_RATIO = 248 / 180;
 
 let logoBase64Cache: Promise<string> | null = null;
 
-/** Carga el logo de la empresa (public/logo.jpeg) como data URL, cacheado tras la primera llamada. */
 function cargarLogoReporte(): Promise<string> {
   if (!logoBase64Cache) {
     logoBase64Cache = fetch('/logo.jpeg')
@@ -23,7 +21,6 @@ function cargarLogoReporte(): Promise<string> {
   return logoBase64Cache;
 }
 
-/** Dibuja el logo de la empresa en la esquina superior derecha del documento, a un tamaño acorde al reporte. */
 export async function agregarLogoReporte(doc: jsPDF, anchoMm = 30): Promise<void> {
   const logo = await cargarLogoReporte();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -38,7 +35,6 @@ export interface SegmentoPastel {
   color: [number, number, number];
 }
 
-/** Genera un gráfico de pastel como imagen PNG (data URL) a partir de los segmentos dados. */
 export function generarGraficoPastel(segmentos: SegmentoPastel[], tamanoPx = 260): string {
   const canvas = document.createElement('canvas');
   canvas.width = tamanoPx;

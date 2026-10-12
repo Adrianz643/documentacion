@@ -29,9 +29,6 @@ penales y administrativas en materia de propiedad intelectual.
 
 USE gdprod;
 
--- ---------------------------------------------------------------------
--- 1. CAPA 1: CATÁLOGO
--- ---------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS subroles (
     id             SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -46,9 +43,6 @@ CREATE TABLE IF NOT EXISTS subroles (
     UNIQUE KEY uq_subrol_clave (clave)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ---------------------------------------------------------------------
--- 2. CAPA 2: RELACIÓN N:M USUARIO <-> SUBROL
--- ---------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS usuario_subroles (
     id             INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -65,22 +59,12 @@ CREATE TABLE IF NOT EXISTS usuario_subroles (
     CONSTRAINT fk_us_subrol  FOREIGN KEY (subrol_id)  REFERENCES subroles(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ---------------------------------------------------------------------
--- 3. SEMILLA DE DATOS
--- ---------------------------------------------------------------------
 
 INSERT IGNORE INTO subroles (clave, nombre) VALUES
     ('ARDUM',           'ARDUM'),
     ('ARDUM_HL',        'ARDUM HL'),
     ('EMPRESAS_CHINAS', 'Empresas Chinas');
 
--- ---------------------------------------------------------------------
--- MIGRACIÓN DE CUENTAS EXISTENTES (2026-09-19): las cuentas editor/visor
--- creadas antes de este control no tenian ningun subrol; sin esta migracion
--- quedarian bloqueadas de golpe en los tres modulos. Se les otorgan los 3
--- subroles para preservar su acceso actual; un admin puede restringirlas
--- despues desde el formulario de usuarios.
--- ---------------------------------------------------------------------
 INSERT IGNORE INTO usuario_subroles (usuario_id, subrol_id)
 SELECT u.id, s.id
 FROM usuarios u
@@ -88,17 +72,3 @@ INNER JOIN roles r ON r.id = u.rol_id
 CROSS JOIN subroles s
 WHERE u.deleted_at IS NULL AND LOWER(r.nombre) IN ('editor', 'visor');
 
--- ---------------------------------------------------------------------
--- NOTA — Regla de negocio (aplicada en server/src/modules/usuarios y en
--- el middleware server/src/middlewares/subrol.middleware.ts, no en la BD):
---   - Si el rol asignado al usuario es 'editor' o 'visor'/'Visor', debe
---     tener al menos un subrol asignado (uno, dos o los tres).
---   - Si el rol es 'admin' o 'superadmin', no se le asignan subroles
---     (cualquier valor enviado se descarta); estos roles siempre tienen
---     acceso a los tres modulos, sin excepcion.
---   - El JWT incluye las claves de subrol del usuario (campo `subroles`),
---     y cada modulo de negocio exige la clave correspondiente en las
---     rutas: ARDUM -> propietarios, documentos-personales, fiel,
---     declaraciones, facturas; ARDUM_HL -> facturas-hl;
---     EMPRESAS_CHINAS -> empresas-chinas.
--- ---------------------------------------------------------------------

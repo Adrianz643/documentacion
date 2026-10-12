@@ -63,7 +63,6 @@ export class DeclaracionesComponent implements OnInit {
   private propietarioSvc     = inject(PropietarioService);
   private columnasSvc        = inject(ColumnasPersonalizadasService);
 
-  // -- Estado reactivo con Signals --------------------------
   empresaId      = signal<number>(0);
   loading        = signal(false);
   errorMessage   = signal<string | null>(null);
@@ -78,8 +77,6 @@ export class DeclaracionesComponent implements OnInit {
   aEliminar  = signal<{ registro: Declaracion; columnKey?: string; columnLabel?: string } | null>(null);
   columnaAEliminar = signal<{ tabla: TablaDeclaraciones; col: TableColumn } | null>(null);
 
-  // Filtros y columnas: independientes por tabla, cada una con su propio buscador,
-  // su propio set de columnas (base + personalizadas) y su propia sección en el backend.
   searchTermMensual = signal('');
   searchTermCero    = signal('');
   columnasMensuales = signal<TableColumn[]>([...COLUMNAS_BASE]);
@@ -99,11 +96,8 @@ export class DeclaracionesComponent implements OnInit {
     return q ? lista.filter(d => (d.propietario?.nombre ?? '').toLowerCase().includes(q)) : lista;
   }
 
-  // Formulario para nueva/editar fila
   filaForm!: FormGroup;
 
-  // Formulario para nueva columna (compartido por el modal; sabe a cuál tabla
-  // aplica gracias a tablaColumnaActiva, fijada al abrir el modal desde cada tabla)
   tablaColumnaActiva = signal<TablaDeclaraciones>('mensual');
   columnaForm = this.fb.group({
     nombre: ['', [Validators.required, Validators.maxLength(120)]],

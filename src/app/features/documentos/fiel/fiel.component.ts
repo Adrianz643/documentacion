@@ -48,8 +48,6 @@ export class FielComponent implements OnInit {
   editando     = signal<FielRegistro | null>(null);
   aEliminar    = signal<{ registro: FielRegistro; columnKey?: string; columnLabel?: string } | null>(null);
 
-  // Captura inline de la contraseña FIEL: borrador por fila hasta que se confirma (palomita)
-  // y se guarda; a partir de ahí el campo queda bloqueado (solo lectura) en el servidor.
   contrasenaDraft   = signal<Record<number, string>>({});
   contrasenaVisible = signal<Set<number>>(new Set());
   guardandoContrasena = signal<Set<number>>(new Set());
@@ -71,12 +69,6 @@ export class FielComponent implements OnInit {
     fechaVencimiento: [''],
   });
 
-  // El 1/ene/2022 es un piso absoluto: nunca se puede registrar ni editar una FIEL
-  // con fecha de creación anterior (el sistema no modela vigencia antes de esa fecha).
-  // Para registros NUEVOS el piso además avanza con el tiempo (hoy - 4 años) para no
-  // permitir capturar una FIEL que ya nacería vencida; al editar un registro existente
-  // se respeta el piso absoluto pero no el dinámico, para no bloquear datos históricos
-  // cuya vigencia de 4 años ya venció de forma legítima.
   readonly fechaCreacionMaxima = fechaCreacionMaximaFiel();
   fechaCreacionMinima = computed(() => this.editando() ? VIGENCIA_FIEL_DESDE : fechaCreacionMinimaFiel());
 
@@ -105,9 +97,6 @@ export class FielComponent implements OnInit {
       error: () => this.errorMessage.set('No fue posible cargar los propietarios.'),
     });
 
-    // Calendario de vigencia FIEL: del 1/ene/2022 en adelante, vigencia de 4 años.
-    // Al capturar la fecha de creación se sugiere automáticamente el vencimiento,
-    // salvo que el usuario ya lo haya editado manualmente.
     this.nuevoForm.get('fechaCreacion')!.valueChanges.subscribe((valor) => {
       const vencimientoCtrl = this.nuevoForm.get('fechaVencimiento')!;
       const actual = vencimientoCtrl.value ?? '';

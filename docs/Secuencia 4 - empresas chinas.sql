@@ -30,9 +30,6 @@ penales y administrativas en materia de propiedad intelectual.
 
 USE gdprod;
 
--- ---------------------------------------------------------------------
--- 1. CAPA 1: CATÁLOGOS (Referenciales)
--- ---------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS etapa_requisitos (
     id          SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -49,9 +46,6 @@ CREATE TABLE IF NOT EXISTS etapa_requisitos (
     INDEX idx_er_etapa (etapa_num)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ---------------------------------------------------------------------
--- 2. CAPA 2: TABLA MAESTRA (Empresas Chinas)
--- ---------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS empresas_chinas (
     id                  INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -75,9 +69,6 @@ CREATE TABLE IF NOT EXISTS empresas_chinas (
     INDEX idx_ec_deleted (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ---------------------------------------------------------------------
--- 3. CAPA 3: EXPEDIENTE POR ETAPA (Transaccional)
--- ---------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS empresa_china_requisitos (
     id               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -114,18 +105,10 @@ CREATE TABLE IF NOT EXISTS empresa_china_etapa_checklist (
     CONSTRAINT fk_ecec_empresa FOREIGN KEY (empresa_china_id) REFERENCES empresas_chinas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ---------------------------------------------------------------------
--- 4. SEMILLA DE DATOS (SEED INITIAL DATA)
--- ---------------------------------------------------------------------
 
--- Fila de empresas para el programa "Empresas Chinas" (id = 2), tal como
--- ya se preveia en el frontend (EmpresasListComponent). Los documentos de
--- este subsistema se guardan con documentos.empresa_id = 2.
 INSERT IGNORE INTO empresas (id, nombre, tipo, slug) VALUES
     (2, 'Empresas Chinas', 'china', 'empresas-chinas');
 
--- Requisitos por etapa (catálogo fijo tomado de los datos que ya operaba
--- el frontend en cada etapaN-data.service.ts)
 INSERT IGNORE INTO etapa_requisitos (etapa_num, codigo, descripcion, tipo_campo) VALUES
     (1, '1.1',  'Aprobación del nombre de la empresa',                             'archivo'),
     (1, '1.2',  'Una cuenta de correo electrónico',                                'texto'),
@@ -160,64 +143,18 @@ INSERT IGNORE INTO etapa_requisitos (etapa_num, codigo, descripcion, tipo_campo)
     (5, '5.2',  'Inscripción al padrón de importadores',                          'archivo'),
     (5, '5.3',  'Trámites adicionales',                                           'archivo');
 
--- ---------------------------------------------------------------------
--- NOTA: documentos no requiere columna empresa_china_id — la relación
--- documento -> empresa china ya queda resuelta via
--- empresa_china_requisitos.documento_id + empresa_china_requisitos.empresa_china_id.
--- Los documentos de este subsistema se insertan con documentos.empresa_id = 2
--- y documentos.propietario_id = NULL (no aplica el concepto de propietario).
--- ---------------------------------------------------------------------
 
--- ---------------------------------------------------------------------
--- AJUSTE POSTERIOR (2026-09-12): el requisito 3.4 "Contraseña del SAT"
--- se sembro por error como tipo_campo = 'archivo'. Una contraseña no se
--- sube como archivo, se captura como texto (con mascara + boton de
--- mostrar/ocultar en el frontend). Se corrige la clasificacion.
--- ---------------------------------------------------------------------
 UPDATE etapa_requisitos SET tipo_campo = 'texto' WHERE etapa_num = 3 AND codigo = '3.4';
 
--- ---------------------------------------------------------------------
--- AJUSTE POSTERIOR (2026-09-18): nuevos requisitos de catalogo para
--- Etapa 2 y Etapa 3. No se altera ninguna estructura de tabla: el
--- catalogo etapa_requisitos ya es generico (etapa_num + codigo +
--- descripcion + tipo_campo) y el frontend/backend renderizan y suben
--- archivos para cualquier requisito nuevo sin cambios de codigo. La
--- columna "Contraseña capturable" (3.7) se enmascara automaticamente en
--- el frontend porque su descripcion contiene "contraseñ" (igual que 3.4).
--- ---------------------------------------------------------------------
 INSERT IGNORE INTO etapa_requisitos (etapa_num, codigo, descripcion, tipo_campo) VALUES
     (2, '2.5', 'Acta Constitutiva',      'archivo'),
     (3, '3.5', 'Certificado (.cer)',     'archivo'),
     (3, '3.6', 'Llave privada (.key)',   'archivo'),
     (3, '3.7', 'Contraseña capturable',  'texto');
 
--- ---------------------------------------------------------------------
--- AJUSTE POSTERIOR (2026-10-09): reemplazo completo del catálogo de
--- etapa_requisitos con la lista definitiva entregada por el cliente
--- (reemplaza todos los INSERT anteriores de esta secuencia, incluido el
--- UPDATE del 2026-09-12). Pasa de 36 a 47 filas: Etapa 1 se queda en 17
--- (reescritos), Etapa 2 pasa de 5 a 8, Etapa 3 de 7 a 11, Etapa 4 de 4 a
--- 8 y Etapa 5 se mantiene en 3 (reescritos).
---
--- De paso se corrigio un bug de orden: el backend
--- (empresas-chinas.repository.ts) ordenaba por `codigo` como texto, lo
--- que mostraba "1.10" antes que "1.2" (comparacion caracter a caracter).
--- Ahora ordena por `id`, que preserva el orden de insercion; por eso es
--- importante insertar estas filas en el orden exacto en que deben
--- mostrarse.
---
--- Como en este punto 0 empresas_chinas existian en producción (ningun
--- empresa_china_requisitos dependia de los ids viejos), se vacia la
--- tabla completa antes de volver a sembrarla.
--- ---------------------------------------------------------------------
 DELETE FROM etapa_requisitos;
 ALTER TABLE etapa_requisitos AUTO_INCREMENT = 1;
 
--- Tipo de documento generico usado por TODOS los requisitos tipo 'archivo'
--- de este modulo (server/src/modules/empresas-chinas/empresas-chinas.
--- repository.ts, TIPO_DOCUMENTO_CLAVE). Faltaba desde el inicio de esta
--- secuencia -- sin el, cualquier intento de subir un archivo en Empresas
--- Chinas respondia 500 ("El tipo de documento no esta configurado").
 INSERT INTO tipos_documento (clave, nombre) VALUES
     ('REQUISITO_EMPRESA_CHINA', 'Requisito de Empresa China');
 

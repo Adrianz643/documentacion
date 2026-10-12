@@ -5,8 +5,6 @@ import { verificarAccesoSubrol } from '../../middlewares/subrol.middleware';
 import * as service from './columnas-personalizadas.service';
 import { parseCrearColumnaInput, parseEmpresaIdQuery, parseIdParam, parseSeccionQuery } from './columnas-personalizadas.validation';
 
-// Modulo compartido por ARDUM (empresa_id=1) y Empresas Chinas (empresa_id=2): la clave de
-// subrol requerida depende del empresaId recibido, no es fija como en el resto de modulos.
 const EMPRESA_ID_SUBROL: Record<number, string> = { 1: 'ARDUM', 2: 'EMPRESAS_CHINAS' };
 
 export const listarHandler = asyncHandler(async (req: Request, res: Response) => {

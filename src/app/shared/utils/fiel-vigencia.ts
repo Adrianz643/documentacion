@@ -1,5 +1,3 @@
-// Calendario de vigencia FIEL: a partir del 1 de enero de 2022, la FIEL tiene
-// una vigencia de 4 años desde su fecha de creación.
 export const VIGENCIA_FIEL_ANIOS = 4;
 export const VIGENCIA_FIEL_DESDE = '2022-01-01';
 export const VIGENCIA_FIEL_UMBRAL_POR_VENCER_DIAS = 90;

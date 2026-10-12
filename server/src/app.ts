@@ -14,11 +14,6 @@ const ANGULAR_DIST_PATH =
 
 const LOCALHOST_ORIGIN = /^https?:\/\/localhost:\d+$/;
 
-/**
- * En el monolito, produccion sirve el frontend y la API desde el mismo origen (sin CORS de por medio).
- * En desarrollo, el proxy de Angular ya evita CORS para el flujo normal; esto solo cubre llamadas
- * directas al backend (Postman, otra pestaña, un puerto distinto de ng serve) sin atarse a un puerto fijo.
- */
 const corsOriginDelegate: CorsOptionsDelegate = (req, callback) => {
   const origin = req.headers.origin;
   const permitido = !origin || (!env.isProduction && LOCALHOST_ORIGIN.test(origin)) || origin === env.corsOrigin;

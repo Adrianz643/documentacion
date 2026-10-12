@@ -11,7 +11,6 @@ const loginLimiter = rateLimit({
   message: { message: 'Demasiados intentos de inicio de sesion. Intente mas tarde.' },
 });
 
-// Mas estricto que el login: ambos disparan envio de correo o cambian la contrasena.
 const recuperacionLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 5,

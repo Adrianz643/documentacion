@@ -7,7 +7,7 @@ import { env } from '../config/env';
 import { UPLOADS_ROOT } from '../utils/fileStorage';
 
 const BACKUPS_ROOT = env.backups.dir;
-const INTERVALO_MS = 24 * 60 * 60 * 1000; // cada 24 horas
+const INTERVALO_MS = 24 * 60 * 60 * 1000;
 const MANIFEST_FILENAME = 'manifest.json';
 const ESTADO_FILENAME = 'estado.json';
 

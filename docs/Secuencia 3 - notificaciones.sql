@@ -26,9 +26,6 @@ penales y administrativas en materia de propiedad intelectual.
 
 USE gdprod;
 
--- ---------------------------------------------------------------------
--- 1. CAPA 3: NOTIFICACIONES (Transaccional, por usuario)
--- ---------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS notificaciones (
     id              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -53,18 +50,3 @@ CREATE TABLE IF NOT EXISTS notificaciones (
     INDEX idx_notif_origen  (origen_tabla, origen_id, usuario_id, dias_restantes, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ---------------------------------------------------------------------
--- NOTA — Regla de negocio (implementada en el job del backend, no en SQL):
--- Para cada fiel_registros con fecha_vencimiento entre hoy y +3 dias, se
--- genera una notificacion por usuario activo:
---   - dias_restantes = 3, 2 o 1: una sola notificacion por dia (se verifica
---     que no exista ya una fila con ese origen_id + usuario_id + dias_restantes
---     antes de insertar).
---   - dias_restantes = 0 (dia de vencimiento): una notificacion nueva cada
---     5 minutos mientras no haya sido atendida.
--- "Atendida" = el usuario le dio click (marca leida = 1) o eliminar
--- (marca deleted_at, deja de listarse). Ninguna de las dos acciones evita
--- que se genere una notificacion nueva al llegar el siguiente umbral de
--- dias_restantes (o el siguiente ciclo de 5 minutos en el dia 0): cada
--- ocurrencia es independiente.
--- ---------------------------------------------------------------------

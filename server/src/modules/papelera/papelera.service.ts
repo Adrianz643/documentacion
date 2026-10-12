@@ -16,8 +16,6 @@ function esAdmin(rol: string): boolean {
   return ROLES_ADMIN.has(rol.toLowerCase());
 }
 
-// Modulos cuya papelera pertenece a un subrol especifico; los que no aparecen aqui
-// (usuarios, documentos sueltos) no se restringen por subrol.
 const MODULO_SUBROL: Partial<Record<ModuloPapelera, string>> = {
   'documentos-personales': 'ARDUM',
   fiel: 'ARDUM',

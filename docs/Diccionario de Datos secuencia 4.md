@@ -9,7 +9,7 @@
 
 | Capa | Tabla | Tipo | Descripción |
 | :--- | :--- | :--- | :--- |
-| **Capa 1** | `etapa_requisitos` | Catálogo | Requisitos fijos de las 5 etapas de constitución (17+8+11+8+3 = 47 filas, reemplazo definitivo del 2026-10-09). |
+| **Capa 1** | `etapa_requisitos` | Catálogo | Requisitos fijos de las 5 etapas de constitución (17+8+11+8+3 = 47 filas). |
 | **Capa 2** | `empresas_chinas` | Maestra | Empresa china en proceso de constitución (equivalente a `propietarios` en ARDUM). |
 | **Capa 3** | `empresa_china_requisitos` | Transaccional | Valor/documento capturado por una empresa china para un requisito de una etapa. |
 | **Capa 3** | `empresa_china_etapa_checklist` | Transaccional | Marca de "Check List completo" por empresa china y etapa. |
@@ -106,8 +106,5 @@ Marca si el "Check List" de una etapa quedó completo para una empresa china (ch
 ## Semilla de Datos
 
 - `empresas`: se agrega la fila `id = 2` (`Empresas Chinas`, tipo `china`, slug `empresas-chinas`), como contraparte de ARDUM (`id = 1`) ya sembrada en la Secuencia 2.
-- `etapa_requisitos`: 47 filas vigentes (17 Etapa 1, 8 Etapa 2, 11 Etapa 3, 8 Etapa 4, 3 Etapa 5). El catálogo original de 36 filas (2026-09) fue **reemplazado por completo el 2026-10-09** con la lista definitiva del cliente — ver AJUSTE POSTERIOR (2026-10-09) en `Secuencia 4 - empresas chinas.sql`. En ese reemplazo también se corrigió: (1) una doble codificación UTF-8 (mojibake) que había quedado en los `INSERT` ejecutados por SSH sin `--default-character-set=utf8mb4`, y (2) el orden de visualización — el backend (`empresas-chinas.repository.ts`) ordenaba por `codigo` como texto (`"1.10"` antes que `"1.2"`), ahora ordena por `id` para respetar el orden real de las etapas.
-
-**Nota:** al momento del reemplazo ya existían 3 `empresas_chinas` reales en producción (ninguna con `etapa_actual` mayor a 1) y 2 filas de `empresa_china_requisitos` ligadas al requisito retirado `3.7 Contraseña capturable` — el cliente confirmó que eran datos de prueba y se limpiaron junto con el catálogo.
-
-**Bug adicional detectado y corregido el mismo día (2026-10-09):** la tabla `tipos_documento` (Secuencia 2) nunca tuvo una fila con `clave = 'REQUISITO_EMPRESA_CHINA'`, que es la que usa `empresas-chinas.repository.ts` (`TIPO_DOCUMENTO_CLAVE`) para registrar cualquier archivo subido a un requisito de tipo `archivo`. Sin esa fila, `POST /api/empresas-chinas/:id/requisitos/:codigo` respondía `500` ("El tipo de documento no esta configurado") en cualquier intento de subir un archivo, desde el día uno de este módulo. Se agregó el `INSERT` correspondiente en `Secuencia 4 - empresas chinas.sql` y en `schema.sql`.
+- `etapa_requisitos`: 47 filas vigentes (17 Etapa 1, 8 Etapa 2, 11 Etapa 3, 8 Etapa 4, 3 Etapa 5).
+- `tipos_documento` (Secuencia 2): incluye la fila `clave = 'REQUISITO_EMPRESA_CHINA'`, usada por `empresas-chinas.repository.ts` (`TIPO_DOCUMENTO_CLAVE`) para registrar cualquier archivo subido a un requisito de tipo `archivo`.

@@ -56,7 +56,6 @@ export class Etapa1AprobacionComponent implements OnInit {
     this.columnas.update(cs => cs.map(c => c.key === key ? { ...c, visible: !c.visible } : c));
   }
 
-  // Formulario para subir/capturar el valor de un requisito
   uploadForm = this.fb.group({
     archivo:    this.fb.control<File | null>(null),
     valorTexto: this.fb.control(''),
@@ -64,7 +63,6 @@ export class Etapa1AprobacionComponent implements OnInit {
   requisitoSeleccionado  = signal<EtapaRequisito | null>(null);
   empresaSeleccionadaId  = signal<number | null>(null);
 
-  // Formulario para dar de alta una empresa china
   nuevaEmpresaForm = this.fb.group({
     nombre:              ['', Validators.required],
     representanteLegal:  [''],

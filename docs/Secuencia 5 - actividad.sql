@@ -31,9 +31,6 @@ penales y administrativas en materia de propiedad intelectual.
 
 USE gdprod;
 
--- ---------------------------------------------------------------------
--- 1. CAPA 3: BITÁCORA (Transaccional)
--- ---------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS actividad_log (
     id               INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -55,28 +52,14 @@ CREATE TABLE IF NOT EXISTS actividad_log (
     INDEX idx_actividad_fecha (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ---------------------------------------------------------------------
--- 2. PERMISO DE CONSULTA Y ASIGNACIÓN POR ROL
--- Regla de negocio: admin y superadmin ven TODA la actividad; editor y
--- viewer solo ven la suya propia (filtro aplicado en el backend según
--- usuarios.rol_id, no en esta tabla).
--- ---------------------------------------------------------------------
 
 INSERT IGNORE INTO permisos (nombre, modulo, accion, descripcion) VALUES
     ('actividad.leer', 'ACTIVIDAD', 'LEER', 'Consultar la bitacora de actividad del sistema');
 
--- superadmin ya cubierto por su wildcard de la Secuencia 1 (sección 6)
--- NOTA: el 4o rol (consulta/solo-lectura) esta sembrado en la BD real como
--- 'Visor' (no 'viewer' como dice el seed original de la Secuencia 1) --
--- se incluyen ambas grafias para que este script sea idempotente sin
--- importar cual de las dos exista.
 INSERT IGNORE INTO permisos_rol (rol_id, permiso_id)
 SELECT r.id, p.id FROM roles r JOIN permisos p ON 1=1
 WHERE r.nombre IN ('admin','editor','viewer','Visor') AND p.nombre = 'actividad.leer';
 
--- El wildcard de superadmin de la Secuencia 1 se ejecuto una sola vez contra
--- los permisos que existian en ese momento; un permiso creado despues (como
--- este) no queda cubierto automaticamente, por eso se asigna explicitamente.
 INSERT IGNORE INTO permisos_rol (rol_id, permiso_id)
 SELECT r.id, p.id FROM roles r JOIN permisos p ON 1=1
 WHERE r.nombre = 'superadmin' AND p.nombre = 'actividad.leer';

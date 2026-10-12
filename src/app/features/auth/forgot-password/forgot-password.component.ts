@@ -43,8 +43,6 @@ export class ForgotPasswordComponent {
           this.errorMessage.set(error.error?.message ?? 'Demasiados intentos. Intenta más tarde.');
           return;
         }
-        // El backend no distingue si el usuario existe o no (evita enumeracion);
-        // cualquier otro error se trata igual que un envio exitoso.
         this.enviado.set(true);
       }
     });

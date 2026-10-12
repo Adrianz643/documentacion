@@ -11,8 +11,6 @@ export interface AuthTokenPayload {
 }
 
 export function signAuthToken(payload: AuthTokenPayload): string {
-  // jwtid asegura que dos logins del mismo usuario en el mismo segundo (iat identico)
-  // no produzcan tokens identicos, lo que chocaria con la restriccion UNIQUE de sesiones.token.
   return jwt.sign(payload, env.jwt.secret, {
     expiresIn: env.jwt.expiresIn as jwt.SignOptions['expiresIn'],
     jwtid: randomUUID(),

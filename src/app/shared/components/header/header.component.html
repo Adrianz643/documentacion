@@ -8,7 +8,6 @@
 
   <div class="ms-auto d-flex align-items-center gap-2">
     @if (!isDashboard()) {
-      <!-- Búsqueda global -->
       <div class="gd-search-wrap" [class.gd-search-wrap--open]="buscarAbierto()">
         <input #buscarInput type="search" class="form-control form-control-sm gd-search-input"
           placeholder="Buscar…" [value]="busqueda()"
@@ -16,10 +15,8 @@
           (keydown.escape)="cerrarBuscar()" aria-label="Buscar" />
       </div>
       <button type="button" class="gd-icon-btn" [class.active]="buscarAbierto()" aria-label="Buscar" ngbTooltip="Buscar" (click)="toggleBuscar()"><i class="fi fi-rr-search"></i></button>
-      <!-- Editar mi perfil -->
       <a class="gd-icon-btn" routerLink="/perfil/editar" aria-label="Editar mi perfil" ngbTooltip="Editar mi perfil"><i class="fi fi-rr-settings"></i></a>
     }
-    <!-- Notificaciones -->
     <div ngbDropdown placement="bottom-end">
       <button class="gd-icon-btn position-relative" ngbDropdownToggle aria-label="Notificaciones" (click)="notif.refrescar()">
         <i class="fi fi-rr-bell"></i>
@@ -48,7 +45,6 @@
         }
       </div>
     </div>
-    <!-- Usuario -->
     <div ngbDropdown placement="bottom-end">
       <button class="gd-avatar-btn" ngbDropdownToggle aria-label="Mi cuenta">
         <span class="gd-avatar">AM</span>

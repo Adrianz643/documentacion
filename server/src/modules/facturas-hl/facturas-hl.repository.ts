@@ -3,8 +3,6 @@ import { pool } from '../../config/database';
 import type { FacturaHlRow } from '../../types/db.types';
 import type { CampoFacturaHl, CrearFacturaHlInput, ActualizarFacturaHlInput } from './facturas-hl.types';
 
-// Bucket tecnico en `empresas` (Hegewisch Lopez) usado unicamente para satisfacer
-// documentos.empresa_id al subir comprobantes; no se expone como empresa navegable.
 export const EMPRESA_HL_ID = 3;
 
 export const CAMPO_COLUMNA: Record<CampoFacturaHl, string> = {

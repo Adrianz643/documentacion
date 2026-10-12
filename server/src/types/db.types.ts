@@ -1,9 +1,5 @@
 import type { RowDataPacket } from 'mysql2';
 
-/**
- * Fila resultante de usuarios + personas + roles + cat_estados_usuario,
- * usada exclusivamente durante el flujo de autenticacion (incluye password_hash).
- */
 export interface UsuarioAuthRow extends RowDataPacket {
   usuario_id: number;
   username: string;
@@ -20,9 +16,6 @@ export interface UsuarioAuthRow extends RowDataPacket {
   persona_email: string;
 }
 
-/**
- * Fila de perfil de usuario para consumo general (sin password_hash).
- */
 export interface UsuarioPerfilRow extends RowDataPacket {
   usuario_id: number;
   username: string;
@@ -37,9 +30,6 @@ export interface UsuarioPerfilRow extends RowDataPacket {
   persona_email: string;
 }
 
-/**
- * Fila de una fila del listado paginado de usuarios (sin datos sensibles de identidad completos).
- */
 export interface UsuarioListadoRow extends RowDataPacket {
   usuario_id: number;
   username: string;
@@ -56,9 +46,6 @@ export interface UsuarioListadoRow extends RowDataPacket {
   persona_email: string;
 }
 
-/**
- * Fila completa de un usuario para el formulario de edicion (incluye datos de persona editables).
- */
 export interface UsuarioDetalleRow extends RowDataPacket {
   usuario_id: number;
   username: string;
@@ -152,10 +139,6 @@ export interface UsuarioActivoRow extends RowDataPacket {
   id: number;
 }
 
-/**
- * Fila usada por el flujo de recuperacion de contrasena: busca por username
- * o por el correo de la persona vinculada, solo entre usuarios activos.
- */
 export interface UsuarioRecuperacionRow extends RowDataPacket {
   usuario_id: number;
   persona_nombre: string;

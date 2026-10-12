@@ -31,9 +31,6 @@ penales y administrativas en materia de propiedad intelectual.
 
 USE gdprod;
 
--- ---------------------------------------------------------------------
--- 1. TABLA SINGLETON DE CONFIGURACIÓN
--- ---------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS configuracion_alertas_fiel (
     id                 TINYINT UNSIGNED NOT NULL,
@@ -46,24 +43,6 @@ CREATE TABLE IF NOT EXISTS configuracion_alertas_fiel (
     PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ---------------------------------------------------------------------
--- 2. SEMILLA DE DATOS
--- Fila unica (id = 1) con el valor 3 para preservar el comportamiento
--- actual (BETWEEN 0 AND 3) hasta que un admin lo cambie desde la UI.
--- ---------------------------------------------------------------------
 
 INSERT IGNORE INTO configuracion_alertas_fiel (id, dias_anticipacion) VALUES (1, 3);
 
--- ---------------------------------------------------------------------
--- NOTA — Regla de negocio (aplicada en la aplicacion, no en la BD):
---   - server/src/modules/configuracion/*: expone GET/PUT
---     /api/configuracion/alertas-fiel, protegido con el permiso
---     'usuarios.editar' (solo admin/superadmin, igual que /api/backups).
---   - server/src/jobs/fielVencimiento.job.ts: en cada corrida (cada 60s)
---     lee configuracion_alertas_fiel.dias_anticipacion y lo usa como limite
---     superior del rango de dias restantes (antes fijo en 3).
---   - Rango valido validado en el servicio: entero entre 1 y 90 dias.
---   - Si la fila no existe (entorno nuevo sin esta migracion aplicada), el
---     repositorio cae a un valor por defecto de 3 en memoria, sin romper el
---     job.
--- ---------------------------------------------------------------------

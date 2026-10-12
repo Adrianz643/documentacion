@@ -14,9 +14,6 @@ import {
 
 const router = Router();
 
-// '/me...' debe registrarse antes de '/:id' para que Express no lo confunda con un id.
-// Autoservicio: cualquier usuario autenticado puede ver/editar su propio perfil, sin el
-// permiso 'usuarios.leer'/'usuarios.editar' que solo tienen admin/superadmin.
 router.get('/me', requireAuth, obtenerPerfilHandler);
 router.get('/me/detalle', requireAuth, obtenerPerfilDetalleHandler);
 router.put('/me', requireAuth, actualizarPerfilHandler);

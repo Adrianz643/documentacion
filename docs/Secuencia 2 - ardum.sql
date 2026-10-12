@@ -25,9 +25,6 @@ penales y administrativas en materia de propiedad intelectual.
 
 USE gdprod;
 
--- ---------------------------------------------------------------------
--- 1. CAPA 1: CATÁLOGOS (Referenciales)
--- ---------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS empresas (
     id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -54,9 +51,6 @@ CREATE TABLE IF NOT EXISTS tipos_documento (
     updated_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ---------------------------------------------------------------------
--- 2. CAPA 2: TABLAS MAESTRAS (Propietarios, Documentos y Columnas)
--- ---------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS propietarios (
     id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -124,10 +118,6 @@ CREATE TABLE IF NOT EXISTS columnas_personalizadas (
     INDEX idx_colpers_deleted         (deleted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ---------------------------------------------------------------------
--- 3. CAPA 3: EXPEDIENTES ARDUM (Documentos Personales, FIEL, Declaraciones,
---    Facturas) y valores de columnas personalizadas
--- ---------------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS documentos_personales (
     id                    INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -231,9 +221,6 @@ CREATE TABLE IF NOT EXISTS valores_columnas_personalizadas (
     INDEX idx_vcp_propietario (propietario_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ---------------------------------------------------------------------
--- 4. SEMILLA DE DATOS (SEED INITIAL DATA)
--- ---------------------------------------------------------------------
 
 INSERT IGNORE INTO empresas (id, nombre, tipo, slug) VALUES
     (1, 'ARDUM', 'nacional', 'ardum');
@@ -248,33 +235,6 @@ INSERT IGNORE INTO tipos_documento (clave, nombre) VALUES
     ('FIEL_CONTRASENA',     'Contraseña de la FIEL (.txt)'),
     ('COMPROBANTE',         'Comprobante de pago');
 
--- ---------------------------------------------------------------------
--- CAMBIO (2026-09-18): se agregó la columna numero_lote (VARCHAR(20) NULL)
--- a propietarios, con su índice idx_propietarios_numero_lote, para
--- identificar el lote del propietario en Documentos Personales.
--- ---------------------------------------------------------------------
 
--- ---------------------------------------------------------------------
--- CAMBIO (2026-09-18): la contraseña de la FIEL dejó de capturarse como
--- archivo .txt. Se eliminó contrasena_id (y su FK a documentos) de
--- fiel_registros y se agregó la columna contrasena VARCHAR(500) NULL,
--- que guarda el valor cifrado (AES-256-GCM, clave FIEL_CONTRASENA_KEY en
--- el backend) capturado directamente en un input de texto en la UI.
--- ---------------------------------------------------------------------
 
--- ---------------------------------------------------------------------
--- CAMBIO (2026-09-18): se eliminaron de declaraciones los campos
--- pago_inicial, siguiente_pago_monto y monto_ultimo_pago (ya no se
--- capturan en el formulario de "Nueva declaración" ni se muestran en
--- las tablas ni en el detalle).
--- ---------------------------------------------------------------------
 
--- ---------------------------------------------------------------------
--- NOTA: esta secuencia cubre únicamente los expedientes de ARDUM. Las
--- tablas de Empresas Chinas (empresas_chinas, etapa_requisitos,
--- empresa_china_requisitos, empresa_china_etapa_checklist) y las de
--- notificaciones/configuración se documentarán en una secuencia aparte.
--- Cuando esa secuencia exista, valores_columnas_personalizadas deberá
--- ampliarse con una columna empresa_china_id (NULL) para admitir
--- columnas personalizadas de ese módulo.
--- ---------------------------------------------------------------------
