@@ -1,28 +1,4 @@
-/*
-═══════════════════════════════════════════════════════════════════════════════
-                      AVISO DE DERECHOS DE AUTOR Y RESERVA LEGAL
-═══════════════════════════════════════════════════════════════════════════════
-Autor: Adrian Alejandro Vazquez Zambrano
-Proyecto: Sistema de Gestión Documental (gdprod) - Subsistema Notificaciones
-Año: 2026. Todos los derechos reservados.
-
-Queda estrictamente prohibida la reproducción, modificación, adaptación,
-distribución o explotación total o parcial sin el consentimiento previo, expreso
-y por escrito del titular de los derechos de autor. Cualquier uso o alteración
-no autorizada será perseguida conforme a las disposiciones legales civiles,
-penales y administrativas en materia de propiedad intelectual.
-═══════════════════════════════════════════════════════════════════════════════
-*/
--- ═════════════════════════════════════════════════════════════════════
--- APLICATIVO GESTIÓN DOCUMENTAL (GDPROD) - SUBSISTEMA NOTIFICACIONES
 -- Autor: Adrian Alejandro Vazquez Zambrano
--- Base de Datos: gdprod
--- Motor: MySQL 8.0 (InnoDB, utf8mb4)
--- Alcance: alertas personales por usuario generadas por el sistema (ej. FIEL
---          próxima a vencer). Tabla genérica y reutilizable: cualquier módulo
---          futuro que necesite avisar algo (declaraciones, facturas, Empresas
---          Chinas) solo inserta filas nuevas, sin requerir cambios de esquema.
--- ═════════════════════════════════════════════════════════════════════
 
 USE gdprod;
 

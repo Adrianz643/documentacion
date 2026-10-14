@@ -1,33 +1,4 @@
-/*
-═══════════════════════════════════════════════════════════════════════════════
-                      AVISO DE DERECHOS DE AUTOR Y RESERVA LEGAL
-═══════════════════════════════════════════════════════════════════════════════
-Autor: Adrian Alejandro Vazquez Zambrano
-Proyecto: Sistema de Gestión Documental (gdprod) - Subsistema Actividad
-Año: 2026. Todos los derechos reservados.
-
-Queda estrictamente prohibida la reproducción, modificación, adaptación,
-distribución o explotación total o parcial sin el consentimiento previo, expreso
-y por escrito del titular de los derechos de autor. Cualquier uso o alteración
-no autorizada será perseguida conforme a las disposiciones legales civiles,
-penales y administrativas en materia de propiedad intelectual.
-═══════════════════════════════════════════════════════════════════════════════
-*/
--- ═════════════════════════════════════════════════════════════════════
--- APLICATIVO GESTIÓN DOCUMENTAL (GDPROD) - SUBSISTEMA ACTIVIDAD
 -- Autor: Adrian Alejandro Vazquez Zambrano
--- Base de Datos: gdprod
--- Motor: MySQL 8.0 (InnoDB, utf8mb4)
--- Alcance: bitácora legible de actividad de usuarios (crear/editar/eliminar/
---          restaurar/login/logout) a través de todos los módulos del
---          aplicativo (ARDUM, Empresas Chinas, Usuarios, Papelera, Auth).
---          Es distinta de `auditoria_cambios` (Secuencia 1), que guarda
---          diffs JSON técnicos por tabla/registro; `actividad_log` guarda
---          un feed legible pensado para el módulo "Actividad" del frontend.
--- Convención: mismas reglas que las Secuencias 2 y 4 — todas las tablas
---          llevan columnas de auditoría (creado_por, modificado_por,
---          created_at, updated_at), incluidos los catálogos.
--- ═════════════════════════════════════════════════════════════════════
 
 USE gdprod;
 

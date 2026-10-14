@@ -1,24 +1,4 @@
-/*
-═══════════════════════════════════════════════════════════════════════════════
-                      AVISO DE DERECHOS DE AUTOR Y RESERVA LEGAL
-═══════════════════════════════════════════════════════════════════════════════
-Autor: Adrian Alejandro Vazquez Zambrano
-Proyecto: Sistema de Gestión Documental (gdprod) - Subsistema IAM/RBAC
-Año: 2026. Todos los derechos reservados.
-
-Queda estrictamente prohibida la reproducción, modificación, adaptación, 
-distribución o explotación total o parcial sin el consentimiento previo, expreso 
-y por escrito del titular de los derechos de autor. Cualquier uso o alteración 
-no autorizada será perseguida conforme a las disposiciones legales civiles, 
-penales y administrativas en materia de propiedad intelectual.
-═══════════════════════════════════════════════════════════════════════════════
-*/
--- ═════════════════════════════════════════════════════════════════════
--- APLICATIVO GESTIÓN DOCUMENTAL (GDPROD) - SUBSISTEMA IAM / RBAC
 -- Autor: Adrian Alejandro Vazquez Zambrano
--- Base de Datos: gdprod
--- Motor: MySQL 8.0 (InnoDB, utf8mb4)
--- ═════════════════════════════════════════════════════════════════════
 
 CREATE DATABASE IF NOT EXISTS gdprod
     CHARACTER SET utf8mb4

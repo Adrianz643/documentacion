@@ -1,30 +1,4 @@
-/*
-═══════════════════════════════════════════════════════════════════════════════
-                      AVISO DE DERECHOS DE AUTOR Y RESERVA LEGAL
-═══════════════════════════════════════════════════════════════════════════════
-Autor: Adrian Alejandro Vazquez Zambrano
-Proyecto: Sistema de Gestión Documental (gdprod) - Subsistema Facturas HL
-Año: 2026. Todos los derechos reservados.
-
-Queda estrictamente prohibida la reproducción, modificación, adaptación,
-distribución o explotación total o parcial sin el consentimiento previo, expreso
-y por escrito del titular de los derechos de autor. Cualquier uso o alteración
-no autorizada será perseguida conforme a las disposiciones legales civiles,
-penales y administrativas en materia de propiedad intelectual.
-═══════════════════════════════════════════════════════════════════════════════
-*/
--- ═════════════════════════════════════════════════════════════════════
--- APLICATIVO GESTIÓN DOCUMENTAL (GDPROD) - SUBSISTEMA FACTURAS HL
 -- Autor: Adrian Alejandro Vazquez Zambrano
--- Base de Datos: gdprod
--- Motor: MySQL 8.0 (InnoDB, utf8mb4)
--- Alcance: facturas de Hegewisch López (la consultora que opera este
---          aplicativo), espejo funcional de "Facturas" de ARDUM (Secuencia 2)
---          pero con almacenamiento propio y separado, ya que es otro módulo:
---          Hegewisch López no maneja propietarios de condominio/lote, así
---          que en vez de un propietario_id (FK a propietarios) cada factura
---          guarda un campo de texto libre `cliente`.
--- ═════════════════════════════════════════════════════════════════════
 
 USE gdprod;
 

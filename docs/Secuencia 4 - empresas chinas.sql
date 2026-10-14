@@ -1,32 +1,4 @@
-/*
-═══════════════════════════════════════════════════════════════════════════════
-                      AVISO DE DERECHOS DE AUTOR Y RESERVA LEGAL
-═══════════════════════════════════════════════════════════════════════════════
-Autor: Adrian Alejandro Vazquez Zambrano
-Proyecto: Sistema de Gestión Documental (gdprod) - Subsistema Empresas Chinas
-Año: 2026. Todos los derechos reservados.
-
-Queda estrictamente prohibida la reproducción, modificación, adaptación,
-distribución o explotación total o parcial sin el consentimiento previo, expreso
-y por escrito del titular de los derechos de autor. Cualquier uso o alteración
-no autorizada será perseguida conforme a las disposiciones legales civiles,
-penales y administrativas en materia de propiedad intelectual.
-═══════════════════════════════════════════════════════════════════════════════
-*/
--- ═════════════════════════════════════════════════════════════════════
--- APLICATIVO GESTIÓN DOCUMENTAL (GDPROD) - SUBSISTEMA EMPRESAS CHINAS
 -- Autor: Adrian Alejandro Vazquez Zambrano
--- Base de Datos: gdprod
--- Motor: MySQL 8.0 (InnoDB, utf8mb4)
--- Alcance: expediente de constitución de empresas chinas a través de sus 5
---          etapas (Aprobación de nombre, RFC, Firma Electrónica, Cuenta
---          bancaria, Otros trámites). Reutiliza empresas, documentos y
---          usuarios ya creados en las secuencias 1 y 2 — no se altera
---          ninguna tabla existente.
--- Convención: mismas reglas que la Secuencia 2 (ARDUM) — todas las tablas
---          llevan columnas de auditoría (creado_por, modificado_por,
---          created_at, updated_at), incluidos los catálogos.
--- ═════════════════════════════════════════════════════════════════════
 
 USE gdprod;
 

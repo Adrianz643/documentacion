@@ -1,27 +1,4 @@
-/*
-═══════════════════════════════════════════════════════════════════════════════
-                      AVISO DE DERECHOS DE AUTOR Y RESERVA LEGAL
-═══════════════════════════════════════════════════════════════════════════════
-Autor: Adrian Alejandro Vazquez Zambrano
-Proyecto: Sistema de Gestión Documental (gdprod) - Recuperación de contraseña y
-          alertas de FIEL por correo electrónico
-Año: 2026. Todos los derechos reservados.
-
-Queda estrictamente prohibida la reproducción, modificación, adaptación,
-distribución o explotación total o parcial sin el consentimiento previo, expreso
-y por escrito del titular de los derechos de autor. Cualquier uso o alteración
-no autorizada será perseguida conforme a las disposiciones legales civiles,
-penales y administrativas en materia de propiedad intelectual.
-═══════════════════════════════════════════════════════════════════════════════
-*/
--- ═════════════════════════════════════════════════════════════════════
--- APLICATIVO GESTIÓN DOCUMENTAL (GDPROD)
--- Secuencia 9: recuperación de contraseña ("¿Olvidaste tu contraseña?") y
--- aviso por correo electrónico del vencimiento de la FIEL (ademas de la
--- campanita de notificaciones in-app que ya existia desde la Secuencia 3).
--- Base de Datos: gdprod
--- Motor: MySQL 8.0 (InnoDB, utf8mb4)
--- ═════════════════════════════════════════════════════════════════════
+-- Autor: Adrian Alejandro Vazquez Zambrano
 
 USE gdprod;
 
