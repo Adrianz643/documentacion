@@ -1,4 +1,5 @@
 -- Autor: Adrian Alejandro Vazquez Zambrano
+-- Año: 2026
 
 CREATE DATABASE IF NOT EXISTS gdprod
     CHARACTER SET utf8mb4
