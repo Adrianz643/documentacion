@@ -3,6 +3,7 @@ import { env } from './config/env';
 import { pool } from './config/database';
 import { iniciarJobBackup } from './jobs/backup.job';
 import { iniciarJobFielVencimiento } from './jobs/fielVencimiento.job';
+import { iniciarJobDeclaracionesMensuales } from './jobs/declaracionesMensuales.job';
 import { iniciarJobPurgaPapelera } from './jobs/papeleraPurge.job';
 
 async function bootstrap(): Promise<void> {
@@ -14,6 +15,7 @@ async function bootstrap(): Promise<void> {
   });
 
   iniciarJobFielVencimiento();
+  iniciarJobDeclaracionesMensuales();
   iniciarJobPurgaPapelera();
   iniciarJobBackup();
 }
