@@ -5,6 +5,7 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NgbModal, NgbTooltipModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import JSZip from 'jszip';
+import { DocumentosZip, descargarZip } from '../../../shared/utils/descargas';
 import { Documento, FielRegistro, Propietario, TableColumn } from '../../../core/models';
 import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
 import { ColumnManagerComponent } from '../../../shared/components/column-manager/column-manager.component';
@@ -156,15 +157,12 @@ export class FielComponent implements OnInit {
 
   async exportar(r: FielRegistro): Promise<void> {
     const zip = new JSZip();
+    const empaquetado = new DocumentosZip(zip);
+    const fallidos = empaquetado.fallidos;
     const documentos = [r.clavePrivadaDoc, r.certificadoDoc].filter((d): d is Documento => !!d);
 
     for (const doc of documentos) {
-      try {
-        const blob = await fetch(doc.rutaStorage).then(res => res.blob());
-        zip.file(doc.nombreArchivo, blob);
-      } catch {
-        zip.file(doc.nombreArchivo, `No fue posible descargar ${doc.nombreArchivo}`);
-      }
+      await empaquetado.agregar(doc);
     }
 
     zip.file(
@@ -176,13 +174,7 @@ export class FielComponent implements OnInit {
       `Generado el ${new Date().toLocaleString('es-MX')}\n`
     );
 
-    const blob = await zip.generateAsync({ type: 'blob' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `FIEL ${r.propietario?.nombre ?? r.id} ${new Date().toISOString().slice(0, 10)}.zip`;
-    a.click();
-    URL.revokeObjectURL(url);
+    await descargarZip(zip, `FIEL ${r.propietario?.nombre ?? r.id} ${new Date().toISOString().slice(0, 10)}.zip`, fallidos);
   }
 
   contrasenaDraftValue(id: number): string {

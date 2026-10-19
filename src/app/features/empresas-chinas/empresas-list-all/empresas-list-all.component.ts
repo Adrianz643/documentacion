@@ -6,6 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import JSZip from 'jszip';
+import { DocumentosZip, descargarZip } from '../../../shared/utils/descargas';
 import { EmpresaChina } from '../../../core/models';
 import { EmpresasChinasService } from '../../../core/services/empresas-chinas.service';
 import { agregarLogoReporte, dibujarGraficoPastelConLeyenda, SegmentoPastel } from '../../../core/utils/pdf-report.util';
@@ -136,6 +137,7 @@ export class EmpresasListAllComponent implements OnInit {
   async descargarExpediente(e: EmpresaChina) {
     const detalle = await firstValueFrom(this.service.obtenerDetalle(e.id));
     const zip = new JSZip();
+    const fallidos: string[] = [];
     let documentosIncluidos = 0;
 
     for (const etapa of detalle.etapas) {
@@ -146,14 +148,10 @@ export class EmpresasListAllComponent implements OnInit {
       if (!documentos.length) continue;
 
       const carpeta = zip.folder(`Etapa ${etapa.etapaNum}`)!;
+      const empaquetado = new DocumentosZip(carpeta, fallidos);
       for (const doc of documentos) {
         documentosIncluidos++;
-        try {
-          const blob = await fetch(doc.rutaStorage).then(r => r.blob());
-          carpeta.file(doc.nombreArchivo, blob);
-        } catch {
-          carpeta.file(doc.nombreArchivo, `No fue posible descargar ${doc.nombreArchivo}`);
-        }
+        await empaquetado.agregar(doc);
       }
     }
 
@@ -168,13 +166,7 @@ export class EmpresasListAllComponent implements OnInit {
       `Generado el ${new Date().toLocaleString('es-MX')}\n`
     );
 
-    const blob = await zip.generateAsync({ type: 'blob' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${e.nombre} ${this.fechaArchivo()}.zip`;
-    a.click();
-    URL.revokeObjectURL(url);
+    await descargarZip(zip, `${e.nombre} ${this.fechaArchivo()}.zip`, fallidos);
   }
 
   private slug(nombre: string): string {

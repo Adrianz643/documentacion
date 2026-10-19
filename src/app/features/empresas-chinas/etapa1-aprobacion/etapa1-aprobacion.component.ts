@@ -6,6 +6,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { NgbModal, NgbTooltipModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import JSZip from 'jszip';
+import { DocumentosZip, descargarZip } from '../../../shared/utils/descargas';
 import { EmpresaChinaRequisito, EtapaRequisito, TableColumn } from '../../../core/models/index';
 import { ColumnManagerComponent } from '../../../shared/components/column-manager/column-manager.component';
 import { OcultoParaVisorDirective } from '../../../shared/directives/oculto-para-visor.directive';
@@ -168,6 +169,8 @@ export class Etapa1AprobacionComponent implements OnInit {
 
   async exportar(empresa: FilaEtapaChina) {
     const zip = new JSZip();
+    const empaquetado = new DocumentosZip(zip);
+    const fallidos = empaquetado.fallidos;
 
     const documentos = this.requisitos()
       .map(req => ({ req, valor: this.getReqValue(empresa, req.codigo) }))
@@ -175,12 +178,7 @@ export class Etapa1AprobacionComponent implements OnInit {
 
     for (const { valor } of documentos) {
       const doc = valor!.documento!;
-      try {
-        const blob = await fetch(doc.rutaStorage).then(r => r.blob());
-        zip.file(doc.nombreArchivo, blob);
-      } catch {
-        zip.file(doc.nombreArchivo, `No fue posible descargar ${doc.nombreArchivo}`);
-      }
+      await empaquetado.agregar(doc);
     }
 
     zip.file(
@@ -193,13 +191,7 @@ export class Etapa1AprobacionComponent implements OnInit {
       `Generado el ${new Date().toLocaleString('es-MX')}\n`
     );
 
-    const blob = await zip.generateAsync({ type: 'blob' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${empresa.nombre} ${this.fechaArchivo()}.zip`;
-    a.click();
-    URL.revokeObjectURL(url);
+    await descargarZip(zip, `${empresa.nombre} ${this.fechaArchivo()}.zip`, fallidos);
   }
 
   private fechaArchivo(): string {

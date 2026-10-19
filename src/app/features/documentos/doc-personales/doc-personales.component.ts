@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { NgbModal, NgbTooltipModule, NgbDropdownModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import JSZip from 'jszip';
+import { DocumentosZip, descargarZip } from '../../../shared/utils/descargas';
 import { Documento, DocumentoPersonal, TableColumn } from '../../../core/models';
 import { ColumnManagerComponent } from '../../../shared/components/column-manager/column-manager.component';
 import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
@@ -101,16 +102,13 @@ export class DocPersonalesComponent implements OnInit {
 
   async exportar(r: DocumentoPersonal): Promise<void> {
     const zip = new JSZip();
+    const empaquetado = new DocumentosZip(zip);
+    const fallidos = empaquetado.fallidos;
     const documentos = [r.contratoArdumDoc, r.contratoHegewischDoc, r.csfDoc, r.acuseCitaDoc]
       .filter((d): d is Documento => !!d);
 
     for (const doc of documentos) {
-      try {
-        const blob = await fetch(doc.rutaStorage).then(res => res.blob());
-        zip.file(doc.nombreArchivo, blob);
-      } catch {
-        zip.file(doc.nombreArchivo, `No fue posible descargar ${doc.nombreArchivo}`);
-      }
+      await empaquetado.agregar(doc);
     }
 
     zip.file(
@@ -122,13 +120,7 @@ export class DocPersonalesComponent implements OnInit {
       `Generado el ${new Date().toLocaleString('es-MX')}\n`
     );
 
-    const blob = await zip.generateAsync({ type: 'blob' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${r.propietario.nombre} ${new Date().toISOString().slice(0, 10)}.zip`;
-    a.click();
-    URL.revokeObjectURL(url);
+    await descargarZip(zip, `${r.propietario.nombre} ${new Date().toISOString().slice(0, 10)}.zip`, fallidos);
   }
 
   subirDocumento(r: DocumentoPersonal, campo: CampoDocumentoPersonal, file: File): void {
