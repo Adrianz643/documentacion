@@ -30,3 +30,4 @@
 - **Vigencia (misma regla que FIEL):** `Vigente` si faltan más de 90 días, `Por vencer (N días)` si faltan 90 días o menos, `Vencida` si la fecha ya pasó y `Sin fecha` si `fecha_vencimiento` es `NULL`.
 - **Validación:** el backend rechaza con `400` una `fecha_vencimiento` anterior a `fecha`.
 - **Aviso en pantalla:** si hay facturas vencidas o por vencer, ambas pantallas muestran un aviso con el conteo, igual que el módulo FIEL.
+- **Notificaciones de vencimiento (`server/src/jobs/facturasVencimiento.job.ts`):** cada 60 s el job busca facturas y facturas HL con `fecha_vencimiento` entre hoy y `dias_anticipacion` días (el umbral global de la Secuencia 8) y crea una notificación en `notificaciones` por usuario activo, con los mismos criterios de no repetición que FIEL. El vencimiento es siempre la fecha capturada manualmente; no se aplica ninguna regla de 4 años.
