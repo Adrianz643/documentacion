@@ -90,7 +90,7 @@
     @if (requisitoSeleccionado()?.tipoCampo === 'archivo') {
     <div class="mb-3"><label class="form-label" for="fArch3">Archivo <span class="text-danger">*</span></label>
     <input id="fArch3" type="file" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.txt" (change)="onFile($event)" [class.is-invalid]="uploadForm.get('archivo')?.invalid&&uploadForm.get('archivo')?.touched"/>
-    <div class="form-text">PDF, Word, Excel, Imágenes — Máx. 10 MB</div><div class="invalid-feedback">Selecciona un archivo.</div></div>
+    <div class="form-text">PDF, Word, Excel, Imágenes — Máx. 20 MB</div><div class="invalid-feedback">Selecciona un archivo.</div></div>
     } @else if (esCampoSensible(requisitoSeleccionado())) {
     <div class="mb-3"><label class="form-label" for="valorTexto3">Valor <span class="text-danger">*</span></label>
     <div class="input-group input-group-sm">

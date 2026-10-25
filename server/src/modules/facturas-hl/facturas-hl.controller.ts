@@ -9,7 +9,7 @@ import {
   parseCrearFacturaHlInput,
 } from './facturas-hl.validation';
 
-const MAX_ARCHIVO_BYTES = 10 * 1024 * 1024;
+const MAX_ARCHIVO_BYTES = 20 * 1024 * 1024;
 export const uploadMiddleware = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_ARCHIVO_BYTES },

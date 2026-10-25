@@ -25,7 +25,7 @@ import { AuthService } from '../../../core/services/auth.service';
         <div class="gd-upload-icon" aria-hidden="true"><i class="fi fi-rr-cloud-upload"></i></div>
         <span class="gd-upload-label">Subir documento</span>
         <span class="gd-upload-hint">{{ accept() | uppercase }}</span>
-        <span class="gd-upload-hint">Máx. 10 MB</span>
+        <span class="gd-upload-hint">Máx. 20 MB</span>
       </div>
     }
   `,
