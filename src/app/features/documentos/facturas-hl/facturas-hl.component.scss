@@ -46,3 +46,11 @@ $azul:#0B4DB8;$borde:#DDE5EF;$txt:#172B4D;$fondo:#F7F9FC;$enc:#DCEBEC;$enc-txt:#
   p{font-size:13px;color:#53657D;}
 }
 .gd-help-title{display:block;font-size:13.5px;font-weight:700;color:$txt;margin-bottom:4px;}
+
+.gd-badge-vigencia{
+  display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;
+  background:#EEF2F7;color:#53657D;
+  &--vigente{background:rgba(31,169,113,.12);color:$verde;}
+  &--por-vencer{background:#FEF3C7;color:#B45309;}
+  &--vencida{background:rgba(220,38,38,.1);color:#DC2626;}
+}

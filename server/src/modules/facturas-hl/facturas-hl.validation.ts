@@ -26,19 +26,39 @@ function requireFecha(body: Body, campo: string, etiqueta: string): string {
   return valor;
 }
 
+function optionalFecha(body: Body, campo: string, etiqueta: string): string | null {
+  const valor = body[campo];
+  if (valor === undefined || valor === null || valor === '') return null;
+  if (typeof valor !== 'string' || Number.isNaN(Date.parse(valor))) {
+    throw new HttpError(400, `${etiqueta} debe ser una fecha valida`);
+  }
+  return valor;
+}
+
+function validarVencimiento(fecha: string, fechaVencimiento: string | null): string | null {
+  if (fechaVencimiento && fechaVencimiento < fecha) {
+    throw new HttpError(400, 'La fecha de vencimiento no puede ser anterior a la fecha de creacion');
+  }
+  return fechaVencimiento;
+}
+
 export function parseCrearFacturaHlInput(body: unknown): CrearFacturaHlInput {
   const b = (body ?? {}) as Body;
+  const fecha = requireFecha(b, 'fecha', 'La fecha');
   return {
     cliente: requireCliente(b),
-    fecha: requireFecha(b, 'fecha', 'La fecha'),
+    fecha,
+    fechaVencimiento: validarVencimiento(fecha, optionalFecha(b, 'fechaVencimiento', 'La fecha de vencimiento')),
   };
 }
 
 export function parseActualizarFacturaHlInput(body: unknown): ActualizarFacturaHlInput {
   const b = (body ?? {}) as Body;
+  const fecha = requireFecha(b, 'fecha', 'La fecha');
   return {
     cliente: requireCliente(b),
-    fecha: requireFecha(b, 'fecha', 'La fecha'),
+    fecha,
+    fechaVencimiento: validarVencimiento(fecha, optionalFecha(b, 'fechaVencimiento', 'La fecha de vencimiento')),
   };
 }
 

@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Documento, FacturaHl } from '../../../core/models';
+import { estadoVigenciaFiel } from '../../../shared/utils/fiel-vigencia';
 import { SafeUrlPipe } from '../../../shared/pipes/safe-url.pipe';
 import { FileSizePipe } from '../../../shared/pipes/file-size.pipe';
 import { FacturasHlService } from '../../../core/services/facturas-hl.service';
@@ -17,6 +18,7 @@ import { FacturasHlService } from '../../../core/services/facturas-hl.service';
 export class FacturaHlDetalleComponent implements OnInit {
   private route   = inject(ActivatedRoute);
   private service = inject(FacturasHlService);
+  estadoVigencia = estadoVigenciaFiel;
   private modal   = inject(NgbModal);
 
   id           = signal(0);

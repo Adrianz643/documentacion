@@ -22,8 +22,16 @@
         <span class="gd-info-value">{{ r.propietario?.nombre || '—' }}</span>
       </div>
       <div class="gd-info-item">
-        <span class="gd-info-label">Fecha</span>
+        <span class="gd-info-label">Fecha de Creación</span>
         <span class="gd-info-value">{{ (r.fecha | date:'dd/MM/yyyy') || '—' }}</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Fecha de Vencimiento</span>
+        <span class="gd-info-value">{{ (r.fechaVencimiento | date:'dd/MM/yyyy') || '—' }}</span>
+      </div>
+      <div class="gd-info-item">
+        <span class="gd-info-label">Vigencia</span>
+        <span class="gd-info-value"><span class="badge gd-badge-vigencia" [ngClass]="estadoVigencia(r.fechaVencimiento).clase">{{ estadoVigencia(r.fechaVencimiento).label }}</span></span>
       </div>
     </div>
   </div>

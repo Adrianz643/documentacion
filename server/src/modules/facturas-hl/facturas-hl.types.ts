@@ -17,6 +17,7 @@ export interface FacturaHlDTO {
   id: number;
   cliente: string;
   fecha: string;
+  fechaVencimiento: string | null;
   comprobanteId: number | null;
   comprobanteDoc: DocumentoDTO | null;
 }
@@ -24,11 +25,13 @@ export interface FacturaHlDTO {
 export interface CrearFacturaHlInput {
   cliente: string;
   fecha: string;
+  fechaVencimiento: string | null;
 }
 
 export interface ActualizarFacturaHlInput {
   cliente: string;
   fecha: string;
+  fechaVencimiento: string | null;
 }
 
 export interface ArchivoSubidoInput {

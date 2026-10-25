@@ -9,6 +9,7 @@ export type CampoFacturaHl = 'comprobante';
 export interface FacturaHlFormData {
   cliente: string;
   fecha: string;
+  fechaVencimiento?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

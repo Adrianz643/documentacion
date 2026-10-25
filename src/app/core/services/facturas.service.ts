@@ -9,6 +9,7 @@ export type CampoFactura = 'comprobante';
 export interface FacturaFormData {
   propietarioId: number;
   fecha: string;
+  fechaVencimiento?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

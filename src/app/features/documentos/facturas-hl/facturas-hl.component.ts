@@ -6,6 +6,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FacturaHl, TableColumn, TipoCampo } from '../../../core/models';
 import { FileUploadComponent } from '../../../shared/components/file-upload/file-upload.component';
+import { VIGENCIA_FIEL_UMBRAL_POR_VENCER_DIAS, diasRestantesVigenciaFiel, estadoVigenciaFiel } from '../../../shared/utils/fiel-vigencia';
 import { OcultoParaVisorDirective } from '../../../shared/directives/oculto-para-visor.directive';
 import { CampoFacturaHl, FacturasHlService } from '../../../core/services/facturas-hl.service';
 import { ColumnasPersonalizadasService } from '../../../core/services/columnas-personalizadas.service';
@@ -15,7 +16,9 @@ const SECCION = 'facturas_hl';
 
 const COLUMNAS_BASE: TableColumn[] = [
   {key:'cliente',label:'Cliente',visible:true,sortable:true,type:'text'},
-  {key:'fecha',label:'Fecha',visible:true,sortable:true,type:'date'},
+  {key:'fecha',label:'Fecha de Creación',visible:true,sortable:true,type:'date'},
+  {key:'fechaVencimiento',label:'Fecha de Vencimiento',visible:true,sortable:true,type:'date'},
+  {key:'vigencia',label:'Vigencia',visible:true,sortable:false,type:'badge'},
   {key:'comprobante',label:'Comprobante',visible:true,sortable:false,type:'file'},
 ];
 
@@ -46,8 +49,17 @@ export class FacturasHlComponent implements OnInit {
 
   columns=signal<TableColumn[]>([...COLUMNAS_BASE]);
   visibles=computed(()=>this.columns().filter(c=>c.visible));
+  estadoVigencia = estadoVigenciaFiel;
+  porVencer = computed(() => this.registros().filter((r) => {
+    const dias = diasRestantesVigenciaFiel(r.fechaVencimiento);
+    return dias !== null && dias >= 0 && dias <= VIGENCIA_FIEL_UMBRAL_POR_VENCER_DIAS;
+  }));
+  vencidas = computed(() => this.registros().filter((r) => {
+    const dias = diasRestantesVigenciaFiel(r.fechaVencimiento);
+    return dias !== null && dias < 0;
+  }));
   filtrados=computed(()=>{const q=this.search().toLowerCase();return q?this.registros().filter(r=>r.cliente.toLowerCase().includes(q)):this.registros();});
-  nuevoForm = this.fb.group({ cliente: ['', [Validators.required, Validators.maxLength(180)]], fecha:['',Validators.required] });
+  nuevoForm = this.fb.group({ cliente: ['', [Validators.required, Validators.maxLength(180)]], fecha:['',Validators.required], fechaVencimiento:[''] });
 
   columnaForm = this.fb.group({
     nombre: ['', [Validators.required, Validators.maxLength(120)]],
@@ -130,6 +142,7 @@ export class FacturasHlComponent implements OnInit {
   }
 
   cellHasValue(r: FacturaHl, c: TableColumn): boolean {
+    if (c.key === 'vigencia') return false;
     if (c.type !== 'file') return true;
     return c.key === 'comprobante' ? !!r.comprobanteDoc : false;
   }
@@ -146,14 +159,14 @@ export class FacturasHlComponent implements OnInit {
 
   abrirEditar(r: FacturaHl, ref: any) {
     this.editando.set(r);
-    this.nuevoForm.reset({ cliente: r.cliente, fecha: r.fecha });
+    this.nuevoForm.reset({ cliente: r.cliente, fecha: r.fecha, fechaVencimiento: r.fechaVencimiento ?? '' });
     this.modal.open(ref, { centered: true });
   }
 
   guardar(m:any){
     if(this.nuevoForm.invalid){this.nuevoForm.markAllAsTouched();return;}
     const v = this.nuevoForm.getRawValue();
-    const datos = { cliente: v.cliente!.trim(), fecha: v.fecha! };
+    const datos = { cliente: v.cliente!.trim(), fecha: v.fecha!, fechaVencimiento: v.fechaVencimiento || null };
     const editando = this.editando();
 
     this.guardando.set(true);

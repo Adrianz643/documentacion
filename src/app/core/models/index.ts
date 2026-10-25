@@ -42,8 +42,8 @@ export interface ColumnaPersonalizada { id: number; empresaId: number; seccion: 
 export interface ValorColumnaPersonalizada { id: number; columnaId: number; propietarioId?: number; empresaChinaId?: number; valorTexto?: string; valorDocumentoId?: number; valorDocumento?: Documento; }
 export interface FielRegistro { id: number; propietarioId: number; propietario?: Propietario; clavePrivadaId?: number; clavePrivadaDoc?: Documento; certificadoId?: number; certificadoDoc?: Documento; contrasena?: string | null; fechaCreacion?: string; fechaVencimiento?: string; }
 export interface Declaracion { id: number; propietarioId: number; propietario?: Propietario; tipo: TipoDeclaracion; siguientePagoFrecuencia: FrecuenciaPago; fechaUltimoPago?: string; fechaDeclaracion?: string; comprobanteId?: number; comprobanteDoc?: Documento; periodoMes: number; periodoAnio: number; }
-export interface Factura { id: number; propietarioId: number; propietario?: Propietario; fecha: string; comprobanteId?: number; comprobanteDoc?: Documento; }
-export interface FacturaHl { id: number; cliente: string; fecha: string; comprobanteId?: number; comprobanteDoc?: Documento; }
+export interface Factura { id: number; propietarioId: number; propietario?: Propietario; fecha: string; fechaVencimiento?: string | null; comprobanteId?: number; comprobanteDoc?: Documento; }
+export interface FacturaHl { id: number; cliente: string; fecha: string; fechaVencimiento?: string | null; comprobanteId?: number; comprobanteDoc?: Documento; }
 export interface EmpresaChina { id: number; codigo: string; nombre: string; representanteLegal?: string; correoElectronico?: string; telefono?: string; fechaRegistro?: string; etapaActual: number; estado: EstadoEmpresaChina; progresoPct: number; createdAt: string; updatedAt: string; }
 export interface EtapaRequisito { id: number; etapaNum: number; codigo: string; descripcion: string; tipoCampo: TipoCampo; }
 export interface EmpresaChinaRequisito { id: number; empresaChinaId: number; requisitoId: number; requisito?: EtapaRequisito; documentoId?: number; documento?: Documento; valorTexto?: string; completado: boolean; }

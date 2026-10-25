@@ -30,6 +30,7 @@ const SELECT_JOIN = `
     f.id,
     f.cliente,
     f.fecha,
+    f.fecha_vencimiento,
     f.comprobante_id,
     dc.tipo_documento_id     AS comprobante_tipo_id,
     dc.nombre_archivo        AS comprobante_nombre,
@@ -63,17 +64,17 @@ export async function findTipoDocumentoIdByClave(clave: string): Promise<number 
 
 export async function crear(input: CrearFacturaHlInput, actorId: number): Promise<number> {
   const [result] = await pool.execute<ResultSetHeader>(
-    `INSERT INTO facturas_hl (cliente, fecha, creado_por, modificado_por)
-     VALUES (?, ?, ?, ?)`,
-    [input.cliente, input.fecha, actorId, actorId],
+    `INSERT INTO facturas_hl (cliente, fecha, fecha_vencimiento, creado_por, modificado_por)
+     VALUES (?, ?, ?, ?, ?)`,
+    [input.cliente, input.fecha, input.fechaVencimiento, actorId, actorId],
   );
   return result.insertId;
 }
 
 export async function actualizar(id: number, input: ActualizarFacturaHlInput, actorId: number): Promise<void> {
   await pool.execute<ResultSetHeader>(
-    `UPDATE facturas_hl SET cliente = ?, fecha = ?, modificado_por = ? WHERE id = ?`,
-    [input.cliente, input.fecha, actorId, id],
+    `UPDATE facturas_hl SET cliente = ?, fecha = ?, fecha_vencimiento = ?, modificado_por = ? WHERE id = ?`,
+    [input.cliente, input.fecha, input.fechaVencimiento, actorId, id],
   );
 }
 

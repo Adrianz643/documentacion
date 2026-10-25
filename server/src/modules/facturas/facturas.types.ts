@@ -20,6 +20,7 @@ export interface FacturaDTO {
   propietarioId: number;
   propietario: PropietarioDTO;
   fecha: string;
+  fechaVencimiento: string | null;
   comprobanteId: number | null;
   comprobanteDoc: DocumentoDTO | null;
 }
@@ -28,11 +29,13 @@ export interface CrearFacturaInput {
   empresaId: number;
   propietarioId: number;
   fecha: string;
+  fechaVencimiento: string | null;
 }
 
 export interface ActualizarFacturaInput {
   propietarioId: number;
   fecha: string;
+  fechaVencimiento: string | null;
 }
 
 export interface ArchivoSubidoInput {

@@ -39,6 +39,7 @@ function mapRowToDTO(row: FacturaHlRow): FacturaHlDTO {
     id: row.id,
     cliente: row.cliente,
     fecha: row.fecha.toISOString().slice(0, 10),
+    fechaVencimiento: row.fecha_vencimiento ? row.fecha_vencimiento.toISOString().slice(0, 10) : null,
     comprobanteId: row.comprobante_id,
     comprobanteDoc: mapDocumento(
       row.comprobante_id, row.comprobante_tipo_id, row.comprobante_nombre, row.comprobante_ruta,

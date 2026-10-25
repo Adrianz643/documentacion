@@ -186,6 +186,7 @@ export interface FacturaRow extends RowDataPacket {
   propietario_created_at: Date;
   propietario_updated_at: Date;
   fecha: Date;
+  fecha_vencimiento: Date | null;
   comprobante_id: number | null;
   comprobante_tipo_id: number | null;
   comprobante_nombre: string | null;
@@ -200,6 +201,7 @@ export interface FacturaHlRow extends RowDataPacket {
   id: number;
   cliente: string;
   fecha: Date;
+  fecha_vencimiento: Date | null;
   comprobante_id: number | null;
   comprobante_tipo_id: number | null;
   comprobante_nombre: string | null;

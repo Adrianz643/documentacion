@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Documento, Factura } from '../../../core/models';
+import { estadoVigenciaFiel } from '../../../shared/utils/fiel-vigencia';
 import { SafeUrlPipe } from '../../../shared/pipes/safe-url.pipe';
 import { FileSizePipe } from '../../../shared/pipes/file-size.pipe';
 import { FacturasService } from '../../../core/services/facturas.service';
@@ -17,6 +18,7 @@ import { FacturasService } from '../../../core/services/facturas.service';
 export class FacturaDetalleComponent implements OnInit {
   private route   = inject(ActivatedRoute);
   private service = inject(FacturasService);
+  estadoVigencia = estadoVigenciaFiel;
   private modal   = inject(NgbModal);
 
   empresaId    = signal(0);
