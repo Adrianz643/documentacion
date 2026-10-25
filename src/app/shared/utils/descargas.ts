@@ -4,10 +4,7 @@ import { Documento } from '../../core/models';
 export class DocumentosZip {
   private readonly usados = new Set<string>();
 
-  constructor(
-    private readonly destino: Pick<JSZip, 'file'>,
-    readonly fallidos: string[] = [],
-  ) {}
+  constructor(private readonly destino: Pick<JSZip, 'file'>) {}
 
   async agregar(doc: Documento): Promise<boolean> {
     try {
@@ -15,7 +12,6 @@ export class DocumentosZip {
       this.destino.file(this.nombreUnico(doc.nombreArchivo), blob);
       return true;
     } catch {
-      this.fallidos.push(doc.nombreArchivo);
       return false;
     }
   }
@@ -50,10 +46,7 @@ export function guardarBlob(blob: Blob, nombre: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export async function descargarZip(zip: JSZip, nombre: string, fallidos: string[]): Promise<void> {
-  if (fallidos.length) {
-    zip.file('no-descargados.txt', `No fue posible incluir los siguientes archivos:\n${fallidos.join('\n')}\n`);
-  }
+export async function descargarZip(zip: JSZip, nombre: string): Promise<void> {
   guardarBlob(await zip.generateAsync({ type: 'blob' }), nombre);
 }
 

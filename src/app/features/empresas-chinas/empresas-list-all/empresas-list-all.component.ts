@@ -137,7 +137,6 @@ export class EmpresasListAllComponent implements OnInit {
   async descargarExpediente(e: EmpresaChina) {
     const detalle = await firstValueFrom(this.service.obtenerDetalle(e.id));
     const zip = new JSZip();
-    const fallidos: string[] = [];
 
     for (const etapa of detalle.etapas) {
       const documentos = etapa.requisitosEstado
@@ -147,14 +146,14 @@ export class EmpresasListAllComponent implements OnInit {
       if (!documentos.length) continue;
 
       const carpeta = zip.folder(`Etapa ${etapa.etapaNum}`)!;
-      const empaquetado = new DocumentosZip(carpeta, fallidos);
+      const empaquetado = new DocumentosZip(carpeta);
       for (const doc of documentos) {
         await empaquetado.agregar(doc);
       }
     }
 
 
-    await descargarZip(zip, `${e.nombre} ${this.fechaArchivo()}.zip`, fallidos);
+    await descargarZip(zip, `${e.nombre} ${this.fechaArchivo()}.zip`);
   }
 
   private slug(nombre: string): string {

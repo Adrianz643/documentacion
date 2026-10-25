@@ -158,7 +158,6 @@ export class FielComponent implements OnInit {
   async exportar(r: FielRegistro): Promise<void> {
     const zip = new JSZip();
     const empaquetado = new DocumentosZip(zip);
-    const fallidos = empaquetado.fallidos;
     const documentos = [r.clavePrivadaDoc, r.certificadoDoc].filter((d): d is Documento => !!d);
 
     for (const doc of documentos) {
@@ -166,7 +165,7 @@ export class FielComponent implements OnInit {
     }
 
 
-    await descargarZip(zip, `FIEL ${r.propietario?.nombre ?? r.id} ${new Date().toISOString().slice(0, 10)}.zip`, fallidos);
+    await descargarZip(zip, `FIEL ${r.propietario?.nombre ?? r.id} ${new Date().toISOString().slice(0, 10)}.zip`);
   }
 
   contrasenaDraftValue(id: number): string {

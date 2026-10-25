@@ -103,7 +103,6 @@ export class DocPersonalesComponent implements OnInit {
   async exportar(r: DocumentoPersonal): Promise<void> {
     const zip = new JSZip();
     const empaquetado = new DocumentosZip(zip);
-    const fallidos = empaquetado.fallidos;
     const documentos = [r.contratoArdumDoc, r.contratoHegewischDoc, r.csfDoc, r.acuseCitaDoc]
       .filter((d): d is Documento => !!d);
 
@@ -112,7 +111,7 @@ export class DocPersonalesComponent implements OnInit {
     }
 
 
-    await descargarZip(zip, `${r.propietario.nombre} ${new Date().toISOString().slice(0, 10)}.zip`, fallidos);
+    await descargarZip(zip, `${r.propietario.nombre} ${new Date().toISOString().slice(0, 10)}.zip`);
   }
 
   subirDocumento(r: DocumentoPersonal, campo: CampoDocumentoPersonal, file: File): void {

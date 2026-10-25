@@ -177,7 +177,6 @@ export class Etapa3FirmaComponent implements OnInit {
   async exportar(empresa: FilaEtapaChina) {
     const zip = new JSZip();
     const empaquetado = new DocumentosZip(zip);
-    const fallidos = empaquetado.fallidos;
 
     const documentos = this.requisitos()
       .map(req => ({ req, valor: this.getReqValue(empresa, req.codigo) }))
@@ -189,7 +188,7 @@ export class Etapa3FirmaComponent implements OnInit {
     }
 
 
-    await descargarZip(zip, `${empresa.nombre} ${this.fechaArchivo()}.zip`, fallidos);
+    await descargarZip(zip, `${empresa.nombre} ${this.fechaArchivo()}.zip`);
   }
 
   private fechaArchivo(): string {
