@@ -165,14 +165,6 @@ export class FielComponent implements OnInit {
       await empaquetado.agregar(doc);
     }
 
-    zip.file(
-      'expediente-info.txt',
-      `FIEL de ${r.propietario?.nombre ?? ''}\n` +
-      `Documentos incluidos: ${documentos.length} de 2\n` +
-      `Contraseña capturada: ${r.contrasena ? 'Sí' : 'No'}\n` +
-      `Check List: ${this.checkListCompleto(r) ? 'Completo' : 'Pendiente'}\n` +
-      `Generado el ${new Date().toLocaleString('es-MX')}\n`
-    );
 
     await descargarZip(zip, `FIEL ${r.propietario?.nombre ?? r.id} ${new Date().toISOString().slice(0, 10)}.zip`, fallidos);
   }

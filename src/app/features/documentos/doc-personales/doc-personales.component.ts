@@ -111,14 +111,6 @@ export class DocPersonalesComponent implements OnInit {
       await empaquetado.agregar(doc);
     }
 
-    zip.file(
-      'expediente-info.txt',
-      `Expediente de ${r.propietario.nombre}\n` +
-      `Número de lote: ${r.propietario.numeroLote || '—'}\n` +
-      `Documentos incluidos: ${documentos.length} de 4\n` +
-      `Check List: ${this.checkListCompleto(r) ? 'Completo' : 'Pendiente'}\n` +
-      `Generado el ${new Date().toLocaleString('es-MX')}\n`
-    );
 
     await descargarZip(zip, `${r.propietario.nombre} ${new Date().toISOString().slice(0, 10)}.zip`, fallidos);
   }

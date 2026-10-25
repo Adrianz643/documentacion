@@ -138,7 +138,6 @@ export class EmpresasListAllComponent implements OnInit {
     const detalle = await firstValueFrom(this.service.obtenerDetalle(e.id));
     const zip = new JSZip();
     const fallidos: string[] = [];
-    let documentosIncluidos = 0;
 
     for (const etapa of detalle.etapas) {
       const documentos = etapa.requisitosEstado
@@ -150,21 +149,10 @@ export class EmpresasListAllComponent implements OnInit {
       const carpeta = zip.folder(`Etapa ${etapa.etapaNum}`)!;
       const empaquetado = new DocumentosZip(carpeta, fallidos);
       for (const doc of documentos) {
-        documentosIncluidos++;
         await empaquetado.agregar(doc);
       }
     }
 
-    zip.file(
-      'expediente-info.txt',
-      `Expediente de ${e.nombre}\n` +
-      `Código: ${e.codigo}\n` +
-      `Etapa actual: Etapa ${e.etapaActual}\n` +
-      `Estado: ${this.titleCase(e.estado)}\n` +
-      `Progreso: ${e.progresoPct}%\n` +
-      `Documentos incluidos: ${documentosIncluidos}\n` +
-      `Generado el ${new Date().toLocaleString('es-MX')}\n`
-    );
 
     await descargarZip(zip, `${e.nombre} ${this.fechaArchivo()}.zip`, fallidos);
   }

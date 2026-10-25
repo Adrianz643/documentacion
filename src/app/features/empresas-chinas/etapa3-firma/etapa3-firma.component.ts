@@ -188,15 +188,6 @@ export class Etapa3FirmaComponent implements OnInit {
       await empaquetado.agregar(doc);
     }
 
-    zip.file(
-      'expediente-info.txt',
-      `Expediente de ${empresa.nombre}\n` +
-      `Código: ${empresa.codigo}\n` +
-      `Etapa actual: Etapa ${empresa.etapaActual}\n` +
-      `Documentos incluidos: ${documentos.length} de ${this.requisitos().length}\n` +
-      `Check List: ${empresa.checkList ? 'Completo' : 'Pendiente'}\n` +
-      `Generado el ${new Date().toLocaleString('es-MX')}\n`
-    );
 
     await descargarZip(zip, `${empresa.nombre} ${this.fechaArchivo()}.zip`, fallidos);
   }
