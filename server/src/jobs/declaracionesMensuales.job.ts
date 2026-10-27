@@ -1,32 +1,14 @@
-import type { RowDataPacket } from 'mysql2/promise';
-import { pool } from '../config/database';
 import type { UsuarioActivoRow } from '../types/db.types';
+import { pool } from '../config/database';
 import * as notificacionesRepository from '../modules/notificaciones/notificaciones.repository';
 
 const TIPO_NOTIFICACION = 'DECLARACIONES_MENSUALES';
 const ORIGEN_TABLA = 'declaraciones';
 const EMPRESA_ARDUM_ID = 1;
+const DIA_AVISO = 10;
+const DIA_LIMITE = 17;
 const INTERVALO_REVISION_MS = 60 * 60 * 1000;
 const DIAS_RESTANTES_NO_APLICA = 0;
-
-interface PendientesRow extends RowDataPacket {
-  total: number;
-}
-
-async function contarPropietariosSinDeclaracion(mes: number, anio: number): Promise<number> {
-  const [rows] = await pool.execute<PendientesRow[]>(
-    `SELECT COUNT(*) AS total
-     FROM propietarios p
-     WHERE p.empresa_id = ? AND p.deleted_at IS NULL
-       AND NOT EXISTS (
-         SELECT 1 FROM declaraciones d
-         WHERE d.propietario_id = p.id AND d.deleted_at IS NULL
-           AND d.periodo_mes = ? AND d.periodo_anio = ?
-       )`,
-    [EMPRESA_ARDUM_ID, mes, anio],
-  );
-  return Number(rows[0]?.total ?? 0);
-}
 
 async function findUsuariosActivos(): Promise<number[]> {
   const [rows] = await pool.execute<UsuarioActivoRow[]>(
@@ -45,19 +27,17 @@ export async function revisarDeclaracionesMensuales(): Promise<void> {
   ejecutando = true;
   try {
     const hoy = new Date();
-    const mes = hoy.getMonth() + 1;
+    const dia = hoy.getDate();
+    if (dia < DIA_AVISO || dia > DIA_LIMITE) return;
+
     const anio = hoy.getFullYear();
-    const periodoId = anio * 100 + mes;
-
-    const pendientes = await contarPropietariosSinDeclaracion(mes, anio);
-    if (pendientes === 0) return;
-
-    const usuariosIds = await findUsuariosActivos();
+    const periodoId = anio * 100 + (hoy.getMonth() + 1);
     const nombreMes = hoy.toLocaleDateString('es-MX', { month: 'long' });
     const titulo = 'Declaraciones del mes';
-    const cuerpo = `Declaraciones de ${nombreMes} ${anio}: ${pendientes} propietario${pendientes === 1 ? '' : 's'} sin declaración registrada.`;
+    const cuerpo = `Declaraciones de ${nombreMes} ${anio}: presenta las declaraciones del mes a más tardar el ${DIA_LIMITE} de ${nombreMes}.`;
     const ruta = `/empresas/${EMPRESA_ARDUM_ID}/documentos/declaraciones`;
 
+    const usuariosIds = await findUsuariosActivos();
     for (const usuarioId of usuariosIds) {
       const yaExiste = await notificacionesRepository.existeParaOrigenDia(ORIGEN_TABLA, periodoId, usuarioId, DIAS_RESTANTES_NO_APLICA);
       if (yaExiste) continue;
