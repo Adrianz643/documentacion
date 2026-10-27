@@ -22,6 +22,9 @@ const SECCION_CERO = 'declaraciones_cero';
 
 type TablaDeclaraciones = 'mensual' | 'cero';
 
+const DIA_INICIO_AVISO = 10;
+const DIA_LIMITE_DECLARACION = 17;
+
 const COLUMNAS_BASE: TableColumn[] = [
   { key: 'propietario',             label: 'Nombre del Propietario',      visible: true,  sortable: true,  type: 'text'     },
   { key: 'siguientePagoFrecuencia', label: 'Siguiente Pago Frecuentes',   visible: true,  sortable: false, type: 'text'     },
@@ -81,6 +84,27 @@ export class DeclaracionesComponent implements OnInit {
   searchTermCero    = signal('');
   columnasMensuales = signal<TableColumn[]>([...COLUMNAS_BASE]);
   columnasCero      = signal<TableColumn[]>([...COLUMNAS_BASE]);
+
+  avisoVencimiento = computed(() => {
+    const hoy = new Date();
+    const dia = hoy.getDate();
+    if (dia < DIA_INICIO_AVISO || dia > DIA_LIMITE_DECLARACION) return null;
+
+    const mes = hoy.getMonth() + 1;
+    const anio = hoy.getFullYear();
+    const conDeclaracion = new Set(
+      this.declaraciones().filter(d => d.periodoMes === mes && d.periodoAnio === anio).map(d => d.propietarioId),
+    );
+    const pendientes = this.propietarios().filter(p => !conDeclaracion.has(p.id)).length;
+    if (!pendientes) return null;
+
+    return {
+      pendientes,
+      diasRestantes: DIA_LIMITE_DECLARACION - dia,
+      limite: DIA_LIMITE_DECLARACION,
+      mes: hoy.toLocaleDateString('es-MX', { month: 'long' }),
+    };
+  });
 
   declaracionesMensuales = computed(() => this.filtrarPorBusqueda(
     this.declaraciones().filter(d => d.tipo === 'mensual'),
