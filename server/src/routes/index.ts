@@ -17,6 +17,7 @@ import notificacionesRoutes from '../modules/notificaciones/notificaciones.route
 import papeleraRoutes from '../modules/papelera/papelera.routes';
 import propietariosRoutes from '../modules/propietarios/propietarios.routes';
 import usuariosRoutes from '../modules/usuarios/usuarios.routes';
+import valoresColumnasRoutes from '../modules/valores-columnas/valores-columnas.routes';
 
 const router = Router();
 
@@ -32,6 +33,7 @@ router.use('/facturas', facturasRoutes);
 router.use('/facturas-hl', facturasHlRoutes);
 router.use('/empresas-chinas', empresasChinasRoutes);
 router.use('/columnas-personalizadas', columnasPersonalizadasRoutes);
+router.use('/valores-columnas', valoresColumnasRoutes);
 router.use('/notificaciones', notificacionesRoutes);
 router.use('/papelera', papeleraRoutes);
 router.use('/actividad', actividadRoutes);

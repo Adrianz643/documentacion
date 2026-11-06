@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { RouterLink, ActivatedRoute } from '@angular/router';
@@ -29,7 +29,7 @@ import {
   templateUrl: './fiel.component.html',
   styleUrl: './fiel.component.scss'
 })
-export class FielComponent implements OnInit {
+export class FielComponent implements OnInit, OnDestroy {
   private route             = inject(ActivatedRoute);
   private modal             = inject(NgbModal);
   private fb                = inject(FormBuilder);
@@ -89,6 +89,15 @@ export class FielComponent implements OnInit {
     const dias = diasRestantesVigenciaFiel(r.fechaVencimiento);
     return dias !== null && dias < 0;
   }));
+
+  ngOnDestroy(): void {
+    for (const [id, valor] of Object.entries(this.contrasenaDraft())) {
+      const contrasena = valor.trim();
+      if (contrasena) {
+        this.fielService.actualizarContrasena(Number(id), this.empresaId(), contrasena).subscribe();
+      }
+    }
+  }
 
   ngOnInit() {
     this.empresaId.set(Number(this.route.snapshot.paramMap.get('empresaId')??1));

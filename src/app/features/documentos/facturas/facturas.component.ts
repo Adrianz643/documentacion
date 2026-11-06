@@ -11,6 +11,8 @@ import { OcultoParaVisorDirective } from '../../../shared/directives/oculto-para
 import { CampoFactura, FacturasService } from '../../../core/services/facturas.service';
 import { PropietarioService } from '../../../core/services/propietario.service';
 import { ColumnasPersonalizadasService } from '../../../core/services/columnas-personalizadas.service';
+import { CeldaColumnaPersonalizadaComponent } from '../../../shared/components/celda-columna-personalizada/celda-columna-personalizada.component';
+import { ValoresColumnas } from '../../../shared/utils/valores-columnas';
 
 const SECCION = 'facturas';
 
@@ -31,13 +33,14 @@ function mapTipoColumnaATableType(tipo: string): TableColumn['type'] {
 }
 
 @Component({ selector:'app-facturas', standalone:true,
-  imports:[CommonModule,DatePipe,ReactiveFormsModule,RouterLink,NgbTooltipModule,NgbDropdownModule,NgbPaginationModule,FileUploadComponent,OcultoParaVisorDirective],
+  imports:[CeldaColumnaPersonalizadaComponent, CommonModule,DatePipe,ReactiveFormsModule,RouterLink,NgbTooltipModule,NgbDropdownModule,NgbPaginationModule,FileUploadComponent,OcultoParaVisorDirective],
   templateUrl:'./facturas.component.html', styleUrl:'./facturas.component.scss' })
 export class FacturasComponent implements OnInit {
   private route=inject(ActivatedRoute); private modal=inject(NgbModal); private fb=inject(FormBuilder);
   private facturasSvc = inject(FacturasService);
   private propietarioSvc = inject(PropietarioService);
   private columnasSvc = inject(ColumnasPersonalizadasService);
+  valoresCol = new ValoresColumnas(this.columnasSvc, (mensaje) => this.errorMessage.set(mensaje));
 
   empresaId=signal(0); loading=signal(false); errorMessage=signal<string | null>(null); guardando=signal(false);
   search=signal(''); page=signal(1); pageSize=signal(25);
@@ -75,6 +78,7 @@ export class FacturasComponent implements OnInit {
       error: () => this.errorMessage.set('No fue posible cargar los propietarios.'),
     });
     this.cargarColumnasPersonalizadas();
+    this.valoresCol.cargar(this.empresaId(), [SECCION]);
   }
 
   private cargarColumnasPersonalizadas(): void {
@@ -86,6 +90,7 @@ export class FacturasComponent implements OnInit {
           visible: true,
           sortable: false,
           type: mapTipoColumnaATableType(c.tipo),
+          tipoCampo: c.tipo,
         }));
         this.columns.set([...COLUMNAS_BASE, ...extra]);
       },
@@ -112,6 +117,7 @@ export class FacturasComponent implements OnInit {
           visible: true,
           sortable: false,
           type: mapTipoColumnaATableType(c.tipo),
+          tipoCampo: c.tipo,
         }));
         this.columns.set([...COLUMNAS_BASE, ...extra]);
         modalInstance.close();
@@ -139,6 +145,7 @@ export class FacturasComponent implements OnInit {
           visible: true,
           sortable: false,
           type: mapTipoColumnaATableType(c.tipo),
+          tipoCampo: c.tipo,
         }));
         this.columns.set([...COLUMNAS_BASE, ...extra]);
         this.columnaAEliminar.set(null);

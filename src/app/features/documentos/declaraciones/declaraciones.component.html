@@ -142,7 +142,11 @@
                         }
                       }
                       @default {
-                        —
+                        @if (col.key.startsWith('custom_')) {
+                          <app-celda-columna-personalizada [tipo]="col.tipoCampo ?? 'texto'" [valor]="valoresCol.valorDe(col, decl.id)" (texto)="valoresCol.guardarTexto(col, decl.id, $event)" (archivo)="valoresCol.subirArchivo(col, decl.id, $event)" (quitar)="valoresCol.quitar(col, decl.id)"/>
+                        } @else {
+                          —
+                        }
                       }
                     }
                     @if (editingId() === decl.id && cellHasValue(decl, col)) {
@@ -266,6 +270,12 @@
                     @case ('siguientePagoFrecuencia') {
                       <span class="text-capitalize">{{ decl.siguientePagoFrecuencia }}</span>
                     }
+                    @case ('fechaUltimoPago') {
+                      {{ decl.fechaUltimoPago | date:'dd/MM/yyyy' }}
+                    }
+                    @case ('fechaDeclaracion') {
+                      {{ decl.fechaDeclaracion | date:'dd/MM/yyyy' }}
+                    }
                     @case ('comprobante') {
                       @if (decl.comprobanteDoc) {
                         <div class="gd-file-wrap">
@@ -279,7 +289,13 @@
                         <app-file-upload label="comprobante" (fileSelected)="subirDocumento(decl, $event)"/>
                       }
                     }
-                    @default { — }
+                    @default {
+                      @if (col.key.startsWith('custom_')) {
+                        <app-celda-columna-personalizada [tipo]="col.tipoCampo ?? 'texto'" [valor]="valoresCol.valorDe(col, decl.id)" (texto)="valoresCol.guardarTexto(col, decl.id, $event)" (archivo)="valoresCol.subirArchivo(col, decl.id, $event)" (quitar)="valoresCol.quitar(col, decl.id)"/>
+                      } @else {
+                        —
+                      }
+                    }
                   }
                   @if (editingId() === decl.id && cellHasValue(decl, col)) {
                     <button type="button" class="gd-cell-remove" [attr.aria-label]="'Quitar ' + col.label" [ngbTooltip]="col.type === 'file' ? 'Quitar documento' : 'Editar'" (click)="onCellRemove(decl, col, modalFila, modalEliminar)">×</button>

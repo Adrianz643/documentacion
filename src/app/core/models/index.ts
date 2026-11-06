@@ -54,4 +54,5 @@ export interface NotificacionLog { id: number; tipo: string; titulo: string; cue
 export interface NotificacionesListado { data: NotificacionLog[]; noLeidas: number; }
 export interface PaginatedResponse<T> { data: T[]; total: number; page: number; perPage: number; }
 export interface ApiError { message: string; code?: string; field?: string; }
-export interface TableColumn { key: string; label: string; visible: boolean; sortable?: boolean; type?: 'text' | 'date' | 'currency' | 'file' | 'badge'; custom?: boolean; requisitoId?: number; }
+export interface TableColumn { key: string; label: string; visible: boolean; sortable?: boolean; type?: 'text' | 'date' | 'currency' | 'file' | 'badge'; custom?: boolean; requisitoId?: number; tipoCampo?: TipoCampo; }
+export interface ValorColumnaRegistro { columnaId: number; registroId: number; valorTexto: string | null; documento: Documento | null; }

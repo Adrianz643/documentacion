@@ -57,7 +57,7 @@
                   @case('fechaVencimiento'){{{r.fechaVencimiento|date:'dd/MM/yyyy'}}}
                   @case('vigencia'){<span class="badge gd-badge-vigencia" [ngClass]="estadoVigencia(r.fechaVencimiento).clase">{{ estadoVigencia(r.fechaVencimiento).label }}</span>}
                   @case('comprobante'){@if(r.comprobanteDoc){<div class="gd-file-wrap"><a [href]="r.comprobanteDoc.rutaStorage" [attr.download]="r.comprobanteDoc.nombreArchivo" class="gd-file-link" target="_blank" rel="noopener" [title]="r.comprobanteDoc.nombreArchivo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><span class="gd-file-text">{{r.comprobanteDoc.nombreArchivo}}</span></a><span class="gd-file-date">{{r.comprobanteDoc.createdAt|date:'dd/MM/yyyy'}}</span></div>}@else{<app-file-upload label="comprobante" (fileSelected)="subirDocumento(r, 'comprobante', $event)"/>}}
-                  @default{—}
+                  @default{@if (c.key.startsWith('custom_')) {<app-celda-columna-personalizada [tipo]="c.tipoCampo ?? 'texto'" [valor]="valoresCol.valorDe(c, r.id)" (texto)="valoresCol.guardarTexto(c, r.id, $event)" (archivo)="valoresCol.subirArchivo(c, r.id, $event)" (quitar)="valoresCol.quitar(c, r.id)"/>} @else {—}}
                 }
                 @if (editingId() === r.id && cellHasValue(r, c)) {
                   <button type="button" class="gd-cell-remove" [attr.aria-label]="'Quitar ' + c.label" [ngbTooltip]="c.type === 'file' ? 'Quitar documento' : 'Editar'" (click)="onCellRemove(r, c, modalNuevo, modalEliminar)">×</button>

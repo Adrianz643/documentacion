@@ -16,6 +16,8 @@ import { OcultoParaVisorDirective } from '../../../shared/directives/oculto-para
 import { CampoDeclaracion, DeclaracionesService } from '../../../core/services/declaraciones.service';
 import { PropietarioService } from '../../../core/services/propietario.service';
 import { ColumnasPersonalizadasService } from '../../../core/services/columnas-personalizadas.service';
+import { CeldaColumnaPersonalizadaComponent } from '../../../shared/components/celda-columna-personalizada/celda-columna-personalizada.component';
+import { ValoresColumnas } from '../../../shared/utils/valores-columnas';
 
 const SECCION_MENSUAL = 'declaraciones';
 const SECCION_CERO = 'declaraciones_cero';
@@ -44,7 +46,7 @@ function mapTipoColumnaATableType(tipo: string): TableColumn['type'] {
 @Component({
   selector: 'app-declaraciones',
   standalone: true,
-  imports: [
+  imports: [CeldaColumnaPersonalizadaComponent, 
     CommonModule,
     OcultoParaVisorDirective,
     ReactiveFormsModule,
@@ -65,6 +67,7 @@ export class DeclaracionesComponent implements OnInit {
   private declaracionesSvc   = inject(DeclaracionesService);
   private propietarioSvc     = inject(PropietarioService);
   private columnasSvc        = inject(ColumnasPersonalizadasService);
+  valoresCol = new ValoresColumnas(this.columnasSvc, (mensaje) => this.errorMessage.set(mensaje));
 
   empresaId      = signal<number>(0);
   loading        = signal(false);
@@ -135,6 +138,7 @@ export class DeclaracionesComponent implements OnInit {
     this.cargarPropietarios();
     this.cargarColumnasPersonalizadas('mensual');
     this.cargarColumnasPersonalizadas('cero');
+    this.valoresCol.cargar(this.empresaId(), [SECCION_MENSUAL, SECCION_CERO]);
   }
 
   private initFilaForm() {
@@ -174,6 +178,7 @@ export class DeclaracionesComponent implements OnInit {
           visible: true,
           sortable: false,
           type: mapTipoColumnaATableType(c.tipo),
+          tipoCampo: c.tipo,
         }));
         destino.set([...COLUMNAS_BASE, ...extra]);
       },
@@ -287,6 +292,7 @@ export class DeclaracionesComponent implements OnInit {
           visible: true,
           sortable: false,
           type: mapTipoColumnaATableType(c.tipo),
+          tipoCampo: c.tipo,
         }));
         destino.set([...COLUMNAS_BASE, ...extra]);
         modalInstance.close();
@@ -327,6 +333,7 @@ export class DeclaracionesComponent implements OnInit {
           visible: true,
           sortable: false,
           type: mapTipoColumnaATableType(c.tipo),
+          tipoCampo: c.tipo,
         }));
         destino.set([...COLUMNAS_BASE, ...extra]);
         this.columnaAEliminar.set(null);

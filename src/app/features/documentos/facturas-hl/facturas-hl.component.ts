@@ -10,6 +10,8 @@ import { VIGENCIA_FIEL_UMBRAL_POR_VENCER_DIAS, diasRestantesVigenciaFiel, estado
 import { OcultoParaVisorDirective } from '../../../shared/directives/oculto-para-visor.directive';
 import { CampoFacturaHl, FacturasHlService } from '../../../core/services/facturas-hl.service';
 import { ColumnasPersonalizadasService } from '../../../core/services/columnas-personalizadas.service';
+import { CeldaColumnaPersonalizadaComponent } from '../../../shared/components/celda-columna-personalizada/celda-columna-personalizada.component';
+import { ValoresColumnas } from '../../../shared/utils/valores-columnas';
 
 const EMPRESA_ID = 3;
 const SECCION = 'facturas_hl';
@@ -31,12 +33,13 @@ function mapTipoColumnaATableType(tipo: string): TableColumn['type'] {
 }
 
 @Component({ selector:'app-facturas-hl', standalone:true,
-  imports:[CommonModule,DatePipe,ReactiveFormsModule,RouterLink,NgbTooltipModule,NgbDropdownModule,NgbPaginationModule,FileUploadComponent,OcultoParaVisorDirective],
+  imports:[CeldaColumnaPersonalizadaComponent, CommonModule,DatePipe,ReactiveFormsModule,RouterLink,NgbTooltipModule,NgbDropdownModule,NgbPaginationModule,FileUploadComponent,OcultoParaVisorDirective],
   templateUrl:'./facturas-hl.component.html', styleUrl:'./facturas-hl.component.scss' })
 export class FacturasHlComponent implements OnInit {
   private modal=inject(NgbModal); private fb=inject(FormBuilder);
   private facturasSvc = inject(FacturasHlService);
   private columnasSvc = inject(ColumnasPersonalizadasService);
+  valoresCol = new ValoresColumnas(this.columnasSvc, (mensaje) => this.errorMessage.set(mensaje));
 
   loading=signal(false); errorMessage=signal<string | null>(null); guardando=signal(false);
   search=signal(''); page=signal(1); pageSize=signal(25);
@@ -69,15 +72,17 @@ export class FacturasHlComponent implements OnInit {
   ngOnInit(){
     this.cargar();
     this.cargarColumnasPersonalizadas();
+    this.valoresCol.cargar(EMPRESA_ID, [SECCION]);
   }
 
-  private aplicarColumnasPersonalizadas(columnas: { id: number; nombre: string; tipo: string }[]): void {
+  private aplicarColumnasPersonalizadas(columnas: { id: number; nombre: string; tipo: TipoCampo }[]): void {
     const extra: TableColumn[] = columnas.map(c => ({
       key: `custom_${c.id}`,
       label: c.nombre,
       visible: true,
       sortable: false,
       type: mapTipoColumnaATableType(c.tipo),
+          tipoCampo: c.tipo,
     }));
     this.columns.set([...COLUMNAS_BASE, ...extra]);
   }
