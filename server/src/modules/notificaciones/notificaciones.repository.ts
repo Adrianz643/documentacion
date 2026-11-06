@@ -4,13 +4,19 @@ import type { NotificacionRow } from '../../types/db.types';
 import type { CrearNotificacionInput } from './notificaciones.types';
 
 const LIMITE_LISTADO = 30;
+const LIMITE_POR_TIPO = 10;
 
 export async function findByUsuario(usuarioId: number): Promise<NotificacionRow[]> {
   const [rows] = await pool.execute<NotificacionRow[]>(
     `SELECT id, usuario_id, tipo, origen_tabla, origen_id, dias_restantes, titulo, cuerpo, ruta, leida, created_at
-     FROM notificaciones
-     WHERE usuario_id = ? AND deleted_at IS NULL
-     ORDER BY created_at DESC
+     FROM (
+       SELECT n.id, n.usuario_id, n.tipo, n.origen_tabla, n.origen_id, n.dias_restantes, n.titulo, n.cuerpo, n.ruta, n.leida, n.created_at,
+              ROW_NUMBER() OVER (PARTITION BY n.tipo ORDER BY n.created_at DESC, n.id DESC) AS posicion
+       FROM notificaciones n
+       WHERE n.usuario_id = ? AND n.deleted_at IS NULL
+     ) recientes
+     WHERE posicion <= ${LIMITE_POR_TIPO}
+     ORDER BY created_at DESC, id DESC
      LIMIT ${LIMITE_LISTADO}`,
     [usuarioId],
   );
