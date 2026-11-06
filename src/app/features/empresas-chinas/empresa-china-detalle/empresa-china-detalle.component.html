@@ -77,6 +77,9 @@
               <span class="gd-req-desc">{{ item.req.descripcion }}</span>
             </div>
             <div class="d-flex align-items-center gap-2">
+              @if (item.req.personalizado && item.req.tipoCampo !== 'archivo' && item.valor?.valorTexto) {
+                <span class="small fw-medium">{{ valorDe(item) }}</span>
+              }
               @if (item.valor?.documento?.createdAt) {
                 <span class="text-muted small">{{ item.valor?.documento?.createdAt | date:'dd/MM/yyyy' }}</span>
               }

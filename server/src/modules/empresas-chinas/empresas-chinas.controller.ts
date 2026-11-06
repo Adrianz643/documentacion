@@ -6,6 +6,7 @@ import * as service from './empresas-chinas.service';
 import {
   parseCodigoParam,
   parseCrearEmpresaChinaInput,
+  parseCrearRequisitoPersonalizadoInput,
   parseEtapaNumParam,
   parseIdParam,
 } from './empresas-chinas.validation';
@@ -19,6 +20,21 @@ export const uploadMiddleware = multer({
 export const listarRequisitosHandler = asyncHandler(async (req: Request, res: Response) => {
   const etapaNum = parseEtapaNumParam(req.params.etapaNum);
   const requisitos = await service.listarRequisitosPorEtapa(etapaNum);
+  res.status(200).json(requisitos);
+});
+
+export const crearRequisitoPersonalizadoHandler = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.auth) throw new HttpError(401, 'No autenticado');
+  const etapaNum = parseEtapaNumParam(req.params.etapaNum);
+  const input = parseCrearRequisitoPersonalizadoInput(req.body);
+  const requisitos = await service.crearRequisitoPersonalizado(etapaNum, input, req.auth.sub);
+  res.status(201).json(requisitos);
+});
+
+export const eliminarRequisitoPersonalizadoHandler = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.auth) throw new HttpError(401, 'No autenticado');
+  const id = parseIdParam(req.params.id);
+  const requisitos = await service.eliminarRequisitoPersonalizado(id, req.auth.sub);
   res.status(200).json(requisitos);
 });
 

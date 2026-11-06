@@ -4,6 +4,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EmpresasChinasService, EmpresaChinaDetalle } from '../../../core/services/empresas-chinas.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { EmpresaChinaRequisito, EtapaRequisito } from '../../../core/models';
+import { valorCelda } from '../../../shared/utils/valor-requisito';
 
 @Component({
   selector: 'app-empresa-china-detalle',
@@ -13,6 +15,7 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrl: './empresa-china-detalle.component.scss'
 })
 export class EmpresaChinaDetalleComponent implements OnInit {
+  valorDe = (item: { req: EtapaRequisito; valor?: EmpresaChinaRequisito }) => valorCelda(item.req, item.valor);
   private route    = inject(ActivatedRoute);
   private router   = inject(Router);
   private location = inject(Location);

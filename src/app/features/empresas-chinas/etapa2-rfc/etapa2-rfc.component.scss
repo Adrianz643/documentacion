@@ -24,3 +24,5 @@ $azul:#0B4DB8;$borde:#DDE5EF;$txt:#172B4D;$fondo:#F7F9FC;$enc:#DCEBEC;$enc-txt:#
   display: inline-flex; align-items: center; justify-content: center; font-size: 12px;
   &:hover { background: $fondo; }
 }
+.gd-valor-personalizado{font-size:12px;font-weight:500;color:#172B4D;text-decoration:none;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;}
+button.gd-valor-personalizado:hover{text-decoration:underline;}

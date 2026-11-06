@@ -45,7 +45,7 @@ export interface Declaracion { id: number; propietarioId: number; propietario?: 
 export interface Factura { id: number; propietarioId: number; propietario?: Propietario; fecha: string; fechaVencimiento?: string | null; comprobanteId?: number; comprobanteDoc?: Documento; }
 export interface FacturaHl { id: number; cliente: string; fecha: string; fechaVencimiento?: string | null; comprobanteId?: number; comprobanteDoc?: Documento; }
 export interface EmpresaChina { id: number; codigo: string; nombre: string; representanteLegal?: string; correoElectronico?: string; telefono?: string; fechaRegistro?: string; etapaActual: number; estado: EstadoEmpresaChina; progresoPct: number; createdAt: string; updatedAt: string; }
-export interface EtapaRequisito { id: number; etapaNum: number; codigo: string; descripcion: string; tipoCampo: TipoCampo; }
+export interface EtapaRequisito { id: number; etapaNum: number; codigo: string; descripcion: string; tipoCampo: TipoCampo; personalizado?: boolean; }
 export interface EmpresaChinaRequisito { id: number; empresaChinaId: number; requisitoId: number; requisito?: EtapaRequisito; documentoId?: number; documento?: Documento; valorTexto?: string; completado: boolean; }
 export interface EmpresaChinaEtapaChecklist { id: number; empresaChinaId: number; etapaNum: number; completada: boolean; completadaEn?: string; }
 export interface KpiEmpresasChinas { total: number; enProceso: number; pendientes: number; finalizadas: number; progresoPorEtapa: { etapa: number; nombre: string; empresas: number; completadas: number; enProceso: number; pendientes: number; }[]; }
@@ -54,4 +54,4 @@ export interface NotificacionLog { id: number; tipo: string; titulo: string; cue
 export interface NotificacionesListado { data: NotificacionLog[]; noLeidas: number; }
 export interface PaginatedResponse<T> { data: T[]; total: number; page: number; perPage: number; }
 export interface ApiError { message: string; code?: string; field?: string; }
-export interface TableColumn { key: string; label: string; visible: boolean; sortable?: boolean; type?: 'text' | 'date' | 'currency' | 'file' | 'badge'; }
+export interface TableColumn { key: string; label: string; visible: boolean; sortable?: boolean; type?: 'text' | 'date' | 'currency' | 'file' | 'badge'; custom?: boolean; requisitoId?: number; }

@@ -1,5 +1,7 @@
 import { HttpError } from '../../utils/httpError';
-import type { CrearEmpresaChinaInput } from './empresas-chinas.types';
+import type { CrearEmpresaChinaInput, CrearRequisitoPersonalizadoInput, TipoCampoRequisito } from './empresas-chinas.types';
+
+const TIPOS_CAMPO_VALIDOS: TipoCampoRequisito[] = ['archivo', 'texto', 'numero', 'boolean', 'fecha'];
 
 type Body = Record<string, unknown>;
 
@@ -63,4 +65,17 @@ export function parseCrearEmpresaChinaInput(body: unknown): CrearEmpresaChinaInp
     telefono: optionalString(b, 'telefono', 30, 'El telefono'),
     fechaRegistro: (fechaRegistro as string) || null,
   };
+}
+
+export function parseCrearRequisitoPersonalizadoInput(body: unknown): CrearRequisitoPersonalizadoInput {
+  const b = (body ?? {}) as Body;
+  const descripcion = typeof b.descripcion === 'string' ? b.descripcion.trim() : '';
+  if (!descripcion || descripcion.length > 200) {
+    throw new HttpError(400, 'El nombre de la columna es requerido y no puede exceder 200 caracteres');
+  }
+  const tipoCampo = b.tipoCampo;
+  if (typeof tipoCampo !== 'string' || !TIPOS_CAMPO_VALIDOS.includes(tipoCampo as TipoCampoRequisito)) {
+    throw new HttpError(400, 'El tipo de columna es invalido');
+  }
+  return { descripcion, tipoCampo: tipoCampo as TipoCampoRequisito };
 }

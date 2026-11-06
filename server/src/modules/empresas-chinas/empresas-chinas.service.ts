@@ -12,6 +12,7 @@ import * as repository from './empresas-chinas.repository';
 import type {
   ArchivoSubidoInput,
   CrearEmpresaChinaInput,
+  CrearRequisitoPersonalizadoInput,
   DocumentoDTO,
   EmpresaChinaDTO,
   EmpresaChinaDetalleDTO,
@@ -50,7 +51,14 @@ function mapEmpresa(row: EmpresaChinaRow): EmpresaChinaDTO {
 }
 
 function mapRequisito(row: EtapaRequisitoRow): EtapaRequisitoDTO {
-  return { id: row.id, etapaNum: row.etapa_num, codigo: row.codigo, descripcion: row.descripcion, tipoCampo: row.tipo_campo };
+  return {
+    id: row.id,
+    etapaNum: row.etapa_num,
+    codigo: row.codigo,
+    descripcion: row.descripcion,
+    tipoCampo: row.tipo_campo,
+    personalizado: row.personalizado === 1,
+  };
 }
 
 function mapDocumento(row: EmpresaChinaRequisitoValorRow): DocumentoDTO | null {
@@ -86,6 +94,55 @@ function mapValor(row: EmpresaChinaRequisitoValorRow): EmpresaChinaRequisitoDTO 
 export async function listarRequisitosPorEtapa(etapaNum: number): Promise<EtapaRequisitoDTO[]> {
   const rows = await repository.findRequisitosPorEtapa(etapaNum);
   return rows.map(mapRequisito);
+}
+
+function validarValorPersonalizado(tipoCampo: string, valor: string): void {
+  if (tipoCampo === 'numero' && (!valor || !Number.isFinite(Number(valor)))) {
+    throw new HttpError(400, 'El valor debe ser un numero');
+  }
+  if (tipoCampo === 'fecha' && (!/^\d{4}-\d{2}-\d{2}$/.test(valor) || Number.isNaN(Date.parse(valor)))) {
+    throw new HttpError(400, 'El valor debe ser una fecha valida');
+  }
+  if (tipoCampo === 'boolean' && valor !== 'Sí' && valor !== 'No') {
+    throw new HttpError(400, 'El valor debe ser Sí o No');
+  }
+}
+
+export async function crearRequisitoPersonalizado(
+  etapaNum: number,
+  input: CrearRequisitoPersonalizadoInput,
+  actorId: number,
+): Promise<EtapaRequisitoDTO[]> {
+  const id = await repository.crearRequisitoPersonalizado(etapaNum, input, actorId);
+  void actividadService.registrar({
+    usuarioId: actorId,
+    modulo: 'EMPRESAS_CHINAS',
+    accion: 'crear',
+    descripcion: `Agregó la columna "${input.descripcion}" en la Etapa ${etapaNum}`,
+    referenciaTabla: 'etapa_requisitos',
+    referenciaId: id,
+  });
+  return listarRequisitosPorEtapa(etapaNum);
+}
+
+export async function eliminarRequisitoPersonalizado(id: number, actorId: number): Promise<EtapaRequisitoDTO[]> {
+  const requisito = await repository.findRequisitoPorId(id);
+  if (!requisito) {
+    throw new HttpError(404, 'Columna no encontrada');
+  }
+  if (requisito.personalizado !== 1) {
+    throw new HttpError(400, 'Solo se pueden eliminar columnas personalizadas');
+  }
+  await repository.eliminarRequisitoPersonalizado(id, actorId);
+  void actividadService.registrar({
+    usuarioId: actorId,
+    modulo: 'EMPRESAS_CHINAS',
+    accion: 'eliminar',
+    descripcion: `Eliminó la columna "${requisito.descripcion}" de la Etapa ${requisito.etapa_num}`,
+    referenciaTabla: 'etapa_requisitos',
+    referenciaId: id,
+  });
+  return listarRequisitosPorEtapa(requisito.etapa_num);
 }
 
 export async function listarEtapa(etapaNum: number): Promise<FilaEtapaDTO[]> {
@@ -268,6 +325,9 @@ export async function subirRequisito(
   } else {
     if (!valorTexto || !valorTexto.trim()) {
       throw new HttpError(400, 'El valor es requerido para este requisito');
+    }
+    if (requisito.personalizado === 1) {
+      validarValorPersonalizado(requisito.tipo_campo, valorTexto.trim());
     }
     await repository.upsertValorTexto(empresaChinaId, requisito.id, valorTexto.trim(), actorId);
   }

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { EmpresaChina, EmpresaChinaRequisito, EtapaRequisito, KpiEmpresasChinas } from '../models';
+import { EmpresaChina, EmpresaChinaRequisito, EtapaRequisito, KpiEmpresasChinas, TipoCampo } from '../models';
 import { environment } from '../../../environments/environment';
 
 export interface FilaEtapaChina extends EmpresaChina {
@@ -34,6 +34,14 @@ export class EmpresasChinasService {
 
   listarRequisitos(etapaNum: number): Observable<EtapaRequisito[]> {
     return this.http.get<EtapaRequisito[]>(`${this.base}/etapa/${etapaNum}/requisitos`);
+  }
+
+  crearRequisito(etapaNum: number, descripcion: string, tipoCampo: TipoCampo): Observable<EtapaRequisito[]> {
+    return this.http.post<EtapaRequisito[]>(`${this.base}/etapa/${etapaNum}/requisitos`, { descripcion, tipoCampo });
+  }
+
+  eliminarRequisitoPersonalizado(id: number): Observable<EtapaRequisito[]> {
+    return this.http.delete<EtapaRequisito[]>(`${this.base}/requisitos/${id}`);
   }
 
   listarEtapa(etapaNum: number): Observable<FilaEtapaChina[]> {

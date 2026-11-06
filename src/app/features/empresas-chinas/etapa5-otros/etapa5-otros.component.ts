@@ -6,7 +6,8 @@ import { NgbModal, NgbPaginationModule, NgbTooltipModule } from '@ng-bootstrap/n
 import JSZip from 'jszip';
 import { DocumentosZip, descargarZip } from '../../../shared/utils/descargas';
 import { EmpresaChinaRequisito, EtapaRequisito, TableColumn } from '../../../core/models/index';
-import { ColumnManagerComponent } from '../../../shared/components/column-manager/column-manager.component';
+import { GestorColumnasEtapaComponent } from '../../../shared/components/gestor-columnas-etapa/gestor-columnas-etapa.component';
+import { valorCelda } from '../../../shared/utils/valor-requisito';
 import { OcultoParaVisorDirective } from '../../../shared/directives/oculto-para-visor.directive';
 import { AuthService } from '../../../core/services/auth.service';
 import { EmpresasChinasService, FilaEtapaChina } from '../../../core/services/empresas-chinas.service';
@@ -16,7 +17,7 @@ const ETAPA_NUM = 5;
 @Component({
   selector: 'app-etapa5-otros',
   standalone: true,
-  imports: [CommonModule, DatePipe, RouterLink, ReactiveFormsModule, NgbPaginationModule, NgbTooltipModule, ColumnManagerComponent, OcultoParaVisorDirective],
+  imports: [CommonModule, DatePipe, RouterLink, ReactiveFormsModule, NgbPaginationModule, NgbTooltipModule, GestorColumnasEtapaComponent, OcultoParaVisorDirective],
   templateUrl: './etapa5-otros.component.html',
   styleUrl: './etapa5-otros.component.scss'
 })
@@ -36,6 +37,7 @@ export class Etapa5OtrosComponent implements OnInit {
 
   requisitos = signal<EtapaRequisito[]>([]);
   columnas   = signal<TableColumn[]>([]);
+  valorCelda = valorCelda;
 
   requisitosVisibles = computed(() => {
     const visibles = new Set(this.columnas().filter(c => c.visible).map(c => c.key));
@@ -66,12 +68,15 @@ export class Etapa5OtrosComponent implements OnInit {
     this.cargar();
   }
 
-  private cargarRequisitos(): void {
+  cargarRequisitos(): void {
     this.service.listarRequisitos(ETAPA_NUM).subscribe({
       next: (requisitos) => {
         this.requisitos.set(requisitos);
+        const previas = new Map(this.columnas().map(c => [c.key, c.visible] as const));
         this.columnas.set(requisitos.map(r => ({
-          key: r.codigo, label: `${r.codigo} — ${r.descripcion}`, visible: true, sortable: false,
+          custom: r.personalizado,
+          requisitoId: r.id,
+          key: r.codigo, label: `${r.codigo} — ${r.descripcion}`, visible: previas.get(r.codigo) ?? true, sortable: false,
           type: r.tipoCampo === 'archivo' ? 'file' : 'text',
         })));
       },
@@ -127,10 +132,10 @@ export class Etapa5OtrosComponent implements OnInit {
     return empresa.requisitos[codigo];
   }
 
-  openUpload(modalRef: any, empresaId: number, requisito: EtapaRequisito) {
+  openUpload(modalRef: any, empresaId: number, requisito: EtapaRequisito, valorActual?: string | null) {
     this.empresaSeleccionadaId.set(empresaId);
     this.requisitoSeleccionado.set(requisito);
-    this.uploadForm.reset({ archivo: null, valorTexto: '' });
+    this.uploadForm.reset({ archivo: null, valorTexto: valorActual ?? '' });
     this.modal.open(modalRef, { centered: true });
   }
 

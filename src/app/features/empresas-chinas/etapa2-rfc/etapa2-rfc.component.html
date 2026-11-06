@@ -16,7 +16,7 @@
       <input type="search" class="form-control" placeholder="Buscar empresa…" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="Buscar empresa"/>
       <span class="input-group-text" aria-hidden="true"><i class="fi fi-rr-search"></i></span>
     </div>
-    <app-column-manager [columns]="columnas()" (toggled)="toggleColumna($event)"/>
+    <app-gestor-columnas-etapa [etapaNum]="2" [columns]="columnas()" (toggled)="toggleColumna($event)" (cambio)="cargarRequisitos()"/>
     <button *appOcultoParaVisor class="btn btn-sm btn-primary gd-btn-primary" (click)="agregarEmpresa(modalNuevaEmpresa)">
       <i class="fi fi-rr-plus"></i> Agregar empresa
     </button>
@@ -48,9 +48,13 @@
                 @let val = getReqValue(emp, req.codigo);
                 @if (val?.completado) {
                   <div class="gd-file-cell">
-                    <span class="gd-file-name" [ngbTooltip]="val?.documento?.nombreArchivo">
+                    @if (req.personalizado && req.tipoCampo !== 'archivo') {
+                      @if (auth.esVisor()) { <span class="gd-valor-personalizado">{{ valorCelda(req, val) }}</span> } @else { <button type="button" class="btn btn-link btn-sm p-0 gd-valor-personalizado" (click)="openUpload(modalSubir, emp.id, req, val?.valorTexto)" ngbTooltip="Editar valor">{{ valorCelda(req, val) }}</button> }
+                    } @else {
+                      <span class="gd-file-name" [ngbTooltip]="val?.documento?.nombreArchivo">
                       <i class="fi fi-rr-document"></i> {{ val?.documento?.nombreArchivo | slice:0:15 }}
                     </span>
+                    }
                     @if (val?.documento) {
                       <span class="gd-file-date">{{ val?.documento?.createdAt | date:'dd/MM/yyyy' }}</span>
                     }
@@ -101,7 +105,12 @@
     <div class="form-text">PDF, Word, Excel, Imágenes — Máx. 20 MB</div><div class="invalid-feedback">Selecciona un archivo.</div></div>
     } @else {
     <div class="mb-3"><label class="form-label" for="valorTexto2">Valor <span class="text-danger">*</span></label>
-    <input id="valorTexto2" type="text" class="form-control" formControlName="valorTexto" [class.is-invalid]="uploadForm.get('valorTexto')?.invalid&&uploadForm.get('valorTexto')?.touched"/>
+    @switch (requisitoSeleccionado()?.tipoCampo) {
+      @case ('boolean') { <select id="valorTexto2" class="form-select" formControlName="valorTexto" [class.is-invalid]="uploadForm.get('valorTexto')?.invalid&&uploadForm.get('valorTexto')?.touched"><option value="">Seleccionar…</option><option value="Sí">Sí</option><option value="No">No</option></select> }
+      @case ('numero') { <input id="valorTexto2" type="number" step="any" class="form-control" formControlName="valorTexto" [class.is-invalid]="uploadForm.get('valorTexto')?.invalid&&uploadForm.get('valorTexto')?.touched"/> }
+      @case ('fecha') { <input id="valorTexto2" type="date" class="form-control" formControlName="valorTexto" [class.is-invalid]="uploadForm.get('valorTexto')?.invalid&&uploadForm.get('valorTexto')?.touched"/> }
+      @default { <input id="valorTexto2" type="text" class="form-control" formControlName="valorTexto" [class.is-invalid]="uploadForm.get('valorTexto')?.invalid&&uploadForm.get('valorTexto')?.touched"/> }
+    }
     <div class="invalid-feedback">Captura un valor para continuar.</div></div>
     }
   </form></div>

@@ -1,5 +1,5 @@
 export type EstadoEmpresaChina = 'en_proceso' | 'pendiente' | 'finalizada' | 'archivada';
-export type TipoCampoRequisito = 'archivo' | 'texto' | 'numero' | 'boolean';
+export type TipoCampoRequisito = 'archivo' | 'texto' | 'numero' | 'boolean' | 'fecha';
 
 export interface DocumentoDTO {
   id: number;
@@ -18,6 +18,12 @@ export interface EtapaRequisitoDTO {
   id: number;
   etapaNum: number;
   codigo: string;
+  descripcion: string;
+  tipoCampo: TipoCampoRequisito;
+  personalizado: boolean;
+}
+
+export interface CrearRequisitoPersonalizadoInput {
   descripcion: string;
   tipoCampo: TipoCampoRequisito;
 }

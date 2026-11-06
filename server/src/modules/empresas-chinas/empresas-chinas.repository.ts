@@ -6,7 +6,7 @@ import type {
   EmpresaChinaRow,
   EtapaRequisitoRow,
 } from '../../types/db.types';
-import type { CrearEmpresaChinaInput } from './empresas-chinas.types';
+import type { CrearEmpresaChinaInput, CrearRequisitoPersonalizadoInput } from './empresas-chinas.types';
 
 const TIPO_DOCUMENTO_CLAVE = 'REQUISITO_EMPRESA_CHINA';
 
@@ -46,14 +46,14 @@ const VALOR_JOIN = `
     d.subido_por          AS doc_subido_por,
     d.created_at          AS doc_creado
   FROM empresa_china_requisitos ecr
-  INNER JOIN etapa_requisitos er ON er.id = ecr.requisito_id
+  INNER JOIN etapa_requisitos er ON er.id = ecr.requisito_id AND er.deleted_at IS NULL
   LEFT JOIN documentos d ON d.id = ecr.documento_id
   WHERE ecr.deleted_at IS NULL
 `;
 
 export async function findRequisitosPorEtapa(etapaNum: number): Promise<EtapaRequisitoRow[]> {
   const [rows] = await pool.execute<EtapaRequisitoRow[]>(
-    `SELECT id, etapa_num, codigo, descripcion, tipo_campo FROM etapa_requisitos WHERE etapa_num = ? ORDER BY id`,
+    `SELECT id, etapa_num, codigo, descripcion, tipo_campo, personalizado FROM etapa_requisitos WHERE etapa_num = ? AND deleted_at IS NULL ORDER BY id`,
     [etapaNum],
   );
   return rows;
@@ -61,17 +61,52 @@ export async function findRequisitosPorEtapa(etapaNum: number): Promise<EtapaReq
 
 export async function findTodosRequisitos(): Promise<EtapaRequisitoRow[]> {
   const [rows] = await pool.execute<EtapaRequisitoRow[]>(
-    `SELECT id, etapa_num, codigo, descripcion, tipo_campo FROM etapa_requisitos ORDER BY etapa_num, id`,
+    `SELECT id, etapa_num, codigo, descripcion, tipo_campo, personalizado FROM etapa_requisitos WHERE deleted_at IS NULL ORDER BY etapa_num, id`,
   );
   return rows;
 }
 
 export async function findRequisitoPorCodigo(codigo: string): Promise<EtapaRequisitoRow | null> {
   const [rows] = await pool.execute<EtapaRequisitoRow[]>(
-    `SELECT id, etapa_num, codigo, descripcion, tipo_campo FROM etapa_requisitos WHERE codigo = ? LIMIT 1`,
+    `SELECT id, etapa_num, codigo, descripcion, tipo_campo, personalizado FROM etapa_requisitos WHERE codigo = ? AND deleted_at IS NULL LIMIT 1`,
     [codigo],
   );
   return rows[0] ?? null;
+}
+
+export async function findRequisitoPorId(id: number): Promise<EtapaRequisitoRow | null> {
+  const [rows] = await pool.execute<EtapaRequisitoRow[]>(
+    `SELECT id, etapa_num, codigo, descripcion, tipo_campo, personalizado FROM etapa_requisitos WHERE id = ? AND deleted_at IS NULL LIMIT 1`,
+    [id],
+  );
+  return rows[0] ?? null;
+}
+
+export async function crearRequisitoPersonalizado(
+  etapaNum: number,
+  input: CrearRequisitoPersonalizadoInput,
+  actorId: number,
+): Promise<number> {
+  const [consecutivoRows] = await pool.execute<RowDataPacket[]>(
+    `SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(codigo, '.', -1) AS UNSIGNED)), 0) + 1 AS siguiente
+     FROM etapa_requisitos WHERE etapa_num = ?`,
+    [etapaNum],
+  );
+  const codigo = `${etapaNum}.${Number(consecutivoRows[0]?.siguiente ?? 1)}`;
+
+  const [result] = await pool.execute<ResultSetHeader>(
+    `INSERT INTO etapa_requisitos (etapa_num, codigo, descripcion, tipo_campo, personalizado, creado_por, modificado_por)
+     VALUES (?, ?, ?, ?, 1, ?, ?)`,
+    [etapaNum, codigo, input.descripcion, input.tipoCampo, actorId, actorId],
+  );
+  return result.insertId;
+}
+
+export async function eliminarRequisitoPersonalizado(id: number, actorId: number): Promise<void> {
+  await pool.execute<ResultSetHeader>(
+    `UPDATE etapa_requisitos SET deleted_at = NOW(), modificado_por = ? WHERE id = ? AND personalizado = 1`,
+    [actorId, id],
+  );
 }
 
 export async function findEmpresasActivas(): Promise<EmpresaChinaRow[]> {
@@ -336,10 +371,11 @@ export async function eliminarValor(
 async function contarRequisitosEtapa(empresaChinaId: number, etapaNum: number): Promise<{ total: number; completados: number }> {
   const [rows] = await pool.execute<ProgresoRow[]>(
     `SELECT
-       (SELECT COUNT(*) FROM etapa_requisitos WHERE etapa_num = ?) AS total,
+       (SELECT COUNT(*) FROM etapa_requisitos WHERE etapa_num = ? AND personalizado = 0 AND deleted_at IS NULL) AS total,
        (SELECT COUNT(*) FROM empresa_china_requisitos ecr
           INNER JOIN etapa_requisitos er ON er.id = ecr.requisito_id
-          WHERE er.etapa_num = ? AND ecr.empresa_china_id = ? AND ecr.completado = 1 AND ecr.deleted_at IS NULL) AS completados`,
+          WHERE er.etapa_num = ? AND er.personalizado = 0 AND er.deleted_at IS NULL
+            AND ecr.empresa_china_id = ? AND ecr.completado = 1 AND ecr.deleted_at IS NULL) AS completados`,
     [etapaNum, etapaNum, empresaChinaId],
   );
   return rows[0] ?? { total: 0, completados: 0 };

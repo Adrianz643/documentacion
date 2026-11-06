@@ -232,7 +232,8 @@ export interface EtapaRequisitoRow extends RowDataPacket {
   etapa_num: number;
   codigo: string;
   descripcion: string;
-  tipo_campo: 'archivo' | 'texto' | 'numero' | 'boolean';
+  tipo_campo: 'archivo' | 'texto' | 'numero' | 'boolean' | 'fecha';
+  personalizado: number;
 }
 
 export interface EmpresaChinaRequisitoValorRow extends RowDataPacket {
