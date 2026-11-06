@@ -24,7 +24,6 @@ const SECCION_CERO = 'declaraciones_cero';
 
 type TablaDeclaraciones = 'mensual' | 'cero';
 
-const DIA_INICIO_AVISO = 10;
 const DIA_LIMITE_DECLARACION = 17;
 
 const COLUMNAS_BASE: TableColumn[] = [
@@ -91,8 +90,6 @@ export class DeclaracionesComponent implements OnInit {
   avisoVencimiento = computed(() => {
     const hoy = new Date();
     const dia = hoy.getDate();
-    if (dia < DIA_INICIO_AVISO || dia > DIA_LIMITE_DECLARACION) return null;
-
     const mes = hoy.getMonth() + 1;
     const anio = hoy.getFullYear();
     const conDeclaracion = new Set(
@@ -103,7 +100,8 @@ export class DeclaracionesComponent implements OnInit {
 
     return {
       pendientes,
-      diasRestantes: DIA_LIMITE_DECLARACION - dia,
+      diasRestantes: Math.max(DIA_LIMITE_DECLARACION - dia, 0),
+      vencidas: dia > DIA_LIMITE_DECLARACION,
       limite: DIA_LIMITE_DECLARACION,
       mes: hoy.toLocaleDateString('es-MX', { month: 'long' }),
     };
