@@ -17,6 +17,7 @@ export class AuthService {
   usuario    = this._usuario.asReadonly();
   isLoggedIn = computed(() => !!this._token());
   esVisor    = computed(() => this._usuario()?.rol?.nombre === 'Visor');
+  esSuperadmin = computed(() => this._usuario()?.rol?.nombre?.toLowerCase() === 'superadmin');
   esAdminOSuperadmin = computed(() => {
     const rol = this._usuario()?.rol?.nombre?.toLowerCase();
     return rol === 'admin' || rol === 'superadmin';

@@ -102,6 +102,13 @@ export async function crearRequisitoPersonalizado(
   return result.insertId;
 }
 
+export async function actualizarDescripcionRequisito(id: number, descripcion: string, actorId: number): Promise<void> {
+  await pool.execute<ResultSetHeader>(
+    `UPDATE etapa_requisitos SET descripcion = ?, modificado_por = ? WHERE id = ? AND deleted_at IS NULL`,
+    [descripcion, actorId, id],
+  );
+}
+
 export async function eliminarRequisitoPersonalizado(id: number, actorId: number): Promise<void> {
   await pool.execute<ResultSetHeader>(
     `UPDATE etapa_requisitos SET deleted_at = NOW(), modificado_por = ? WHERE id = ? AND personalizado = 1`,

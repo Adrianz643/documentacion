@@ -1,8 +1,9 @@
 import { Component, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgbDropdownModule, NgbModal, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { TableColumn, TipoCampo } from '../../../core/models';
+import { AuthService } from '../../../core/services/auth.service';
 import { EmpresasChinasService } from '../../../core/services/empresas-chinas.service';
 import { OcultoParaVisorDirective } from '../../directives/oculto-para-visor.directive';
 
@@ -23,6 +24,11 @@ import { OcultoParaVisorDirective } from '../../directives/oculto-para-visor.dir
             <input class="form-check-input" type="checkbox" [id]="'gce_' + etapaNum() + '_' + col.key"
                    [checked]="col.visible" (change)="toggled.emit(col.key)"/>
             <label class="form-check-label small flex-grow-1" [for]="'gce_' + etapaNum() + '_' + col.key">{{ col.label }}</label>
+            @if (auth.esSuperadmin() && col.requisitoId) {
+              <button type="button" class="btn btn-sm btn-icon p-0 ms-2"
+                      ngbTooltip="Editar nombre" [attr.aria-label]="'Editar nombre de ' + col.label"
+                      (click)="abrirRenombrar(col, modalRenombrar)">✎</button>
+            }
             @if (col.custom) {
               <button *appOcultoParaVisor type="button" class="btn btn-sm btn-icon btn-icon--danger p-0 ms-2"
                       ngbTooltip="Eliminar columna" [attr.aria-label]="'Eliminar columna ' + col.label"
@@ -70,6 +76,29 @@ import { OcultoParaVisorDirective } from '../../directives/oculto-para-visor.dir
       </div>
     </ng-template>
 
+    <ng-template #modalRenombrar let-modal>
+      <div class="modal-header">
+        <h3 class="modal-title fs-6">Editar nombre de columna · Etapa {{ etapaNum() }}</h3>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
+      </div>
+      <div class="modal-body">
+        @if (error()) {
+          <div class="alert alert-danger py-2 small" role="alert">{{ error() }}</div>
+        }
+        <label class="form-label" for="gceRenombrar">Nombre de la columna <span class="text-danger">*</span></label>
+        <input id="gceRenombrar" type="text" class="form-control" [formControl]="nombreEditado" maxlength="200"
+               [class.is-invalid]="nombreEditado.invalid && nombreEditado.touched"
+               (keydown.enter)="renombrar(modal)"/>
+        <div class="invalid-feedback">El nombre es obligatorio.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cancelar</button>
+        <button type="button" class="btn btn-primary btn-sm gd-btn-primary" [disabled]="guardando()" (click)="renombrar(modal)">
+          {{ guardando() ? 'Guardando…' : 'Guardar' }}
+        </button>
+      </div>
+    </ng-template>
+
     <ng-template #modalEliminar let-modal>
       <div class="modal-header">
         <h3 class="modal-title fs-6">Eliminar columna</h3>
@@ -92,6 +121,7 @@ export class GestorColumnasEtapaComponent {
   private modalService = inject(NgbModal);
   private fb = inject(FormBuilder);
   private service = inject(EmpresasChinasService);
+  protected auth = inject(AuthService);
 
   etapaNum = input.required<number>();
   columns = input<TableColumn[]>([]);
@@ -101,6 +131,8 @@ export class GestorColumnasEtapaComponent {
   guardando = signal(false);
   error = signal<string | null>(null);
   columnaAEliminar = signal<TableColumn | null>(null);
+  columnaARenombrar = signal<TableColumn | null>(null);
+  nombreEditado = new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] });
 
   form = this.fb.group({
     descripcion: ['', [Validators.required, Validators.maxLength(200)]],
@@ -121,6 +153,25 @@ export class GestorColumnasEtapaComponent {
     this.service.crearRequisito(this.etapaNum(), v.descripcion!.trim(), v.tipoCampo as TipoCampo).subscribe({
       next: () => { this.guardando.set(false); modal.close(); this.cambio.emit(); },
       error: () => { this.guardando.set(false); this.error.set('No fue posible agregar la columna.'); },
+    });
+  }
+
+  abrirRenombrar(col: TableColumn, ref: any) {
+    this.error.set(null);
+    this.columnaARenombrar.set(col);
+    this.nombreEditado.reset(col.label);
+    this.modalService.open(ref, { centered: true, size: 'sm' });
+  }
+
+  renombrar(modal: any) {
+    const id = this.columnaARenombrar()?.requisitoId;
+    const nombre = this.nombreEditado.value.trim();
+    if (!id || !nombre) { this.nombreEditado.markAsTouched(); return; }
+    this.guardando.set(true);
+    this.error.set(null);
+    this.service.renombrarRequisito(id, nombre).subscribe({
+      next: () => { this.guardando.set(false); this.columnaARenombrar.set(null); modal.close(); this.cambio.emit(); },
+      error: () => { this.guardando.set(false); this.error.set('No fue posible renombrar la columna.'); },
     });
   }
 

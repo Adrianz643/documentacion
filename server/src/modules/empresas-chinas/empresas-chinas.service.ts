@@ -125,6 +125,30 @@ export async function crearRequisitoPersonalizado(
   return listarRequisitosPorEtapa(etapaNum);
 }
 
+export async function renombrarRequisito(
+  id: number,
+  descripcion: string,
+  actor: { sub: number; rol: string },
+): Promise<EtapaRequisitoDTO[]> {
+  if (actor.rol.toLowerCase() !== 'superadmin') {
+    throw new HttpError(403, 'No tienes permiso para renombrar columnas');
+  }
+  const requisito = await repository.findRequisitoPorId(id);
+  if (!requisito) {
+    throw new HttpError(404, 'Columna no encontrada');
+  }
+  await repository.actualizarDescripcionRequisito(id, descripcion, actor.sub);
+  void actividadService.registrar({
+    usuarioId: actor.sub,
+    modulo: 'EMPRESAS_CHINAS',
+    accion: 'editar',
+    descripcion: `Renombró la columna "${requisito.descripcion}" a "${descripcion}" en la Etapa ${requisito.etapa_num}`,
+    referenciaTabla: 'etapa_requisitos',
+    referenciaId: id,
+  });
+  return listarRequisitosPorEtapa(requisito.etapa_num);
+}
+
 export async function eliminarRequisitoPersonalizado(id: number, actorId: number): Promise<EtapaRequisitoDTO[]> {
   const requisito = await repository.findRequisitoPorId(id);
   if (!requisito) {

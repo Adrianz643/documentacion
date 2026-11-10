@@ -67,12 +67,21 @@ export function parseCrearEmpresaChinaInput(body: unknown): CrearEmpresaChinaInp
   };
 }
 
-export function parseCrearRequisitoPersonalizadoInput(body: unknown): CrearRequisitoPersonalizadoInput {
-  const b = (body ?? {}) as Body;
+function parseNombreColumna(b: Body): string {
   const descripcion = typeof b.descripcion === 'string' ? b.descripcion.trim() : '';
   if (!descripcion || descripcion.length > 200) {
     throw new HttpError(400, 'El nombre de la columna es requerido y no puede exceder 200 caracteres');
   }
+  return descripcion;
+}
+
+export function parseRenombrarRequisitoInput(body: unknown): string {
+  return parseNombreColumna((body ?? {}) as Body);
+}
+
+export function parseCrearRequisitoPersonalizadoInput(body: unknown): CrearRequisitoPersonalizadoInput {
+  const b = (body ?? {}) as Body;
+  const descripcion = parseNombreColumna(b);
   const tipoCampo = b.tipoCampo;
   if (typeof tipoCampo !== 'string' || !TIPOS_CAMPO_VALIDOS.includes(tipoCampo as TipoCampoRequisito)) {
     throw new HttpError(400, 'El tipo de columna es invalido');
