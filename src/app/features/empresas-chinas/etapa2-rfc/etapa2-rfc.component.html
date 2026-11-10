@@ -92,7 +92,7 @@
     </div>
   </div>
 </div>
-<div class="gd-info-box d-flex gap-2 p-3 rounded mt-3"><span><i class="fi fi-rr-info"></i></span><p class="mb-0 small">En esta vista puedes subir, consultar y dar seguimiento a los documentos requeridos para la Etapa 2. Utiliza Check List para identificar si todos los requisitos fueron completados.</p></div>
+<div class="gd-info-box d-flex gap-2 p-3 rounded mt-3"><span><i class="fi fi-rr-info"></i></span><p class="mb-0 small">En esta vista puedes subir, consultar y dar seguimiento a los documentos requeridos para la Etapa 2. Utiliza Check List para identificar si todos los requisitos fueron completados. @if (auth.esSuperadmin()) { Como superadmin, puedes editar el nombre de las columnas desde el menú ⊞ Columnas, con el botón ✎ junto a cada una. }</p></div>
 
 <ng-template #modalSubir let-modal>
   <div class="modal-header"><h3 class="modal-title fs-6">{{ requisitoSeleccionado()?.tipoCampo === 'archivo' ? 'Subir documento' : 'Capturar valor' }}</h3><button type="button" class="btn-close" (click)="modal.dismiss()" aria-label="Cerrar"></button></div>
