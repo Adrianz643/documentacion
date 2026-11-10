@@ -47,21 +47,7 @@
           <div class="invalid-feedback">Selecciona un rol.</div>
         </div>
 
-        @if (rolRequiereSubrol() && rolEsVisor()) {
-          <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-3">
-            <label class="form-label" for="uSubrolVisor">Empresa <span class="text-danger">*</span></label>
-            <select id="uSubrolVisor" class="form-select" [class.is-invalid]="subrolesInvalido()"
-                    (change)="seleccionarSubrolVisor($any($event.target).value)">
-              <option value="" [selected]="subrolVisorSeleccionado() === ''">Seleccionar…</option>
-              @for (s of subrolesVisorDisponibles(); track s.id) {
-                <option [value]="s.clave" [selected]="subrolVisorSeleccionado() === s.clave">{{ s.nombre }}</option>
-              }
-            </select>
-            @if (subrolesInvalido()) {
-              <div class="invalid-feedback d-block">Selecciona una empresa (ARDUM o Empresas Chinas).</div>
-            }
-          </div>
-        } @else if (rolRequiereSubrol()) {
+        @if (rolRequiereSubrol()) {
           <div class="col-12 mb-3">
             <label class="form-label d-block">Subroles <span class="text-danger">*</span></label>
             <div class="d-flex flex-wrap gap-3">

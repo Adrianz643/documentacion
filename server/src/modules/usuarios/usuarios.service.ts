@@ -22,9 +22,7 @@ const BCRYPT_ROUNDS = 10;
 const PER_PAGE_MAXIMO = 100;
 const ROLES_RESTRINGIDOS = new Set(['admin', 'superadmin']);
 const ROL_SUPERADMIN = 'superadmin';
-const ROL_VISOR = 'visor';
 const ROLES_CON_SUBROL = new Set(['editor', 'visor']);
-const SUBROLES_VISOR_PERMITIDOS = new Set(['ARDUM', 'EMPRESAS_CHINAS']);
 
 async function verificarAsignacionRol(rolId: number, actorRol: string): Promise<void> {
   if (actorRol.toLowerCase() === ROL_SUPERADMIN) {
@@ -41,14 +39,6 @@ async function resolverSubrolIdsParaGuardar(rolId: number, subrolesClaves: strin
   const requiereSubrol = !!rolNombre && ROLES_CON_SUBROL.has(rolNombre.toLowerCase());
   if (!requiereSubrol) {
     return [];
-  }
-
-  if (rolNombre!.toLowerCase() === ROL_VISOR) {
-    const [unicaClave] = subrolesClaves;
-    if (subrolesClaves.length !== 1 || !unicaClave || !SUBROLES_VISOR_PERMITIDOS.has(unicaClave)) {
-      throw new HttpError(400, 'Selecciona una unica empresa (ARDUM o Empresas Chinas) para el rol visor');
-    }
-    return usuariosRepository.findSubrolIdsPorClaves(subrolesClaves);
   }
 
   if (subrolesClaves.length === 0) {

@@ -9,7 +9,6 @@ import { AuthService } from '../../../core/services/auth.service';
 
 const ROLES_SOLO_SUPERADMIN = new Set(['admin', 'superadmin']);
 const ROLES_CON_SUBROL = new Set(['editor', 'visor']);
-const SUBROLES_VISOR = new Set(['ARDUM', 'EMPRESAS_CHINAS']);
 
 const PASSWORD_MIN_LENGTH = 8;
 
@@ -52,19 +51,6 @@ export class UsuarioFormComponent implements OnInit {
     return !!rol && ROLES_CON_SUBROL.has(rol.nombre.toLowerCase());
   });
 
-  rolEsVisor = computed(() => {
-    const rol = this.catalogos()?.roles.find(r => r.id === this.rolIdSeleccionado());
-    return !!rol && rol.nombre.toLowerCase() === 'visor';
-  });
-
-  subrolesVisorDisponibles = computed(() =>
-    (this.catalogos()?.subroles ?? []).filter(s => SUBROLES_VISOR.has(s.clave)));
-
-  subrolVisorSeleccionado = computed(() => {
-    const [primero] = this.subrolesSeleccionados();
-    return primero ?? '';
-  });
-
   subrolesInvalido = computed(() =>
     this.rolRequiereSubrol() && this.subrolesTouched() && this.subrolesSeleccionados().size === 0);
 
@@ -75,11 +61,6 @@ export class UsuarioFormComponent implements OnInit {
       if (nuevo.has(clave)) nuevo.delete(clave); else nuevo.add(clave);
       return nuevo;
     });
-  }
-
-  seleccionarSubrolVisor(clave: string): void {
-    this.subrolesTouched.set(true);
-    this.subrolesSeleccionados.set(clave ? new Set([clave]) : new Set());
   }
 
   private usuarioId: number | null = null;
@@ -108,13 +89,6 @@ export class UsuarioFormComponent implements OnInit {
     this.cargarCatalogos();
     this.form.get('rolId')?.valueChanges.subscribe((rolId) => {
       this.rolIdSeleccionado.set(rolId);
-      const rol = this.catalogos()?.roles.find(r => r.id === rolId);
-      if (rol && rol.nombre.toLowerCase() === 'visor') {
-        this.subrolesSeleccionados.update(actuales => {
-          const valido = Array.from(actuales).find(clave => SUBROLES_VISOR.has(clave));
-          return valido ? new Set([valido]) : new Set();
-        });
-      }
     });
 
     const id = this.route.snapshot.paramMap.get('id');
@@ -149,9 +123,7 @@ export class UsuarioFormComponent implements OnInit {
 
     this.subrolesTouched.set(true);
     if (this.rolRequiereSubrol() && this.subrolesSeleccionados().size === 0) {
-      this.errorMessage.set(this.rolEsVisor()
-        ? 'Selecciona una empresa (ARDUM o Empresas Chinas) para este usuario visor.'
-        : 'Selecciona al menos un subrol (ARDUM, ARDUM HL o Empresas Chinas) para este rol.');
+      this.errorMessage.set('Selecciona al menos un subrol (ARDUM, ARDUM HL o Empresas Chinas) para este rol.');
       return;
     }
 
