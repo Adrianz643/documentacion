@@ -9,6 +9,7 @@ import JSZip from 'jszip';
 import { DocumentosZip, descargarZip } from '../../../shared/utils/descargas';
 import { EmpresaChina } from '../../../core/models';
 import { EmpresasChinasService } from '../../../core/services/empresas-chinas.service';
+import { valorCelda } from '../../../shared/utils/valor-requisito';
 import { agregarLogoReporte, dibujarGraficoPastelConLeyenda, SegmentoPastel } from '../../../core/utils/pdf-report.util';
 
 @Component({ selector:'app-empresas-list-all', standalone:true,
@@ -57,6 +58,10 @@ export class EmpresasListAllComponent implements OnInit {
     const d = new Date(iso);
     const pad = (n: number) => String(n).padStart(2, '0');
     return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  private formatFechaCorta(iso: string): string {
+    return this.formatFecha(iso).slice(0, 10);
   }
 
   async generarReporte() {
@@ -115,6 +120,8 @@ export class EmpresasListAllComponent implements OnInit {
     doc.setTextColor(120);
     doc.text(`Generado el ${new Date().toLocaleString('es-MX')}`, 14, 22);
 
+    const detalle = await firstValueFrom(this.service.obtenerDetalle(e.id));
+    let siguienteY = 30;
     autoTable(doc, {
       startY: 30,
       head: [['Campo', 'Valor']],
@@ -129,7 +136,28 @@ export class EmpresasListAllComponent implements OnInit {
       ],
       styles: { fontSize: 10 },
       headStyles: { fillColor: [11, 77, 184] },
+      didDrawPage: (datos) => { siguienteY = datos.cursor?.y ?? siguienteY; },
     });
+
+    for (const etapa of detalle.etapas) {
+      doc.setFontSize(12);
+      doc.setTextColor(40);
+      doc.text(`Etapa ${etapa.etapaNum} · Check List: ${etapa.checkList ? 'Completo' : 'Pendiente'}`, 14, siguienteY + 10);
+      autoTable(doc, {
+        startY: siguienteY + 13,
+        head: [['Código', 'Requisito', 'Valor / Documento', 'Fecha', 'Estado']],
+        body: etapa.requisitosEstado.map(({ req, valor }) => [
+          req.codigo,
+          req.descripcion,
+          valor?.documento ? valor.documento.nombreArchivo : valorCelda(req, valor),
+          valor?.documento ? this.formatFechaCorta(valor.documento.createdAt) : '—',
+          valor?.completado ? 'Completado' : 'Pendiente',
+        ]),
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [11, 77, 184] },
+        didDrawPage: (datos) => { siguienteY = datos.cursor?.y ?? siguienteY; },
+      });
+    }
 
     doc.save(`reporte-${this.slug(e.nombre)}.pdf`);
   }
