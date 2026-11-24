@@ -51,9 +51,7 @@
                     @if (req.personalizado && req.tipoCampo !== 'archivo') {
                       @if (auth.esVisor()) { <span class="gd-valor-personalizado">{{ valorCelda(req, val) }}</span> } @else { <button type="button" class="btn btn-link btn-sm p-0 gd-valor-personalizado" (click)="openUpload(modalSubir, emp.id, req, val?.valorTexto)" ngbTooltip="Editar valor">{{ valorCelda(req, val) }}</button> }
                     } @else {
-                      <span class="gd-file-name" [ngbTooltip]="val?.documento?.nombreArchivo">
-                      <i class="fi fi-rr-document"></i> {{ val?.documento?.nombreArchivo | slice:0:15 }}
-                    </span>
+                      @if (val?.documento; as doc) { <a class="gd-file-name" [href]="doc.rutaStorage" target="_blank" rel="noopener" [ngbTooltip]="doc.nombreArchivo + ' (abrir)'"><i class="fi fi-rr-document"></i> {{ doc.nombreArchivo | slice:0:15 }}</a> }
                     }
                     @if (val?.documento) {
                       <span class="gd-file-date">{{ val?.documento?.createdAt | date:'dd/MM/yyyy' }}</span>

@@ -80,6 +80,9 @@
               @if (item.req.personalizado && item.req.tipoCampo !== 'archivo' && item.valor?.valorTexto) {
                 <span class="small fw-medium">{{ valorDe(item) }}</span>
               }
+              @if (item.valor?.documento; as doc) {
+                <a class="small" [href]="doc.rutaStorage" target="_blank" rel="noopener" [attr.aria-label]="'Abrir ' + doc.nombreArchivo">Abrir documento</a>
+              }
               @if (item.valor?.documento?.createdAt) {
                 <span class="text-muted small">{{ item.valor?.documento?.createdAt | date:'dd/MM/yyyy' }}</span>
               }
