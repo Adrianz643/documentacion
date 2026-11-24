@@ -16,7 +16,7 @@
       <input type="search" class="form-control" placeholder="Buscar empresa…" [value]="search()" (input)="search.set($any($event.target).value)" aria-label="Buscar empresa"/>
       <span class="input-group-text" aria-hidden="true"><i class="fi fi-rr-search"></i></span>
     </div>
-    <app-gestor-columnas-etapa [etapaNum]="2" [columns]="columnas()" (toggled)="toggleColumna($event)" (cambio)="cargarRequisitos()"/>
+    <app-gestor-columnas-etapa [etapaNum]="2" [columns]="columnas()" (toggled)="toggleColumna($event)" (cambio)="cargarRequisitos(); cargar()"/>
     <button *appOcultoParaVisor class="btn btn-sm btn-primary gd-btn-primary" (click)="agregarEmpresa(modalNuevaEmpresa)">
       <i class="fi fi-rr-plus"></i> Agregar empresa
     </button>

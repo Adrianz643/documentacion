@@ -82,24 +82,60 @@ export async function findRequisitoPorId(id: number): Promise<EtapaRequisitoRow 
   return rows[0] ?? null;
 }
 
+async function renumerarRequisitosPersonalizados(connection: PoolConnection, etapaNum: number): Promise<void> {
+  await connection.execute(
+    `UPDATE etapa_requisitos SET codigo = CONCAT('del-', id)
+     WHERE etapa_num = ? AND deleted_at IS NOT NULL AND codigo NOT LIKE 'del-%'`,
+    [etapaNum],
+  );
+  const [baseRows] = await connection.execute<RowDataPacket[]>(
+    `SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(codigo, '.', -1) AS UNSIGNED)), 0) AS ultimo
+     FROM etapa_requisitos WHERE etapa_num = ? AND personalizado = 0 AND deleted_at IS NULL`,
+    [etapaNum],
+  );
+  const [personalizadas] = await connection.execute<RowDataPacket[]>(
+    `SELECT id FROM etapa_requisitos WHERE etapa_num = ? AND personalizado = 1 AND deleted_at IS NULL ORDER BY id`,
+    [etapaNum],
+  );
+  await connection.execute(
+    `UPDATE etapa_requisitos SET codigo = CONCAT('tmp-', id)
+     WHERE etapa_num = ? AND personalizado = 1 AND deleted_at IS NULL`,
+    [etapaNum],
+  );
+  const ultimoBase = Number(baseRows[0]?.ultimo ?? 0);
+  for (const [indice, fila] of personalizadas.entries()) {
+    await connection.execute(`UPDATE etapa_requisitos SET codigo = ? WHERE id = ?`, [`${etapaNum}.${ultimoBase + indice + 1}`, fila.id]);
+  }
+}
+
 export async function crearRequisitoPersonalizado(
   etapaNum: number,
   input: CrearRequisitoPersonalizadoInput,
   actorId: number,
 ): Promise<number> {
-  const [consecutivoRows] = await pool.execute<RowDataPacket[]>(
-    `SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(codigo, '.', -1) AS UNSIGNED)), 0) + 1 AS siguiente
-     FROM etapa_requisitos WHERE etapa_num = ?`,
-    [etapaNum],
-  );
-  const codigo = `${etapaNum}.${Number(consecutivoRows[0]?.siguiente ?? 1)}`;
-
-  const [result] = await pool.execute<ResultSetHeader>(
-    `INSERT INTO etapa_requisitos (etapa_num, codigo, descripcion, tipo_campo, personalizado, creado_por, modificado_por)
-     VALUES (?, ?, ?, ?, 1, ?, ?)`,
-    [etapaNum, codigo, input.descripcion, input.tipoCampo, actorId, actorId],
-  );
-  return result.insertId;
+  const connection: PoolConnection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    await renumerarRequisitosPersonalizados(connection, etapaNum);
+    const [consecutivoRows] = await connection.execute<RowDataPacket[]>(
+      `SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(codigo, '.', -1) AS UNSIGNED)), 0) + 1 AS siguiente
+       FROM etapa_requisitos WHERE etapa_num = ? AND deleted_at IS NULL`,
+      [etapaNum],
+    );
+    const codigo = `${etapaNum}.${Number(consecutivoRows[0]?.siguiente ?? 1)}`;
+    const [result] = await connection.execute<ResultSetHeader>(
+      `INSERT INTO etapa_requisitos (etapa_num, codigo, descripcion, tipo_campo, personalizado, creado_por, modificado_por)
+       VALUES (?, ?, ?, ?, 1, ?, ?)`,
+      [etapaNum, codigo, input.descripcion, input.tipoCampo, actorId, actorId],
+    );
+    await connection.commit();
+    return result.insertId;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
 export async function actualizarDescripcionRequisito(id: number, descripcion: string, actorId: number): Promise<void> {
@@ -109,11 +145,22 @@ export async function actualizarDescripcionRequisito(id: number, descripcion: st
   );
 }
 
-export async function eliminarRequisitoPersonalizado(id: number, actorId: number): Promise<void> {
-  await pool.execute<ResultSetHeader>(
-    `UPDATE etapa_requisitos SET deleted_at = NOW(), modificado_por = ? WHERE id = ? AND personalizado = 1`,
-    [actorId, id],
-  );
+export async function eliminarRequisitoPersonalizado(id: number, etapaNum: number, actorId: number): Promise<void> {
+  const connection: PoolConnection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    await connection.execute<ResultSetHeader>(
+      `UPDATE etapa_requisitos SET deleted_at = NOW(), modificado_por = ? WHERE id = ? AND personalizado = 1`,
+      [actorId, id],
+    );
+    await renumerarRequisitosPersonalizados(connection, etapaNum);
+    await connection.commit();
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
 export async function findEmpresasActivas(): Promise<EmpresaChinaRow[]> {

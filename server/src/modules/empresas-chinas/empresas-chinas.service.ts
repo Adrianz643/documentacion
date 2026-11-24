@@ -157,7 +157,7 @@ export async function eliminarRequisitoPersonalizado(id: number, actorId: number
   if (requisito.personalizado !== 1) {
     throw new HttpError(400, 'Solo se pueden eliminar columnas personalizadas');
   }
-  await repository.eliminarRequisitoPersonalizado(id, actorId);
+  await repository.eliminarRequisitoPersonalizado(id, requisito.etapa_num, actorId);
   void actividadService.registrar({
     usuarioId: actorId,
     modulo: 'EMPRESAS_CHINAS',
