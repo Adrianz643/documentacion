@@ -9,6 +9,7 @@ import { EmpresaChinaRequisito, EtapaRequisito, TableColumn } from '../../../cor
 import { GestorColumnasEtapaComponent } from '../../../shared/components/gestor-columnas-etapa/gestor-columnas-etapa.component';
 import { valorCelda } from '../../../shared/utils/valor-requisito';
 import { OcultoParaVisorDirective } from '../../../shared/directives/oculto-para-visor.directive';
+import { QuitarValorRequisitoComponent } from '../../../shared/components/quitar-valor-requisito/quitar-valor-requisito.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { EmpresasChinasService, FilaEtapaChina } from '../../../core/services/empresas-chinas.service';
 
@@ -17,7 +18,7 @@ const ETAPA_NUM = 5;
 @Component({
   selector: 'app-etapa5-otros',
   standalone: true,
-  imports: [CommonModule, DatePipe, RouterLink, ReactiveFormsModule, NgbPaginationModule, NgbTooltipModule, GestorColumnasEtapaComponent, OcultoParaVisorDirective],
+  imports: [QuitarValorRequisitoComponent, CommonModule, DatePipe, RouterLink, ReactiveFormsModule, NgbPaginationModule, NgbTooltipModule, GestorColumnasEtapaComponent, OcultoParaVisorDirective],
   templateUrl: './etapa5-otros.component.html',
   styleUrl: './etapa5-otros.component.scss'
 })
@@ -84,7 +85,7 @@ export class Etapa5OtrosComponent implements OnInit {
     });
   }
 
-  private cargar(): void {
+  cargar(): void {
     this.loading.set(true);
     this.errorMessage.set(null);
     this.service.listarEtapa(ETAPA_NUM).subscribe({

@@ -11,6 +11,7 @@ import { EmpresaChinaRequisito, EtapaRequisito, TableColumn } from '../../../cor
 import { GestorColumnasEtapaComponent } from '../../../shared/components/gestor-columnas-etapa/gestor-columnas-etapa.component';
 import { valorCelda } from '../../../shared/utils/valor-requisito';
 import { OcultoParaVisorDirective } from '../../../shared/directives/oculto-para-visor.directive';
+import { QuitarValorRequisitoComponent } from '../../../shared/components/quitar-valor-requisito/quitar-valor-requisito.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { EmpresasChinasService, FilaEtapaChina } from '../../../core/services/empresas-chinas.service';
 
@@ -19,7 +20,7 @@ const ETAPA_NUM = 1;
 @Component({
   selector: 'app-etapa1-aprobacion',
   standalone: true,
-  imports: [
+  imports: [QuitarValorRequisitoComponent, 
     CommonModule,
     DatePipe,
     ReactiveFormsModule,
@@ -98,7 +99,7 @@ export class Etapa1AprobacionComponent implements OnInit {
     });
   }
 
-  private cargar(): void {
+  cargar(): void {
     this.loading.set(true);
     this.errorMessage.set(null);
     this.service.listarEtapa(ETAPA_NUM).subscribe({

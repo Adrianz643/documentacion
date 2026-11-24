@@ -58,7 +58,7 @@
                     @if (val?.documento) {
                       <span class="gd-file-date">{{ val?.documento?.createdAt | date:'dd/MM/yyyy' }}</span>
                     }
-                    <span class="badge gd-badge-ok" aria-label="Completo"><i class="fi fi-rr-check"></i></span>
+                    <span class="badge gd-badge-ok" aria-label="Completo"><i class="fi fi-rr-check"></i></span> @if (!auth.esVisor()) { <app-quitar-valor-requisito [empresaId]="emp.id" [codigo]="req.codigo" [etiqueta]="req.descripcion" (quitado)="cargar()"/> }
                   </div>
                 } @else if (!auth.esVisor()) {
                   <button class="btn gd-btn-subir btn-sm" (click)="openUpload(modalSubir, emp.id, req)" [attr.aria-label]="'Subir '+req.descripcion"><i class="fi fi-rr-cloud-upload"></i> Subir</button>
