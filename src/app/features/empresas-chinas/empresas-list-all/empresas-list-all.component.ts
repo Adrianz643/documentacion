@@ -7,6 +7,7 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import JSZip from 'jszip';
 import { DocumentosZip, descargarZip } from '../../../shared/utils/descargas';
+import { agregarComplementoDatos } from '../../../shared/utils/complemento-datos';
 import { EmpresaChina } from '../../../core/models';
 import { EmpresasChinasService } from '../../../core/services/empresas-chinas.service';
 import { valorCelda } from '../../../shared/utils/valor-requisito';
@@ -180,6 +181,11 @@ export class EmpresasListAllComponent implements OnInit {
       }
     }
 
+
+    agregarComplementoDatos(zip, e.nombre, this.fechaArchivo(), detalle.etapas.map(etapa => ({
+      titulo: `Etapa ${etapa.etapaNum}`,
+      requisitos: etapa.requisitosEstado.map(({ req, valor }) => ({ req, valor })),
+    })));
 
     await descargarZip(zip, `${e.nombre} ${this.fechaArchivo()}.zip`);
   }

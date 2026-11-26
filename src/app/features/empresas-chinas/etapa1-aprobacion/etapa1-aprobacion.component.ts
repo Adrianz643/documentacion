@@ -7,6 +7,7 @@ import { RouterLink } from '@angular/router';
 import { NgbModal, NgbTooltipModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import JSZip from 'jszip';
 import { DocumentosZip, descargarZip } from '../../../shared/utils/descargas';
+import { agregarComplementoDatos } from '../../../shared/utils/complemento-datos';
 import { EmpresaChinaRequisito, EtapaRequisito, TableColumn } from '../../../core/models/index';
 import { GestorColumnasEtapaComponent } from '../../../shared/components/gestor-columnas-etapa/gestor-columnas-etapa.component';
 import { valorCelda } from '../../../shared/utils/valor-requisito';
@@ -185,6 +186,11 @@ export class Etapa1AprobacionComponent implements OnInit {
     for (const doc of documentos) {
       await empaquetado.agregar(doc);
     }
+
+    agregarComplementoDatos(zip, empresa.nombre, this.fechaArchivo(), [{
+      titulo: 'Etapa 1',
+      requisitos: this.requisitos().map(req => ({ req, valor: this.getReqValue(empresa, req.codigo) })),
+    }]);
 
 
     await descargarZip(zip, `${empresa.nombre} ${this.fechaArchivo()}.zip`);
