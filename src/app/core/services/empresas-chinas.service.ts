@@ -82,6 +82,10 @@ export class EmpresasChinasService {
     return this.http.post<EmpresaChinaDetalle>(`${this.base}/${id}/requisitos/${encodeURIComponent(codigo)}`, { valorTexto });
   }
 
+  eliminarDocumentoRequisito(id: number, codigo: string, documentoId: number): Observable<EmpresaChinaDetalle> {
+    return this.http.delete<EmpresaChinaDetalle>(`${this.base}/${id}/requisitos/${encodeURIComponent(codigo)}/documentos/${documentoId}`);
+  }
+
   eliminarRequisito(id: number, codigo: string): Observable<EmpresaChinaDetalle> {
     return this.http.delete<EmpresaChinaDetalle>(`${this.base}/${id}/requisitos/${encodeURIComponent(codigo)}`);
   }

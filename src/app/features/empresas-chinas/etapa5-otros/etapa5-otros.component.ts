@@ -175,11 +175,11 @@ export class Etapa5OtrosComponent implements OnInit {
     const empaquetado = new DocumentosZip(zip);
 
     const documentos = this.requisitos()
-      .map(req => ({ req, valor: this.getReqValue(empresa, req.codigo) }))
-      .filter(({ valor }) => valor?.completado && valor.documento);
+      .map(req => this.getReqValue(empresa, req.codigo))
+      .filter(valor => valor?.completado)
+      .flatMap(valor => valor?.documentos ?? []);
 
-    for (const { valor } of documentos) {
-      const doc = valor!.documento!;
+    for (const doc of documentos) {
       await empaquetado.agregar(doc);
     }
 

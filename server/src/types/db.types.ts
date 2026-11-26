@@ -245,13 +245,18 @@ export interface EmpresaChinaRequisitoValorRow extends RowDataPacket {
   documento_id: number | null;
   valor_texto: string | null;
   completado: number;
-  doc_tipo_id: number | null;
-  doc_nombre: string | null;
-  doc_ruta: string | null;
-  doc_mime: string | null;
-  doc_tam: number | null;
-  doc_subido_por: number | null;
-  doc_creado: Date | null;
+}
+
+export interface EmpresaChinaRequisitoDocumentoRow extends RowDataPacket {
+  requisito_valor_id: number;
+  documento_id: number;
+  doc_tipo_id: number;
+  doc_nombre: string;
+  doc_ruta: string;
+  doc_mime: string;
+  doc_tam: number;
+  doc_subido_por: number;
+  doc_creado: Date;
 }
 
 export interface EmpresaChinaChecklistRow extends RowDataPacket {

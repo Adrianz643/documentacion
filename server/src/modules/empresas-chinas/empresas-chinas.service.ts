@@ -3,6 +3,7 @@ import { guardarArchivo } from '../../utils/fileStorage';
 import { insertarDocumentoGenerico } from '../../utils/documentos';
 import type {
   EmpresaChinaChecklistRow,
+  EmpresaChinaRequisitoDocumentoRow,
   EmpresaChinaRequisitoValorRow,
   EmpresaChinaRow,
   EtapaRequisitoRow,
@@ -61,10 +62,7 @@ function mapRequisito(row: EtapaRequisitoRow): EtapaRequisitoDTO {
   };
 }
 
-function mapDocumento(row: EmpresaChinaRequisitoValorRow): DocumentoDTO | null {
-  if (!row.documento_id || !row.doc_tipo_id || !row.doc_nombre || !row.doc_ruta || !row.doc_mime || row.doc_tam === null || !row.doc_subido_por || !row.doc_creado) {
-    return null;
-  }
+function mapDocumento(row: EmpresaChinaRequisitoDocumentoRow): DocumentoDTO {
   return {
     id: row.documento_id,
     empresaId: EMPRESA_ID_CHINAS,
@@ -79,16 +77,28 @@ function mapDocumento(row: EmpresaChinaRequisitoValorRow): DocumentoDTO | null {
   };
 }
 
-function mapValor(row: EmpresaChinaRequisitoValorRow): EmpresaChinaRequisitoDTO {
+function mapValor(row: EmpresaChinaRequisitoValorRow, documentos: DocumentoDTO[]): EmpresaChinaRequisitoDTO {
   return {
     id: row.id,
     empresaChinaId: row.empresa_china_id,
     requisitoId: row.requisito_id,
-    documentoId: row.documento_id,
-    documento: mapDocumento(row),
+    documentoId: documentos[0]?.id ?? null,
+    documento: documentos[0] ?? null,
+    documentos,
     valorTexto: row.valor_texto,
     completado: row.completado === 1,
   };
+}
+
+async function mapValores(valores: EmpresaChinaRequisitoValorRow[]): Promise<Map<number, EmpresaChinaRequisitoDTO>> {
+  const documentos = await repository.findDocumentosDeValores(valores.map((v) => v.id));
+  const documentosPorValor = new Map<number, DocumentoDTO[]>();
+  for (const doc of documentos) {
+    const lista = documentosPorValor.get(doc.requisito_valor_id) ?? [];
+    lista.push(mapDocumento(doc));
+    documentosPorValor.set(doc.requisito_valor_id, lista);
+  }
+  return new Map(valores.map((v) => [v.id, mapValor(v, documentosPorValor.get(v.id) ?? [])]));
 }
 
 export async function listarRequisitosPorEtapa(etapaNum: number): Promise<EtapaRequisitoDTO[]> {
@@ -176,12 +186,13 @@ export async function listarEtapa(etapaNum: number): Promise<FilaEtapaDTO[]> {
     repository.findChecklistPorEtapa(etapaNum),
   ]);
 
+  const valoresMapeados = await mapValores(valores);
   const valoresPorEmpresa = new Map<number, Record<string, EmpresaChinaRequisitoDTO>>();
   for (const row of valores) {
     if (!valoresPorEmpresa.has(row.empresa_china_id)) {
       valoresPorEmpresa.set(row.empresa_china_id, {});
     }
-    valoresPorEmpresa.get(row.empresa_china_id)![row.requisito_codigo] = mapValor(row);
+    valoresPorEmpresa.get(row.empresa_china_id)![row.requisito_codigo] = valoresMapeados.get(row.id)!;
   }
 
   const checklistPorEmpresa = new Map<number, boolean>();
@@ -208,9 +219,10 @@ export async function obtenerDetalle(id: number): Promise<EmpresaChinaDetalleDTO
     repository.findChecklistPorEmpresa(id),
   ]);
 
+  const valoresMapeados = await mapValores(valores);
   const valoresPorCodigo = new Map<string, EmpresaChinaRequisitoDTO>();
   for (const row of valores) {
-    valoresPorCodigo.set(row.requisito_codigo, mapValor(row));
+    valoresPorCodigo.set(row.requisito_codigo, valoresMapeados.get(row.id)!);
   }
   const checklistPorEtapa = new Map<number, boolean>();
   for (const row of checklist) {
@@ -342,10 +354,7 @@ export async function subirRequisito(
       tamanoBytes: guardado.tamanoBytes,
       subidoPor: actorId,
     });
-    // El requisito reemplazado solo se marca como borrado logico (repository.upsertValorArchivo
-    // ya le puso deleted_at al documento anterior); el archivo fisico se conserva hasta que se
-    // purgue desde Papelera, asi "Restaurar" siempre tiene bytes reales que recuperar.
-    await repository.upsertValorArchivo(empresaChinaId, requisito.id, documentoId, actorId);
+    await repository.agregarDocumentoValor(empresaChinaId, requisito.id, documentoId, actorId);
   } else {
     if (!valorTexto || !valorTexto.trim()) {
       throw new HttpError(400, 'El valor es requerido para este requisito');
@@ -364,6 +373,38 @@ export async function subirRequisito(
     modulo: 'EMPRESAS_CHINAS',
     accion: requisito.tipo_campo === 'archivo' ? 'subir' : 'editar',
     descripcion: `Actualizó el requisito "${requisito.descripcion}" de "${empresa.nombre}"`,
+    referenciaTabla: 'empresas_chinas',
+    referenciaId: empresaChinaId,
+  });
+}
+
+export async function eliminarDocumentoRequisito(
+  empresaChinaId: number,
+  requisitoCodigo: string,
+  documentoId: number,
+  actorId: number,
+): Promise<void> {
+  const empresa = await repository.findEmpresaById(empresaChinaId);
+  if (!empresa) {
+    throw new HttpError(404, 'Empresa no encontrada');
+  }
+  const requisito = await repository.findRequisitoPorCodigo(requisitoCodigo);
+  if (!requisito) {
+    throw new HttpError(404, 'Requisito no encontrado');
+  }
+
+  const eliminado = await repository.eliminarDocumentoValor(empresaChinaId, requisito.id, documentoId, actorId);
+  if (!eliminado) {
+    throw new HttpError(404, 'Documento no encontrado en este requisito');
+  }
+  await repository.recalcularProgreso(empresaChinaId, actorId);
+  await repository.recalcularChecklist(empresaChinaId, requisito.etapa_num, actorId);
+
+  void actividadService.registrar({
+    usuarioId: actorId,
+    modulo: 'EMPRESAS_CHINAS',
+    accion: 'eliminar',
+    descripcion: `Eliminó un documento del requisito "${requisito.descripcion}" de "${empresa.nombre}"`,
     referenciaTabla: 'empresas_chinas',
     referenciaId: empresaChinaId,
   });

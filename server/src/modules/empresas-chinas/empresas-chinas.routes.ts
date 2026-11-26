@@ -9,6 +9,7 @@ import {
   eliminarHandler,
   eliminarRequisitoPersonalizadoHandler,
   renombrarRequisitoHandler,
+  eliminarDocumentoRequisitoHandler,
   eliminarRequisitoHandler,
   kpisHandler,
   listarEtapaHandler,
@@ -42,6 +43,12 @@ router.delete(
   requireAuth,
   requirePermission('documentos.editar'), requireSubrol('EMPRESAS_CHINAS'),
   eliminarRequisitoHandler,
+);
+router.delete(
+  '/:id/requisitos/:codigo/documentos/:documentoId',
+  requireAuth,
+  requirePermission('documentos.editar'), requireSubrol('EMPRESAS_CHINAS'),
+  eliminarDocumentoRequisitoHandler,
 );
 
 export default router;

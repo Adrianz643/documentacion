@@ -149,8 +149,8 @@ export class EmpresasListAllComponent implements OnInit {
         body: etapa.requisitosEstado.map(({ req, valor }) => [
           req.codigo,
           req.descripcion,
-          valor?.documento ? valor.documento.nombreArchivo : valorCelda(req, valor),
-          valor?.documento ? this.formatFechaCorta(valor.documento.createdAt) : '—',
+          valor?.documentos?.length ? valor.documentos.map(d => d.nombreArchivo).join('\n') : valorCelda(req, valor),
+          valor?.documentos?.length ? valor.documentos.map(d => this.formatFechaCorta(d.createdAt)).join('\n') : '—',
           valor?.completado ? 'Completado' : 'Pendiente',
         ]),
         styles: { fontSize: 8 },
@@ -168,8 +168,8 @@ export class EmpresasListAllComponent implements OnInit {
 
     for (const etapa of detalle.etapas) {
       const documentos = etapa.requisitosEstado
-        .filter(({ valor }) => valor?.completado && valor.documento)
-        .map(({ valor }) => valor!.documento!);
+        .filter(({ valor }) => valor?.completado)
+        .flatMap(({ valor }) => valor?.documentos ?? []);
 
       if (!documentos.length) continue;
 

@@ -7,7 +7,7 @@ import { EmpresasChinasService } from '../../../core/services/empresas-chinas.se
   standalone: true,
   imports: [NgbTooltipModule],
   template: `
-    <button type="button" class="gqv-quitar" ngbTooltip="Eliminar este registro"
+    <button type="button" class="gqv-quitar" [ngbTooltip]="documentoId() !== null ? 'Eliminar este documento' : 'Eliminar este registro'"
             [attr.aria-label]="'Eliminar registro de ' + etiqueta()" (click)="abrir(modalConfirmar)">×</button>
 
     <ng-template #modalConfirmar let-modal>
@@ -19,7 +19,11 @@ import { EmpresasChinasService } from '../../../core/services/empresas-chinas.se
         @if (error()) {
           <div class="alert alert-danger py-2 small" role="alert">{{ error() }}</div>
         }
-        <p class="mb-0">¿Seguro que deseas eliminar el registro de <strong>{{ etiqueta() }}</strong>? Solo se quita este dato, el resto de la fila no cambia. Podrás volver a cargarlo.</p>
+        @if (documentoId() !== null) {
+          <p class="mb-0">¿Seguro que deseas eliminar el documento <strong>{{ etiqueta() }}</strong>? Los demás documentos de este apartado no cambian.</p>
+        } @else {
+          <p class="mb-0">¿Seguro que deseas eliminar el registro de <strong>{{ etiqueta() }}</strong>? Solo se quita este dato, el resto de la fila no cambia. Podrás volver a cargarlo.</p>
+        }
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cancelar</button>
@@ -40,6 +44,7 @@ export class QuitarValorRequisitoComponent {
   empresaId = input.required<number>();
   codigo = input.required<string>();
   etiqueta = input<string>('');
+  documentoId = input<number | null>(null);
   quitado = output<void>();
 
   guardando = signal(false);
@@ -53,7 +58,11 @@ export class QuitarValorRequisitoComponent {
   quitar(modal: any): void {
     this.guardando.set(true);
     this.error.set(null);
-    this.service.eliminarRequisito(this.empresaId(), this.codigo()).subscribe({
+    const documentoId = this.documentoId();
+    const peticion = documentoId === null
+      ? this.service.eliminarRequisito(this.empresaId(), this.codigo())
+      : this.service.eliminarDocumentoRequisito(this.empresaId(), this.codigo(), documentoId);
+    peticion.subscribe({
       next: () => { this.guardando.set(false); modal.close(); this.quitado.emit(); },
       error: () => { this.guardando.set(false); this.error.set('No fue posible eliminar el registro.'); },
     });

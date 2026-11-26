@@ -2,6 +2,7 @@ import type { PoolConnection, ResultSetHeader, RowDataPacket } from 'mysql2/prom
 import { pool } from '../../config/database';
 import type {
   EmpresaChinaChecklistRow,
+  EmpresaChinaRequisitoDocumentoRow,
   EmpresaChinaRequisitoValorRow,
   EmpresaChinaRow,
   EtapaRequisitoRow,
@@ -14,13 +15,15 @@ interface TipoDocumentoIdRow extends RowDataPacket {
   id: number;
 }
 
-interface RutaStorageRow extends RowDataPacket {
-  ruta_storage: string;
-}
-
 interface ValorActualRow extends RowDataPacket {
   id: number;
   documento_id: number | null;
+  valor_texto: string | null;
+  deleted_at: Date | null;
+}
+
+interface DocumentoIdRow extends RowDataPacket {
+  id: number;
 }
 
 interface ProgresoRow extends RowDataPacket {
@@ -37,17 +40,9 @@ const VALOR_JOIN = `
     er.etapa_num,
     ecr.documento_id,
     ecr.valor_texto,
-    ecr.completado,
-    d.tipo_documento_id   AS doc_tipo_id,
-    d.nombre_archivo      AS doc_nombre,
-    d.ruta_storage        AS doc_ruta,
-    d.mime_type           AS doc_mime,
-    d.tamano_bytes        AS doc_tam,
-    d.subido_por          AS doc_subido_por,
-    d.created_at          AS doc_creado
+    ecr.completado
   FROM empresa_china_requisitos ecr
   INNER JOIN etapa_requisitos er ON er.id = ecr.requisito_id AND er.deleted_at IS NULL
-  LEFT JOIN documentos d ON d.id = ecr.documento_id
   WHERE ecr.deleted_at IS NULL
 `;
 
@@ -214,6 +209,30 @@ export async function findValoresPorEmpresa(empresaChinaId: number): Promise<Emp
   return rows;
 }
 
+export async function findDocumentosDeValores(valorIds: number[]): Promise<EmpresaChinaRequisitoDocumentoRow[]> {
+  if (valorIds.length === 0) {
+    return [];
+  }
+  const [rows] = await pool.query<EmpresaChinaRequisitoDocumentoRow[]>(
+    `SELECT
+       ecd.empresa_china_requisito_id AS requisito_valor_id,
+       d.id                           AS documento_id,
+       d.tipo_documento_id            AS doc_tipo_id,
+       d.nombre_archivo               AS doc_nombre,
+       d.ruta_storage                 AS doc_ruta,
+       d.mime_type                    AS doc_mime,
+       d.tamano_bytes                 AS doc_tam,
+       d.subido_por                   AS doc_subido_por,
+       d.created_at                   AS doc_creado
+     FROM empresa_china_requisito_documentos ecd
+     INNER JOIN documentos d ON d.id = ecd.documento_id AND d.deleted_at IS NULL
+     WHERE ecd.empresa_china_requisito_id IN (?)
+     ORDER BY d.created_at, d.id`,
+    [valorIds],
+  );
+  return rows;
+}
+
 export async function findChecklistPorEtapa(etapaNum: number): Promise<EmpresaChinaChecklistRow[]> {
   const [rows] = await pool.execute<EmpresaChinaChecklistRow[]>(
     `SELECT empresa_china_id, etapa_num, completada, completada_en
@@ -313,48 +332,116 @@ export async function findValorActual(
   return rows[0] ?? null;
 }
 
-export async function upsertValorArchivo(
+export async function agregarDocumentoValor(
   empresaChinaId: number,
   requisitoId: number,
   documentoId: number,
   actorId: number,
-): Promise<{ anteriorDocumentoId: number | null; anteriorRutaStorage: string | null }> {
+): Promise<void> {
   const connection: PoolConnection = await pool.getConnection();
   try {
     await connection.beginTransaction();
 
     const [actualRows] = await connection.execute<ValorActualRow[]>(
-      `SELECT id, documento_id FROM empresa_china_requisitos
-       WHERE empresa_china_id = ? AND requisito_id = ? AND deleted_at IS NULL LIMIT 1 FOR UPDATE`,
+      `SELECT id, documento_id, valor_texto, deleted_at FROM empresa_china_requisitos
+       WHERE empresa_china_id = ? AND requisito_id = ? LIMIT 1 FOR UPDATE`,
       [empresaChinaId, requisitoId],
     );
-    const anteriorDocumentoId = actualRows[0]?.documento_id ?? null;
+    const actual = actualRows[0];
 
-    let anteriorRutaStorage: string | null = null;
-    if (anteriorDocumentoId) {
-      const [docRows] = await connection.execute<RutaStorageRow[]>(
-        `SELECT ruta_storage FROM documentos WHERE id = ? LIMIT 1`,
-        [anteriorDocumentoId],
+    let valorId: number;
+    if (!actual) {
+      const [insertado] = await connection.execute<ResultSetHeader>(
+        `INSERT INTO empresa_china_requisitos (empresa_china_id, requisito_id, documento_id, completado, creado_por, modificado_por)
+         VALUES (?, ?, ?, 1, ?, ?)`,
+        [empresaChinaId, requisitoId, documentoId, actorId, actorId],
       );
-      anteriorRutaStorage = docRows[0]?.ruta_storage ?? null;
+      valorId = insertado.insertId;
+    } else {
+      valorId = actual.id;
+      const principal = actual.deleted_at === null ? (actual.documento_id ?? documentoId) : documentoId;
+      await connection.execute<ResultSetHeader>(
+        `UPDATE empresa_china_requisitos SET documento_id = ?, completado = 1, deleted_at = NULL, modificado_por = ? WHERE id = ?`,
+        [principal, actorId, valorId],
+      );
     }
 
     await connection.execute<ResultSetHeader>(
-      `INSERT INTO empresa_china_requisitos (empresa_china_id, requisito_id, documento_id, completado, creado_por, modificado_por)
-       VALUES (?, ?, ?, 1, ?, ?)
-       ON DUPLICATE KEY UPDATE documento_id = VALUES(documento_id), completado = 1, deleted_at = NULL, modificado_por = VALUES(modificado_por)`,
-      [empresaChinaId, requisitoId, documentoId, actorId, actorId],
+      `INSERT INTO empresa_china_requisito_documentos (empresa_china_requisito_id, documento_id, creado_por, modificado_por)
+       VALUES (?, ?, ?, ?)`,
+      [valorId, documentoId, actorId, actorId],
     );
 
-    if (anteriorDocumentoId) {
+    await connection.commit();
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+export async function eliminarDocumentoValor(
+  empresaChinaId: number,
+  requisitoId: number,
+  documentoId: number,
+  actorId: number,
+): Promise<boolean> {
+  const connection: PoolConnection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [actualRows] = await connection.execute<ValorActualRow[]>(
+      `SELECT id, documento_id, valor_texto, deleted_at FROM empresa_china_requisitos
+       WHERE empresa_china_id = ? AND requisito_id = ? AND deleted_at IS NULL LIMIT 1 FOR UPDATE`,
+      [empresaChinaId, requisitoId],
+    );
+    const actual = actualRows[0];
+    if (!actual) {
+      await connection.rollback();
+      return false;
+    }
+
+    const [vinculo] = await connection.execute<DocumentoIdRow[]>(
+      `SELECT ecd.id FROM empresa_china_requisito_documentos ecd
+       INNER JOIN documentos d ON d.id = ecd.documento_id AND d.deleted_at IS NULL
+       WHERE ecd.empresa_china_requisito_id = ? AND ecd.documento_id = ? LIMIT 1`,
+      [actual.id, documentoId],
+    );
+    if (!vinculo[0]) {
+      await connection.rollback();
+      return false;
+    }
+
+    await connection.execute<ResultSetHeader>(
+      `UPDATE documentos SET deleted_at = NOW(), modificado_por = ? WHERE id = ?`,
+      [actorId, documentoId],
+    );
+
+    const [restantes] = await connection.execute<DocumentoIdRow[]>(
+      `SELECT d.id FROM empresa_china_requisito_documentos ecd
+       INNER JOIN documentos d ON d.id = ecd.documento_id AND d.deleted_at IS NULL
+       WHERE ecd.empresa_china_requisito_id = ?
+       ORDER BY d.created_at, d.id LIMIT 1`,
+      [actual.id],
+    );
+    const principalNuevo = restantes[0]?.id ?? null;
+
+    if (actual.documento_id === documentoId) {
       await connection.execute<ResultSetHeader>(
-        `UPDATE documentos SET deleted_at = NOW(), modificado_por = ? WHERE id = ?`,
-        [actorId, anteriorDocumentoId],
+        `UPDATE empresa_china_requisitos SET documento_id = ?, modificado_por = ? WHERE id = ?`,
+        [principalNuevo, actorId, actual.id],
+      );
+    }
+    if (principalNuevo === null && !actual.valor_texto) {
+      await connection.execute<ResultSetHeader>(
+        `UPDATE empresa_china_requisitos SET deleted_at = NOW(), modificado_por = ? WHERE id = ?`,
+        [actorId, actual.id],
       );
     }
 
     await connection.commit();
-    return { anteriorDocumentoId, anteriorRutaStorage };
+    return true;
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -381,31 +468,26 @@ export async function eliminarValor(
   empresaChinaId: number,
   requisitoId: number,
   actorId: number,
-): Promise<{ rutaStorage: string | null }> {
+): Promise<void> {
   const connection: PoolConnection = await pool.getConnection();
   try {
     await connection.beginTransaction();
 
     const [actualRows] = await connection.execute<ValorActualRow[]>(
-      `SELECT id, documento_id FROM empresa_china_requisitos
+      `SELECT id, documento_id, valor_texto, deleted_at FROM empresa_china_requisitos
        WHERE empresa_china_id = ? AND requisito_id = ? AND deleted_at IS NULL LIMIT 1 FOR UPDATE`,
       [empresaChinaId, requisitoId],
     );
     const actual = actualRows[0];
 
-    let rutaStorage: string | null = null;
     if (actual) {
-      if (actual.documento_id) {
-        const [docRows] = await connection.execute<RutaStorageRow[]>(
-          `SELECT ruta_storage FROM documentos WHERE id = ? LIMIT 1`,
-          [actual.documento_id],
-        );
-        rutaStorage = docRows[0]?.ruta_storage ?? null;
-        await connection.execute<ResultSetHeader>(
-          `UPDATE documentos SET deleted_at = NOW(), modificado_por = ? WHERE id = ?`,
-          [actorId, actual.documento_id],
-        );
-      }
+      await connection.execute<ResultSetHeader>(
+        `UPDATE documentos SET deleted_at = NOW(), modificado_por = ?
+         WHERE deleted_at IS NULL AND id IN (
+           SELECT documento_id FROM empresa_china_requisito_documentos WHERE empresa_china_requisito_id = ?
+         )`,
+        [actorId, actual.id],
+      );
       await connection.execute<ResultSetHeader>(
         `UPDATE empresa_china_requisitos SET deleted_at = NOW(), modificado_por = ? WHERE id = ?`,
         [actorId, actual.id],
@@ -413,7 +495,6 @@ export async function eliminarValor(
     }
 
     await connection.commit();
-    return { rutaStorage };
   } catch (error) {
     await connection.rollback();
     throw error;

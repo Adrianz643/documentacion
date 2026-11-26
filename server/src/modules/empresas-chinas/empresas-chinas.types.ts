@@ -34,6 +34,7 @@ export interface EmpresaChinaRequisitoDTO {
   requisitoId: number;
   documentoId: number | null;
   documento: DocumentoDTO | null;
+  documentos: DocumentoDTO[];
   valorTexto: string | null;
   completado: boolean;
 }

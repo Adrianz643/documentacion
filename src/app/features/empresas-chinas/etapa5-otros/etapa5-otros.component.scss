@@ -28,3 +28,5 @@ $azul:#0B4DB8;$borde:#DDE5EF;$txt:#172B4D;$fondo:#F7F9FC;$enc:#DCEBEC;$enc-txt:#
 button.gd-valor-personalizado:hover{text-decoration:underline;}
 a.gd-file-name{text-decoration:none;cursor:pointer;}
 a.gd-file-name:hover{text-decoration:underline;}
+.gd-doc-linea{display:flex;align-items:center;justify-content:center;gap:4px;}
+.gd-agregar-doc{font-size:11px;}

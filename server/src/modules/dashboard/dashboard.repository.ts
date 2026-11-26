@@ -56,7 +56,8 @@ export async function findRecientes(soloUsuarioId?: number): Promise<DocumentoRe
      LEFT JOIN facturas f ON f.comprobante_id = d.id
      LEFT JOIN fiel_registros fr
        ON d.id IN (fr.clave_privada_id, fr.certificado_id)
-     LEFT JOIN empresa_china_requisitos ecr ON ecr.documento_id = d.id
+     LEFT JOIN empresa_china_requisito_documentos ecd ON ecd.documento_id = d.id
+     LEFT JOIN empresa_china_requisitos ecr ON ecr.id = ecd.empresa_china_requisito_id
      WHERE d.deleted_at IS NULL ${filtro}
      ORDER BY d.created_at DESC
      LIMIT ${LIMITE_RECIENTES}`,

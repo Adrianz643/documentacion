@@ -99,3 +99,12 @@ export const eliminarRequisitoHandler = asyncHandler(async (req: Request, res: R
   await service.eliminarRequisito(id, codigo, req.auth.sub);
   res.status(200).json(await service.obtenerDetalle(id));
 });
+
+export const eliminarDocumentoRequisitoHandler = asyncHandler(async (req: Request, res: Response) => {
+  if (!req.auth) throw new HttpError(401, 'No autenticado');
+  const id = parseIdParam(req.params.id);
+  const codigo = parseCodigoParam(req.params.codigo);
+  const documentoId = parseIdParam(req.params.documentoId);
+  await service.eliminarDocumentoRequisito(id, codigo, documentoId, req.auth.sub);
+  res.status(200).json(await service.obtenerDetalle(id));
+});

@@ -283,12 +283,11 @@ export async function restaurar(
   );
 
   if (modulo === 'documentos') {
-    // Reenlace best-effort: si el archivo era un requisito de empresa china, su fila en
-    // empresa_china_requisitos conserva documento_id y se borro logicamente junto con el
-    // archivo, asi que restaurarla reconecta automaticamente el requisito con su archivo.
     await pool.execute<ResultSetHeader>(
-      `UPDATE empresa_china_requisitos SET deleted_at = NULL, modificado_por = ?
-       WHERE documento_id = ? AND deleted_at IS NOT NULL`,
+      `UPDATE empresa_china_requisitos ecr
+       INNER JOIN empresa_china_requisito_documentos ecd ON ecd.empresa_china_requisito_id = ecr.id
+       SET ecr.deleted_at = NULL, ecr.documento_id = COALESCE(ecr.documento_id, ecd.documento_id), ecr.modificado_por = ?
+       WHERE ecd.documento_id = ?`,
       [actorId, id],
     );
 
