@@ -1,3 +1,6 @@
+// Autor: Adrian Alejandro Vazquez Zambrano · Contacto: adrian.ale.1130@gmail.com
+// Archivo de autoría de Adrian Alejandro Vazquez Zambrano. Su distribución o modificación requiere su permiso expreso.
+
 import { EmpresaChinaRequisito, EtapaRequisito } from '../../core/models';
 
 export function formatearValorRequisito(tipoCampo: EtapaRequisito['tipoCampo'], valor: string | null | undefined): string {

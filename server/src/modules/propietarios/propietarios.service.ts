@@ -1,3 +1,6 @@
+// Autor: Adrian Alejandro Vazquez Zambrano · Contacto: adrian.ale.1130@gmail.com
+// Archivo de autoría de Adrian Alejandro Vazquez Zambrano. Su distribución o modificación requiere su permiso expreso.
+
 import type { PropietarioRow } from '../../types/db.types';
 import * as repository from './propietarios.repository';
 import type { PropietarioDTO } from './propietarios.types';

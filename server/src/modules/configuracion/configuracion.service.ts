@@ -1,3 +1,6 @@
+// Autor: Adrian Alejandro Vazquez Zambrano · Contacto: adrian.ale.1130@gmail.com
+// Archivo de autoría de Adrian Alejandro Vazquez Zambrano. Su distribución o modificación requiere su permiso expreso.
+
 import { HttpError } from '../../utils/httpError';
 import * as actividadService from '../actividad/actividad.service';
 import * as configuracionRepository from './configuracion.repository';

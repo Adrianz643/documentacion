@@ -1,3 +1,6 @@
+// Autor: Adrian Alejandro Vazquez Zambrano · Contacto: adrian.ale.1130@gmail.com
+// Archivo de autoría de Adrian Alejandro Vazquez Zambrano. Su distribución o modificación requiere su permiso expreso.
+
 import { Routes } from '@angular/router';
 export const EMPRESAS_CHINAS_ROUTES: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },

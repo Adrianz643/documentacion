@@ -1,3 +1,6 @@
+// Autor: Adrian Alejandro Vazquez Zambrano · Contacto: adrian.ale.1130@gmail.com
+// Archivo de autoría de Adrian Alejandro Vazquez Zambrano. Su distribución o modificación requiere su permiso expreso.
+
 import type { NotificacionRow } from '../../types/db.types';
 import * as repository from './notificaciones.repository';
 import type { NotificacionDTO, NotificacionesListadoDTO } from './notificaciones.types';

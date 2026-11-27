@@ -1,3 +1,6 @@
+// Autor: Adrian Alejandro Vazquez Zambrano · Contacto: adrian.ale.1130@gmail.com
+// Archivo de autoría de Adrian Alejandro Vazquez Zambrano. Su distribución o modificación requiere su permiso expreso.
+
 export const VIGENCIA_FIEL_ANIOS = 4;
 export const VIGENCIA_FIEL_DESDE = '2022-01-01';
 export const VIGENCIA_FIEL_UMBRAL_POR_VENCER_DIAS = 90;

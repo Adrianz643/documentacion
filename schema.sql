@@ -1,3 +1,6 @@
+-- Autor: Adrian Alejandro Vazquez Zambrano · Contacto: adrian.ale.1130@gmail.com
+-- Archivo de autoría de Adrian Alejandro Vazquez Zambrano. Su distribución o modificación requiere su permiso expreso.
+
 SET FOREIGN_KEY_CHECKS=0; SET NAMES utf8mb4;
 CREATE TABLE cat_paises(id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,codigo_iso CHAR(2) NOT NULL UNIQUE,nombre VARCHAR(100) NOT NULL UNIQUE,activo TINYINT(1) NOT NULL DEFAULT 1,created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE cat_tipos_documento(id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,clave VARCHAR(20) NOT NULL UNIQUE,nombre VARCHAR(100) NOT NULL,descripcion VARCHAR(255),activo TINYINT(1) NOT NULL DEFAULT 1,created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

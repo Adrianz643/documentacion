@@ -1,3 +1,6 @@
+// Autor: Adrian Alejandro Vazquez Zambrano · Contacto: adrian.ale.1130@gmail.com
+// Archivo de autoría de Adrian Alejandro Vazquez Zambrano. Su distribución o modificación requiere su permiso expreso.
+
 const AZUL_PRIMARIO = '#0B4DB8';
 const AZUL_OSCURO = '#172B4D';
 const GRIS_TEXTO = '#53657D';

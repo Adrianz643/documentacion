@@ -1,5 +1,6 @@
 -- Autor: Adrian Alejandro Vazquez Zambrano
 -- Año: 2026
+-- Archivo de autoría de Adrian Alejandro Vazquez Zambrano. Su distribución o modificación requiere su permiso expreso.
 
 CREATE DATABASE IF NOT EXISTS gdprod
     CHARACTER SET utf8mb4
