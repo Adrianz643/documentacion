@@ -88,8 +88,8 @@
                   } @else if (!auth.esVisor()) {
                     <button class="btn gd-btn-subir btn-sm"
                             (click)="openUpload(modalSubir, empresa.id, req)"
-                            [attr.aria-label]="'Subir ' + req.descripcion">
-                      <span aria-hidden="true"><i class="fi fi-rr-cloud-upload"></i></span> Subir
+                            [attr.aria-label]="(req.tipoCampo === 'archivo' ? 'Subir ' : 'Capturar ') + req.descripcion">
+                      @if (req.tipoCampo === 'archivo') { <i class="fi fi-rr-cloud-upload" aria-hidden="true"></i> Subir } @else { <i class="fi fi-rr-edit" aria-hidden="true"></i> Capturar }
                     </button>
                   } @else {
                     <span class="text-muted small">Sin documento</span>
