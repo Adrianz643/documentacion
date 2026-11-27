@@ -50,9 +50,9 @@
                   <div class="gd-file-cell">
                     @if (req.tipoCampo !== 'archivo') {
                       @if (auth.esVisor()) { <span class="gd-valor-personalizado">{{ valorCelda(req, val) }}</span> } @else { <button type="button" class="btn btn-link btn-sm p-0 gd-valor-personalizado" (click)="openUpload(modalSubir, emp.id, req, val?.valorTexto)" ngbTooltip="Editar valor">{{ valorCelda(req, val) }}</button> }
-                    } @else {
-                      @for (doc of val?.documentos ?? []; track doc.id) { <div class="gd-doc-linea"><a class="gd-file-name" [href]="doc.rutaStorage" target="_blank" rel="noopener" [ngbTooltip]="doc.nombreArchivo + ' (abrir)'"><i class="fi fi-rr-document"></i> {{ doc.nombreArchivo | slice:0:15 }}</a> <span class="gd-file-date">{{ doc.createdAt | date:'dd/MM/yyyy' }}</span> @if (!auth.esVisor()) { <app-quitar-valor-requisito [empresaId]="emp.id" [codigo]="req.codigo" [documentoId]="doc.id" [etiqueta]="doc.nombreArchivo" (quitado)="cargar()"/> } </div> }
                     }
+                      @if (req.tipoCampo === 'archivo' && val?.valorTexto) { <span class="gd-valor-personalizado">{{ val?.valorTexto }}</span> }
+                      @for (doc of val?.documentos ?? []; track doc.id) { <div class="gd-doc-linea"><a class="gd-file-name" [href]="doc.rutaStorage" target="_blank" rel="noopener" [ngbTooltip]="doc.nombreArchivo + ' (abrir)'"><i class="fi fi-rr-document"></i> {{ doc.nombreArchivo | slice:0:15 }}</a> <span class="gd-file-date">{{ doc.createdAt | date:'dd/MM/yyyy' }}</span> @if (!auth.esVisor()) { <app-quitar-valor-requisito [empresaId]="emp.id" [codigo]="req.codigo" [documentoId]="doc.id" [etiqueta]="doc.nombreArchivo" (quitado)="cargar()"/> } </div> }
                     <span class="badge gd-badge-ok" aria-label="Completo"><i class="fi fi-rr-check"></i></span> @if (!auth.esVisor() && req.tipoCampo !== 'archivo') { <app-quitar-valor-requisito [empresaId]="emp.id" [codigo]="req.codigo" [etiqueta]="req.descripcion" (quitado)="cargar()"/> } @if (!auth.esVisor() && req.tipoCampo === 'archivo') { <button type="button" class="btn btn-link btn-sm p-0 gd-agregar-doc" (click)="openUpload(modalSubir, emp.id, req)" [attr.aria-label]="'Agregar otro documento a ' + req.descripcion">＋ Agregar otro</button> }
                   </div>
                 } @else if (!auth.esVisor()) {

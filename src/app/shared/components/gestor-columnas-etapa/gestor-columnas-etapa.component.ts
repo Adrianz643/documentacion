@@ -1,4 +1,5 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgbDropdownModule, NgbModal, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -26,7 +27,7 @@ import { OcultoParaVisorDirective } from '../../directives/oculto-para-visor.dir
             <label class="form-check-label small flex-grow-1" [for]="'gce_' + etapaNum() + '_' + col.key">{{ col.label }}</label>
             @if (auth.esSuperadmin() && col.requisitoId) {
               <button type="button" class="btn btn-sm btn-icon p-0 ms-2"
-                      ngbTooltip="Editar nombre" [attr.aria-label]="'Editar nombre de ' + col.label"
+                      ngbTooltip="Editar nombre y tipo" [attr.aria-label]="'Editar nombre y tipo de ' + col.label"
                       (click)="abrirRenombrar(col, modalRenombrar)">✎</button>
             }
             @if (col.custom) {
@@ -78,18 +79,35 @@ import { OcultoParaVisorDirective } from '../../directives/oculto-para-visor.dir
 
     <ng-template #modalRenombrar let-modal>
       <div class="modal-header">
-        <h3 class="modal-title fs-6">Editar nombre de columna · Etapa {{ etapaNum() }}</h3>
+        <h3 class="modal-title fs-6">Editar columna · Etapa {{ etapaNum() }}</h3>
         <button type="button" class="btn-close" aria-label="Cerrar" (click)="modal.dismiss()"></button>
       </div>
       <div class="modal-body">
         @if (error()) {
           <div class="alert alert-danger py-2 small" role="alert">{{ error() }}</div>
         }
-        <label class="form-label" for="gceRenombrar">Nombre de la columna <span class="text-danger">*</span></label>
-        <input id="gceRenombrar" type="text" class="form-control" [formControl]="nombreEditado" maxlength="200"
-               [class.is-invalid]="nombreEditado.invalid && nombreEditado.touched"
-               (keydown.enter)="renombrar(modal)"/>
-        <div class="invalid-feedback">El nombre es obligatorio.</div>
+        <div class="mb-3">
+          <label class="form-label" for="gceRenombrar">Nombre de la columna <span class="text-danger">*</span></label>
+          <input id="gceRenombrar" type="text" class="form-control" [formControl]="nombreEditado" maxlength="200"
+                 [class.is-invalid]="nombreEditado.invalid && nombreEditado.touched"
+                 (keydown.enter)="renombrar(modal)"/>
+          <div class="invalid-feedback">El nombre es obligatorio.</div>
+        </div>
+        <div>
+          <label class="form-label" for="gceTipoEditado">Tipo de dato</label>
+          <select id="gceTipoEditado" class="form-select" [formControl]="tipoEditado">
+            <option value="texto">Texto</option>
+            <option value="numero">Número</option>
+            <option value="fecha">Fecha</option>
+            <option value="archivo">Archivo</option>
+            <option value="boolean">Sí / No</option>
+          </select>
+          @if (cambiaTipo()) {
+            <div class="alert alert-warning py-2 small mt-2 mb-0" role="alert">
+              Los datos y archivos ya capturados se conservan y se siguen mostrando; solo cambia cómo se captura de aquí en adelante.
+            </div>
+          }
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary btn-sm" (click)="modal.dismiss()">Cancelar</button>
@@ -133,6 +151,12 @@ export class GestorColumnasEtapaComponent {
   columnaAEliminar = signal<TableColumn | null>(null);
   columnaARenombrar = signal<TableColumn | null>(null);
   nombreEditado = new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] });
+  tipoEditado = new FormControl<TipoCampo>('texto', { nonNullable: true });
+  private tipoEditadoValor = toSignal(this.tipoEditado.valueChanges, { initialValue: this.tipoEditado.value });
+  cambiaTipo = computed(() => {
+    const original = this.columnaARenombrar()?.tipoCampo;
+    return !!original && this.tipoEditadoValor() !== original;
+  });
 
   form = this.fb.group({
     descripcion: ['', [Validators.required, Validators.maxLength(200)]],
@@ -159,7 +183,8 @@ export class GestorColumnasEtapaComponent {
   abrirRenombrar(col: TableColumn, ref: any) {
     this.error.set(null);
     this.columnaARenombrar.set(col);
-    this.nombreEditado.reset(col.label);
+    this.nombreEditado.reset(col.label.replace(/^\S+ — /, ''));
+    this.tipoEditado.reset(col.tipoCampo ?? 'texto');
     this.modalService.open(ref, { centered: true, size: 'sm' });
   }
 
@@ -169,9 +194,9 @@ export class GestorColumnasEtapaComponent {
     if (!id || !nombre) { this.nombreEditado.markAsTouched(); return; }
     this.guardando.set(true);
     this.error.set(null);
-    this.service.renombrarRequisito(id, nombre).subscribe({
+    this.service.actualizarRequisito(id, nombre, this.tipoEditado.value).subscribe({
       next: () => { this.guardando.set(false); this.columnaARenombrar.set(null); modal.close(); this.cambio.emit(); },
-      error: () => { this.guardando.set(false); this.error.set('No fue posible renombrar la columna.'); },
+      error: () => { this.guardando.set(false); this.error.set('No fue posible guardar los cambios de la columna.'); },
     });
   }
 

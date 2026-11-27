@@ -133,10 +133,10 @@ export async function crearRequisitoPersonalizado(
   }
 }
 
-export async function actualizarDescripcionRequisito(id: number, descripcion: string, actorId: number): Promise<void> {
+export async function actualizarRequisito(id: number, descripcion: string, tipoCampo: string, actorId: number): Promise<void> {
   await pool.execute<ResultSetHeader>(
-    `UPDATE etapa_requisitos SET descripcion = ?, modificado_por = ? WHERE id = ? AND deleted_at IS NULL`,
-    [descripcion, actorId, id],
+    `UPDATE etapa_requisitos SET descripcion = ?, tipo_campo = ?, modificado_por = ? WHERE id = ? AND deleted_at IS NULL`,
+    [descripcion, tipoCampo, actorId, id],
   );
 }
 

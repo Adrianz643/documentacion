@@ -79,6 +79,7 @@ export class Etapa3FirmaComponent implements OnInit {
         this.columnas.set(requisitos.map(r => ({
           custom: r.personalizado,
           requisitoId: r.id,
+          tipoCampo: r.tipoCampo,
           key: r.codigo, label: `${r.codigo} — ${r.descripcion}`, visible: previas.get(r.codigo) ?? true, sortable: false,
           type: r.tipoCampo === 'archivo' ? 'file' : 'text',
         })));

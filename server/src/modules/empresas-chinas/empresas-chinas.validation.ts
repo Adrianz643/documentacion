@@ -1,5 +1,5 @@
 import { HttpError } from '../../utils/httpError';
-import type { CrearEmpresaChinaInput, CrearRequisitoPersonalizadoInput, TipoCampoRequisito } from './empresas-chinas.types';
+import type { ActualizarRequisitoInput, CrearEmpresaChinaInput, CrearRequisitoPersonalizadoInput, TipoCampoRequisito } from './empresas-chinas.types';
 
 const TIPOS_CAMPO_VALIDOS: TipoCampoRequisito[] = ['archivo', 'texto', 'numero', 'boolean', 'fecha'];
 
@@ -75,16 +75,23 @@ function parseNombreColumna(b: Body): string {
   return descripcion;
 }
 
-export function parseRenombrarRequisitoInput(body: unknown): string {
-  return parseNombreColumna((body ?? {}) as Body);
-}
-
-export function parseCrearRequisitoPersonalizadoInput(body: unknown): CrearRequisitoPersonalizadoInput {
-  const b = (body ?? {}) as Body;
-  const descripcion = parseNombreColumna(b);
+function parseTipoColumna(b: Body): TipoCampoRequisito {
   const tipoCampo = b.tipoCampo;
   if (typeof tipoCampo !== 'string' || !TIPOS_CAMPO_VALIDOS.includes(tipoCampo as TipoCampoRequisito)) {
     throw new HttpError(400, 'El tipo de columna es invalido');
   }
-  return { descripcion, tipoCampo: tipoCampo as TipoCampoRequisito };
+  return tipoCampo as TipoCampoRequisito;
+}
+
+export function parseActualizarRequisitoInput(body: unknown): ActualizarRequisitoInput {
+  const b = (body ?? {}) as Body;
+  return {
+    descripcion: parseNombreColumna(b),
+    tipoCampo: b.tipoCampo === undefined ? undefined : parseTipoColumna(b),
+  };
+}
+
+export function parseCrearRequisitoPersonalizadoInput(body: unknown): CrearRequisitoPersonalizadoInput {
+  const b = (body ?? {}) as Body;
+  return { descripcion: parseNombreColumna(b), tipoCampo: parseTipoColumna(b) };
 }

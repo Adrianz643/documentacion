@@ -9,7 +9,7 @@ import {
   parseCrearRequisitoPersonalizadoInput,
   parseEtapaNumParam,
   parseIdParam,
-  parseRenombrarRequisitoInput,
+  parseActualizarRequisitoInput,
 } from './empresas-chinas.validation';
 
 const MAX_ARCHIVO_BYTES = 20 * 1024 * 1024;
@@ -32,11 +32,11 @@ export const crearRequisitoPersonalizadoHandler = asyncHandler(async (req: Reque
   res.status(201).json(requisitos);
 });
 
-export const renombrarRequisitoHandler = asyncHandler(async (req: Request, res: Response) => {
+export const actualizarRequisitoHandler = asyncHandler(async (req: Request, res: Response) => {
   if (!req.auth) throw new HttpError(401, 'No autenticado');
   const id = parseIdParam(req.params.id);
-  const descripcion = parseRenombrarRequisitoInput(req.body);
-  const requisitos = await service.renombrarRequisito(id, descripcion, req.auth);
+  const input = parseActualizarRequisitoInput(req.body);
+  const requisitos = await service.actualizarRequisito(id, input, req.auth);
   res.status(200).json(requisitos);
 });
 

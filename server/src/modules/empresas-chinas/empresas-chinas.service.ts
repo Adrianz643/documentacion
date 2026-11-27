@@ -13,6 +13,7 @@ import * as repository from './empresas-chinas.repository';
 import type {
   ArchivoSubidoInput,
   CrearEmpresaChinaInput,
+  ActualizarRequisitoInput,
   CrearRequisitoPersonalizadoInput,
   DocumentoDTO,
   EmpresaChinaDTO,
@@ -135,24 +136,27 @@ export async function crearRequisitoPersonalizado(
   return listarRequisitosPorEtapa(etapaNum);
 }
 
-export async function renombrarRequisito(
+export async function actualizarRequisito(
   id: number,
-  descripcion: string,
+  input: ActualizarRequisitoInput,
   actor: { sub: number; rol: string },
 ): Promise<EtapaRequisitoDTO[]> {
   if (actor.rol.toLowerCase() !== 'superadmin') {
-    throw new HttpError(403, 'No tienes permiso para renombrar columnas');
+    throw new HttpError(403, 'No tienes permiso para editar columnas');
   }
   const requisito = await repository.findRequisitoPorId(id);
   if (!requisito) {
     throw new HttpError(404, 'Columna no encontrada');
   }
-  await repository.actualizarDescripcionRequisito(id, descripcion, actor.sub);
+  const tipoCampo = input.tipoCampo ?? requisito.tipo_campo;
+  const cambioTipo = tipoCampo !== requisito.tipo_campo;
+  await repository.actualizarRequisito(id, input.descripcion, tipoCampo, actor.sub);
+  const detalleTipo = cambioTipo ? ` y su tipo de ${requisito.tipo_campo} a ${tipoCampo}` : '';
   void actividadService.registrar({
     usuarioId: actor.sub,
     modulo: 'EMPRESAS_CHINAS',
     accion: 'editar',
-    descripcion: `Renombró la columna "${requisito.descripcion}" a "${descripcion}" en la Etapa ${requisito.etapa_num}`,
+    descripcion: `Editó la columna "${requisito.descripcion}" (nombre: "${input.descripcion}"${detalleTipo}) en la Etapa ${requisito.etapa_num}`,
     referenciaTabla: 'etapa_requisitos',
     referenciaId: id,
   });

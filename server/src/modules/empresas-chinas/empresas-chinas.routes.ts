@@ -8,7 +8,7 @@ import {
   detalleHandler,
   eliminarHandler,
   eliminarRequisitoPersonalizadoHandler,
-  renombrarRequisitoHandler,
+  actualizarRequisitoHandler,
   eliminarDocumentoRequisitoHandler,
   eliminarRequisitoHandler,
   kpisHandler,
@@ -23,7 +23,7 @@ const router = Router();
 
 router.get('/etapa/:etapaNum/requisitos', requireAuth, requirePermission('documentos.leer'), requireSubrol('EMPRESAS_CHINAS'), listarRequisitosHandler);
 router.post('/etapa/:etapaNum/requisitos', requireAuth, requirePermission('documentos.crear'), requireSubrol('EMPRESAS_CHINAS'), crearRequisitoPersonalizadoHandler);
-router.patch('/requisitos/:id', requireAuth, requirePermission('documentos.editar'), requireSubrol('EMPRESAS_CHINAS'), renombrarRequisitoHandler);
+router.patch('/requisitos/:id', requireAuth, requirePermission('documentos.editar'), requireSubrol('EMPRESAS_CHINAS'), actualizarRequisitoHandler);
 router.delete('/requisitos/:id', requireAuth, requirePermission('documentos.editar'), requireSubrol('EMPRESAS_CHINAS'), eliminarRequisitoPersonalizadoHandler);
 router.get('/etapa/:etapaNum', requireAuth, requirePermission('documentos.leer'), requireSubrol('EMPRESAS_CHINAS'), listarEtapaHandler);
 router.get('/todas', requireAuth, requirePermission('documentos.leer'), requireSubrol('EMPRESAS_CHINAS'), listarTodasHandler);

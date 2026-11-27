@@ -28,6 +28,11 @@ export interface CrearRequisitoPersonalizadoInput {
   tipoCampo: TipoCampoRequisito;
 }
 
+export interface ActualizarRequisitoInput {
+  descripcion: string;
+  tipoCampo?: TipoCampoRequisito;
+}
+
 export interface EmpresaChinaRequisitoDTO {
   id: number;
   empresaChinaId: number;

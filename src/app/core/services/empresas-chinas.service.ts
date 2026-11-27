@@ -40,8 +40,8 @@ export class EmpresasChinasService {
     return this.http.post<EtapaRequisito[]>(`${this.base}/etapa/${etapaNum}/requisitos`, { descripcion, tipoCampo });
   }
 
-  renombrarRequisito(id: number, descripcion: string): Observable<EtapaRequisito[]> {
-    return this.http.patch<EtapaRequisito[]>(`${this.base}/requisitos/${id}`, { descripcion });
+  actualizarRequisito(id: number, descripcion: string, tipoCampo: TipoCampo): Observable<EtapaRequisito[]> {
+    return this.http.patch<EtapaRequisito[]>(`${this.base}/requisitos/${id}`, { descripcion, tipoCampo });
   }
 
   eliminarRequisitoPersonalizado(id: number): Observable<EtapaRequisito[]> {
